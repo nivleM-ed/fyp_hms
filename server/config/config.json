@@ -1,0 +1,28 @@
+{
+  "development": {
+    "username": "postgres",
+    "user": "postgres",
+    "password": "password",
+    "database": "fyp_db",
+    "host": "127.0.0.1",
+    "dialect": "postgres",
+    "port": 5432
+  },
+  "test": {
+    "username": "root",
+    "password": null,
+    "database": "fyp_db",
+    "host": "127.0.0.1",
+    "dialect": "postgres",
+    "port": 5432
+  },
+  "production": {
+    "username": "postgres",
+    "user": "postgres",
+    "password": "password",
+    "database": "fyp_db",
+    "host": "127.0.0.1",
+    "dialect": "postgres",
+    "port": 5432
+  }
+}
