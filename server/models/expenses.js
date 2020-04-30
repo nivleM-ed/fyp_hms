@@ -12,6 +12,22 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             unique: true
         },
+        all_time_amount_spent: {
+            type: DataTypes.JSON,
+            allowNull: true
+        },
+        all_time_amount_received: {
+            type: DataTypes.JSON,
+            allowNull: true
+        },
+        all_categories: {
+            type: DataTypes.ARRAY(DataTypes.STRING),
+            allowNull: true
+        },
+        recurring_payment: {
+            type: DataTypes.JSON,
+            allowNull: true
+        },
         expenses: {
             type: DataTypes.JSON,
             allowNull: true

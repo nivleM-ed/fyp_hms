@@ -114,9 +114,9 @@
 </template>
 <script>
 import recipeApi from '@/api/recipe_api.js'
-import recipeClass from '@/model/recipe_class.js'
+import recipeClass from '@/js/recipe_class.js'
 import userApi from '@/api/users_api.js'
-import utils from '@/api/utils.js'
+import utils from '@/js/utils.js'
 
 export default {
   data () {

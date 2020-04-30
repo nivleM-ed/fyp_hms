@@ -6,10 +6,13 @@ const op = sequelize.Op;
 
 exports.update = function (req, res, next) {
     return models.expenses.update({
-        expenses: req.body.expObj._expenses
+        expenses: req.body.expObj._expenses,
+        recurring_payment: req.body.expObj._recurring_payment,
+        all_time_amount_spent: req.body.expObj._all_time_amount_spent != null ? parseInt(req.body.expObj._all_time_amount_spent) : 0,
+        all_time_amount_received: req.body.expObj._all_time_amount_received != null ? parseInt(req.body.expObj._all_time_amount_received) : 0,
+        all_categories: req.body.expObj._all_categories
     }, {
         where: {
-            id: req.body.expObj._id,
             user_id: req.user.id
         }
     }).then(result => {
@@ -22,7 +25,7 @@ exports.update = function (req, res, next) {
 exports.get = function (req, res, next) {
     return models.expenses.findOne({
         include: [{
-            model: models.Users,
+            model: models.users,
             required: true,
             as: 'user_expenses',
             attributes: ['username']
@@ -33,6 +36,7 @@ exports.get = function (req, res, next) {
     }).then(result => {
         res.status(200).send(result);
     }).catch(err => {
+        console.log(err)
         res.status(500).send(err);
     })
 }

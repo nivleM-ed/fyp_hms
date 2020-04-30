@@ -121,7 +121,7 @@
                         <v-btn
                           color="blue darken-1"
                           text
-                          @click="register_dialog = false"
+                          @click="closeRegisterDialog()"
                           >Close</v-btn
                         >
                         <v-btn
@@ -147,10 +147,7 @@
   </div>
 </template>
 <script>
-import userApi from "@/api/users_api.js";
-import userClass from "@/model/users_class.js";
-// import { CONST } from "src/api/const";
-// const url = CONST.CONST_URL.concat("/users/");
+import userClass from "@/js/users_class.js";
 
 export default {
   data() {
@@ -168,31 +165,27 @@ export default {
       firstname: null,
       lastname: null,
       new_username: null,
-      new_password: null
+      new_password: null,
+      userObj: new userClass()
     };
   },
+  props:["user"],
   async created() {
-    try {
-      let check_logged = await userApi.check_logged();
-      console.log("Check Login: ", check_logged);
-      if (!check_logged.err) {
-        this.$router.push("/main");
-      }
-      this.versionB = await userApi.versionB();
-    } catch (err) {
-      this.error = err.message;
-    }
+    this.userObj = new userClass();
+    this.$emit("checkLogged", 1);
+      this.versionB = await this.userObj.versionB();
   },
   methods: {
     async login() {
       this.$refs.loginForm.validate();
       if (this.username && this.password) {
         try {
-          const log = await userApi.login(this.username.trim(), this.password);
-          console.log("User Login");
-          if (log.err) {
+          const log = await this.userObj.login(this.username.trim(), this.password);
+          if (log.err || log == null) {
             alert(log.err);
           } else {
+            console.log(log)
+            this.$emit("update:user", log);
             this.$router.push("/main");
           }
         } catch (err) {
@@ -208,15 +201,13 @@ export default {
         this.firstname &&
         this.lastname
       ) {
-        const userObj = new userClass();
-        userObj.username = this.new_username;
-        userObj.password = this.new_password;
-        userObj.firstname = this.firstname;
-        userObj.lastname = this.lastname;
-        console.log(userObj);
+        this.userObj.username = this.new_username;
+        this.userObj.password = this.new_password;
+        this.userObj.firstname = this.firstname;
+        this.userObj.lastname = this.lastname;
 
         try {
-          const register = await userApi.register(userObj.toJson());
+          const register = await this.userObj.register();
           console.log(register)
           if (register.err) {
             alert("Something went wrong. Please try again");
@@ -231,11 +222,15 @@ export default {
           alert(err);
         }
       }
+    },
+    closeRegisterDialog() {
+      this.$refs.registerForm.reset();
+      this.register_dialog = false;
     }
   },
   watch: {
     register_dialog() {
-      this.$refs.registerForm.reset();
+      
     }
   }
 };

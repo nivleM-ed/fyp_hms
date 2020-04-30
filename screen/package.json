@@ -1,5 +1,5 @@
 {
-  "name": "vue-vuetify",
+  "name": "hms",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -12,11 +12,14 @@
     "bootstrap": "^4.4.1",
     "chartist": "^0.11.4",
     "core-js": "^3.6.4",
+    "crypto-js": "^4.0.0",
     "jquery": "^3.4.1",
     "moment": "^2.24.0",
     "vue": "^2.6.11",
     "vue-chartist": "^2.2.1",
+    "vue-google-charts": "^0.3.2",
     "vue-router": "^3.1.6",
+    "vuebar": "0.0.20",
     "vuetify": "^2.2.11",
     "vuex": "^3.1.2"
   },

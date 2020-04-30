@@ -6,14 +6,23 @@
         Close
       </v-btn>
     </v-snackbar>
-    <NavDraw :notifications="notifications"></NavDraw>
-    <Toolbar :notifications="notifications"></Toolbar>
+    <NavDraw
+      :notifications="notifications"
+      :task_notify="task_notify"
+      :user="user"
+    ></NavDraw>
+    <Toolbar 
+      :notifications="notifications" 
+      v-on:updateData="updateData"
+    ></Toolbar>
     <div>
       <router-view
         :timestamp="timestamp"
         :notifications="notifications"
-        v-on:setChangesTask="task_change"
-        v-on:setChangesComTask="com_task_change"
+        :task_notify="task_notify"
+        :logged="logged"
+        v-on:checkLogged="checkLogged"
+        v-on:updateData="updateData"
       ></router-view>
     </div>
 
@@ -26,74 +35,82 @@ import Toolbar from "@/layout/Toolbar";
 import Footer from "@/layout/Footer";
 
 const moment = require("moment");
-// import { CONST } from "@/api/const.js";
-import tasksApi from "@/api/task_api.js";
-import taskClass from "@/model/task_class.js";
+import taskClass from "@/js/task_class.js";
+import expClass from "@/js/expense_class.js";
+// import notificationClass from "@/js/notification.js";
+import syncClass from "@/js/sync.js";
+import utils from "@/js/utils.js";
 
 export default {
   components: { NavDraw, Toolbar, Footer },
   data() {
     return {
+      taskObj: new taskClass(),
+      expObj: new expClass(),
+
       timestamp: "",
       tasks: [],
       completed_tasks: [],
       com_tasks: "",
+      task_notify: 0,
+      expenses: [],
+      recurring_payment: [],
+
       notifications: [],
       notify_message: null,
       notifications_snackbar: false,
       notifyTask: null,
-      taskObj: new taskClass(),
       notification_sound: new Audio("sound/notification-sound.mp3"),
+      logged: true,
+      intervalSet : null,
     };
   },
+  props: ["user"],
   async created() {
     this.taskObj = new taskClass();
-    const task_data = await tasksApi.getTasks();
-    if (task_data[0].tasks != null) {
-      this.taskObj.tasks = task_data[0].tasks;
-      this.tasks = this.taskObj.tasks;
-    }
-    if (task_data[0].completed_tasks != null) {
-      this.taskObj.completed_tasks = task_data[0].completed_tasks;
-      this.completed_tasks = this.taskObj.completed_tasks;
-    }
-    setInterval(() => {
-      this.getTime();
-      this.setTimeNotify();
+    this.expObj = new expClass();
+    this.syncObj = new syncClass();
+    await this.updateData();
+    
+    this.intervalSet = setInterval(() => {
+      this.timestamp = utils.getToday(true);
+      this.notifications = this.syncObj.latest_notification;
+      this.syncObj.runSync();
+      // this.setTaskNotify();
+      // this.setExpNotify();
     }, 1000);
   },
   methods: {
-    getTime: function() {
-      const today = new Date();
-      const date =
-        today.getDate().toString() +
-        "-" +
-        (today.getMonth() + 1) +
-        "-" +
-        today.getFullYear();
-      const time =
-        today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-      const dateTime = date + " " + time;
-      this.timestamp = dateTime;
+    async checkLogged() {
+      this.$emit("checkLogged", 1);
     },
-    task_change(val) {
-      this.tasks = val;
+    test(data) {
+      return data++
     },
-    com_task_change(val) {
-      this.com_tasks = val;
+    async updateData() {
+      console.log("DashboardLayout UPDATED");
+      await this.taskObj.getTaskDB();
+      await this.expObj.getExpDB();
+
+      this.tasks = this.taskObj.tasks;
+      this.completed_tasks = this.taskObj.completed_tasks;
+
+      this.expenses = this.expObj.expenses;
+      this.recurring_payment = this.expObj.recurring_payment;
+      await this.syncObj.updateSync();
+
+      // console.log('Task',this.tasks)
+      // console.log('Completed Task',this.completed_tasks)
+      // console.log('Expenses',this.expenses)
+      // console.log('Recurring Payment',this.recurring_payment)
     },
-    setTimeNotify() {
-      this.notifications = [];
-      const past = "ago";
-      // const future = "in";
-      for (var i = 0; i < this.tasks.length; i++) {
-        const tmp = moment(this.tasks[i].start, "YYYYMMDD HH:mm").fromNow();
-        this.tasks[i].timeToNotify = tmp;
-        if (tmp.includes(past)) {
-          this.notifications.push(this.tasks[i]);
-        }
-        if (tmp === "a few seconds ago") {
-          this.notifySnackbar(this.tasks[i]);
+    async setTaskNotify() {
+      if (this.tasks) {
+        for (var i = 0; i < this.tasks.length; i++) {
+          const tmp = moment(this.tasks[i].start, "YYYYMMDD HH:mm").fromNow();
+          if (tmp === "a few seconds ago") {
+            this.notifySnackbar(this.tasks[i]);
+          }
         }
       }
     },
@@ -108,10 +125,11 @@ export default {
     setNotifyAcknowledge() {
       this.notifications_snackbar = false;
       this.tasks[
-        this.tasks.findIndex(x => x === this.notifyTask)
+        this.tasks.findIndex((x) => x.id === this.notifyTask.id)
       ].notify_ack = true;
       this.notifyTask = null;
     },
-  }
+  },
+  watch: {},
 };
 </script>

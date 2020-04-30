@@ -1,6 +1,11 @@
 <template>
   <nav>
-    <v-navigation-drawer app permanent expand-on-hover update:mini-variant="drawer">
+    <v-navigation-drawer
+      app
+      permanent
+      expand-on-hover
+      update:mini-variant="drawer"
+    >
       <v-list-item class="px-2">
         <v-list-item-avatar>
           <v-img src="icons/favicon.ico"></v-img>
@@ -22,13 +27,16 @@
           </v-list-item-icon>
 
           <v-list-item-content>
-            <v-list-item-title><v-badge
-          :value="notifications.length > 0 && item.title === 'Task'"
-          color="pink"
-          :content="notifications.length"
-        >
-          {{item.title}}
-        </v-badge></v-list-item-title>
+            <v-list-item-title>
+              <v-badge
+                v-if="task_notify > 0 && item.title === 'Task'"
+                color="pink"
+                :content="task_notify"
+              >
+                <span>{{ item.title }}</span>
+              </v-badge>
+              <span v-else>{{ item.title }}</span>
+            </v-list-item-title>
           </v-list-item-content>
         </v-list-item>
       </v-list>
@@ -47,13 +55,13 @@
 </template>
 
 <script>
-import userApi from "@/api/users_api.js";
+import userClass from "@/js/users_class.js";
+import utils from "@/js/utils.js"
 
 export default {
   data() {
     return {
-      // drawer: null,
-      username: "User",
+      userObj: new userClass(),
       drawer: false,
       mini: true,
       items: [
@@ -61,44 +69,45 @@ export default {
         {
           title: "Task",
           icon: "mdi-clipboard-list-outline",
-          link: "/main/task_ov"
+          link: "/main/task_ov",
         },
         {
           title: "Inventory",
           icon: "mdi-inbox-multiple-outline",
-          link: "/main/inv_ov"
+          link: "/main/inv_ov",
         },
         {
           title: "Expenses",
           icon: "mdi-account-group-outline",
-          link: "/main/expense_ov"
-        }
-      ]
+          link: "/main/expense_ov",
+        },
+      ],
     };
   },
   methods: {
     toPage(page) {
-      // const tmp = "/main/" + page;
       this.$router.push(page);
     },
     async logout() {
       try {
-        let logout = await userApi.logout();
-        if(logout.err) {
-          console.log(logout)
+        let logout = await this. userObj.logout();
+        if (logout.err) {
+          alert(logout.err);
         } else {
           this.$router.push("/");
         }
       } catch (err) {
-        alert(err)
+        alert(err);
       }
+    },
+  },
+  props: ["notifications","user","task_notify"],
+  computed: {
+    username: function() {
+      return this.user ? utils.toFirstUpperCase(this.user.firstname,false) + " " + utils.toFirstUpperCase(this.user.lastname,false) : 'User';
     }
   },
-  props: ["notifications"],
   watch: {
-    drawer() {
-      console.log(this.drawer)
-    }
-  }
+  },
 };
 </script>

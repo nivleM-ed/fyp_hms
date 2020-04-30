@@ -9,8 +9,8 @@
     "port": 5432
   },
   "test": {
-    "username": "root",
-    "password": null,
+    "username": "postgres",
+    "password": "postgres",
     "database": "fyp_db",
     "host": "127.0.0.1",
     "dialect": "postgres",

@@ -27,6 +27,7 @@ var usersRouter = require('./routes/users');
 var taskRouter = require('./routes/tasks');
 var inventoryRouter = require('./routes/inventory');
 var expensesRouter = require('./routes/expenses');
+var notificationRouter = require('./routes/notification');
 
 var app = express();
 app.use(function(req, res, next) {
@@ -60,7 +61,7 @@ app.use(session({
   secret:"apassword",
   saveUninitialized:false,
   resave:false,
-  cookie:{secure:false, httpOnly:true, path: '/' } //maxAge:15 * 1000 * 60
+  cookie:{secure:false, httpOnly:true, path: '/', maxAge: 24 * 100 * 60 * 60 } //24 hours
 }));
 app.use(passport.initialize());
 app.use(passport.session());
@@ -71,6 +72,7 @@ app.use('/api/users', usersRouter);
 app.use('/api/tasks', taskRouter);
 app.use('/api/inventory', inventoryRouter);
 app.use('/api/expenses', expensesRouter);
+app.use('/api/notification', notificationRouter);
 app.post('/api/upload', upload.single('file'), (req, res) => {
   res.json({file: req.file})
 })

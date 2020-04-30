@@ -15,65 +15,49 @@
     >
       <template v-slot:activator="{ on }">
         <v-btn icon v-on="on" class="mr-2">
-          <v-badge
-            :value="notifications.length > 0"
-            color="pink"
-            :content="notifications.length"
-          >
+          <v-badge :value="notifyNum > 0" color="pink" :content="notifyNum">
             <v-icon>mdi-bell-outline</v-icon>
           </v-badge>
         </v-btn>
       </template>
 
-      <v-list>
+      <v-list v-if="notification.length != 0">
         <v-list-item
           v-for="(item, index) in notification"
           :key="index"
-          @click="goToPage(item.page)"
+          @click="goToPage(item)"
         >
-          <v-list-item-title
-            >Task Scheduled: {{ item.details.name }}
-            <span class="font-italic font-weight-light caption"><br/>{{item.details.timeToNotify}}</span>
-          </v-list-item-title>
+          <template>
+            <v-list-item-content>
+              <v-list-item-title v-on:mouseover="setSeen(index)"
+                >{{ item.msg }}: {{ item.name }}
+                <span class="font-italic font-weight-light caption"
+                  ><br />{{ item.time }}</span
+                >
+              </v-list-item-title>
+            </v-list-item-content>
+          </template>
         </v-list-item>
       </v-list>
+      <p class="ma-4" v-else>You have no notification</p>
     </v-menu>
-    <!-- <v-btn icon class="mr-2">
-      <v-badge
-          :value="notifications.length > 0"
-          color="pink"
-          :content="notifications.length"
-        >
-          <v-icon>mdi-bell-outline</v-icon>
-        </v-badge>
-      
-    </v-btn> -->
     <v-btn color="red" depressed @click.prevent="logout">
       Logout
       <v-icon>mdi-logout-variant</v-icon>
     </v-btn>
-    <!-- 
-    <v-btn icon>
-      <v-icon>mdi-magnify</v-icon>
-    </v-btn>
-
-    <v-btn icon>
-      <v-icon>mdi-heart</v-icon>
-    </v-btn>
-
-    <v-btn icon>
-      <v-icon>mdi-dots-vertical</v-icon>
-    </v-btn> -->
   </v-toolbar>
 </template>
 <script>
 import userApi from "@/api/users_api.js";
+import notificationClass from "@/js/notification.js";
 
 export default {
   data() {
     return {
-      notification: [{ title: "Click Me" }],
-      closeOnContentClick: true
+      notification: [],
+      closeOnContentClick: true,
+      notifyNum: [],
+      notifyObj: new notificationClass(),
     };
   },
   props: ["notifications"],
@@ -90,25 +74,41 @@ export default {
         alert(err);
       }
     },
-    goToPage(page) {
-      const tmp = "/main/" + page;
+    goToPage(item) {
+      const tmp = "/main/" + item.page;
       this.$router.push(tmp);
-    }
+    },
+    async getUnseen() {
+      try {
+        let tmp = [];
+        if (this.notification) {
+          for (var i = 0; i < this.notification.length; i++) {
+            if (!this.notification[i].seen) tmp.push(i);
+          }
+        }
+        this.notifyNum = tmp.length;
+      } catch (err) {
+        console.log(err);
+        return err;
+      }
+    },
+    async setSeen(index) {
+      if (!this.notification[index].seen) {
+        this.notifyObj = new notificationClass();
+        this.notification = await this.notifyObj.setSeen(
+          this.notification[index]
+        );
+        await this.getUnseen(); 
+      }
+    },
   },
   watch: {
-    notifications() {
-      this.notification = [];
-      for (var i = 0; i < this.notifications.length; i++) {
-        const msg = "You have tasks scheduled";
-        const page = "task_ov";
-        this.notification.push({
-          msg: msg,
-          page: page,
-          details: this.notifications[i]
-        });
-        console.log(this.notification);
+    notifications(val) {
+      if (val) {
+        this.notification = val;
+        this.getUnseen();
       }
-    }
-  }
+    },
+  },
 };
 </script>

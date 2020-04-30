@@ -1,7 +1,7 @@
 'use strict';
 module.exports = {
     up: (queryInterface, Sequelize) => {
-        return queryInterface.createTable('expenses', {
+        return queryInterface.createTable('notification', {
             id: {
                 allowNull: false,
                 primaryKey: true,
@@ -20,32 +20,16 @@ module.exports = {
                 allowNull: false,
                 type: Sequelize.STRING
             },
-            all_time_amount_spent: {
-                type: Sequelize.JSON,
-                allowNull: true
-            },
-            all_time_amount_received: {
-                type: Sequelize.JSON,
-                allowNull: true
-            },
-            all_categories: {
-                allowNull: true,
-                type: Sequelize.ARRAY(Sequelize.STRING)
-            },
-            recurring_payment: {
+            notification: {
                 allowNull: true,
                 type: Sequelize.JSON
             },
-            expenses: {
-                allowNull: true,
-                type: Sequelize.JSON
-            }
         }, {
             freezeTableName: true
         });
     },
     down: (queryInterface, Sequelize) => {
-        return queryInterface.dropTable('expenses');
+        return queryInterface.dropTable('notification');
     }
 };
 

@@ -34,4 +34,15 @@ exports.run_db = function() {
         foreignKey: 'user_id',
         targetKey: 'id'
     });
+
+    //Notification
+    models.users.hasOne(models.notification, {
+        as: 'notification',
+        foreignKey: 'user_id'
+    });
+    models.notification.belongsTo(models.users, {
+        as: 'user_notify',
+        foreignKey: 'user_id',
+        targetKey: 'id'
+    });
 }

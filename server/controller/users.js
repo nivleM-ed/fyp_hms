@@ -13,12 +13,11 @@ const op = sequelize.Op;
 var CONST = require('../const');
 
 const generateHash = function (password) {
-    return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null)
-}
+    return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
+};
 
 //login
 exports.login = function (req, res, next) {
-    console.log(req.body)
     passport.authenticate('local', {
         session: true
     }, function (err, user, info) {
@@ -29,34 +28,23 @@ exports.login = function (req, res, next) {
         } else {
             req.logIn(user, function (err) {
                 res.send(user);
-            })
+            });
         }
     })(req, res, next);
-}
+};
 
 //check if logged in
 exports.check_logged = function (req, res, next) {
     try {
-        if (req.user) {
-            res.status(200).send({
-                id: req.user.id
-            });
-        } else {
-            res.send({
-                err: "noCookie"
-            });
-        }
+        res.status(200).send(req.user);
     } catch (err) {
-        res.send({
-            err: "systemErr"
-        })
+        res.send(err);
     }
-}
+};
 
 //logout
 exports.logout = function (req, res, next) {
     try {
-        console.log('destroy')
         req.logout();
         req.session.destroy();
         
@@ -64,11 +52,10 @@ exports.logout = function (req, res, next) {
             logout: "logout"
         });
     } catch (err) {
-        console.log(err)
-        res.status(500).send(err)
+        console.log(err);
+        res.status(500).send(err);
     }
-
-}
+};
 
 exports.add_user = function (req, res, next) {
     let errors = {};
@@ -83,15 +70,15 @@ exports.add_user = function (req, res, next) {
                 lastname: req.body.userObj._lastname
             });
             return newUser.save().then(result => {
-                console.log("results",result.id)
+                console.log("results",result.id);
                 setNewUser(result);
                 res.status(200).send();
             }).catch(err => {
                 res.status(500).send(err);
-            })
+            });
         }
-    })
-}
+    });
+};
 
 setNewUser = (data) => {
     const setTasks = (data) => {
@@ -102,21 +89,23 @@ setNewUser = (data) => {
                 resolve(psr);
             }).catch(err => {
                 reject(err);
-            })
-        })
-    }
+            });
+        });
+    };
 
     const setExpenses = (data) => {
         return new Promise((resolve, reject) => {
             return models.expenses.create({
-                user_id: data.id
+                user_id: data.id,
+                all_categories: ['transportation', 'food', 'utilities', 'insurance', 'housing', 'healthcare', 'entertainment', 'miscellaneous'],
+                all_time_spending: 0
             }).then(psr => {
                 resolve(psr);
             }).catch(err => {
                 reject(err);
-            })
-        })
-    }
+            });
+        });
+    };
 
     const setInventory = (data) => {
         return new Promise((resolve, reject) => {
@@ -126,23 +115,35 @@ setNewUser = (data) => {
                 resolve(psr);
             }).catch(err => {
                 reject(err);
-            })
-        })
-    }
+            });
+        });
+    };
 
-    Promise.all([setExpenses(data), setInventory(data), setTasks(data)])
+    const setNotification = (data) => {
+        return new Promise((resolve, reject) => {
+            return models.notification.create({
+                user_id: data.id
+            }).then(psr => {
+                resolve(psr);
+            }).catch(err => {
+                reject(err);
+            });
+        });
+    };
+
+    Promise.all([setExpenses(data), setInventory(data), setTasks(data), setNotification(data)])
         .then(result => {
-            console.log("New user added:", data.id, "(", data.username,")")
+            console.log("New user added:", data.id, "(", data.username,")");
         }).catch(err => {
-            console.log(err) //delete user if fail
-        })
-}
+            console.log(err); //delete user if fail
+        });
+};
 
 exports.version = function (req, res, next) {
     try {
-        let version = CONST.version
-        res.send(version)
+        let version = CONST.version;
+        res.send(version);
     } catch (err) {
-        res.status(500).send(err)
+        res.status(500).send(err);
     }
-}
+};

@@ -20,8 +20,6 @@ import TaskOverview from '@/pages/Task/TaskOverview.vue'
 
 import ExpensesOverview from '@/pages/Expenses/ExpensesOverview.vue'
 
-import Calendar from '@/pages/Calendar/Calendar.vue'
-
 const routes = [
   {
     path: '/',
@@ -79,12 +77,6 @@ const routes = [
         path: 'task_ov',
         name: 'TaskOverview',
         component: TaskOverview
-      },
-      //Calendar
-      {
-        path: 'calendar',
-        name: 'Calendar',
-        component: Calendar
       },
       //Expenses
       {
