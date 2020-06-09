@@ -19,6 +19,10 @@ module.exports = (sequelize, DataTypes) => {
         completed_tasks: {
             type: DataTypes.JSON,
             allowNull: true
+        },
+        formatted_completed_tasks: {
+            type: DataTypes.JSON,
+            allowNull: true
         }
     }, {
         freezeTableName: true

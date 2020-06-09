@@ -11,8 +11,8 @@ export default class taskClass {
   constructor() {
     var tasks = [];
     var completed_tasks = [];
+    var formatted_completed_tasks = [];
   }
-
   get tasks() {
     return this._tasks;
   }
@@ -27,11 +27,19 @@ export default class taskClass {
     this._completed_tasks = in_completed_tasks;
   }
 
+  get formatted_completed_tasks() {
+    return this._formatted_completed_tasks;
+  }
+  set formatted_completed_tasks(in_formatted_completed_tasks) {
+    this._formatted_completed_tasks = in_formatted_completed_tasks;
+  }
+
+
   //methods
   async deleteTask(selectedTask) {
     try {
       await this.getTaskDB();
-      const index = await this.getIndex(selectedTask);
+      const index = await this.getIndex(selectedTask, false);
       this.tasks.splice(index, 1);
 
       const tmp = await this.updateTaskDB();
@@ -62,7 +70,7 @@ export default class taskClass {
     try {
       await this.getTaskDB();
       const tmpData = await this.toData(new_task);
-      const index = await this.getIndex(selectedTask);
+      const index = await this.getIndex(selectedTask, false);
       this.tasks[index] = tmpData;
 
       const tmp = await this.updateTaskDB();
@@ -75,15 +83,19 @@ export default class taskClass {
   async completeTask(selectedTask) {
     try {
       await this.getTaskDB();
-      const index = await this.getIndex(selectedTask);
+      const index = await this.getIndex(selectedTask, false);
       selectedTask.completed = true;
       selectedTask.completed_date = new Date();
+      selectedTask.color = "#EF5350";
+
       if (!this.completed_tasks) {
         this.completed_tasks = [];
         this.completed_tasks[0] = selectedTask;
       } else {
         this.completed_tasks.push(selectedTask);
       }
+
+      await this.formatCompleteTask(selectedTask);
       this.tasks.splice(index, 1);
       await this.updateTaskDB();
       return 1;
@@ -92,10 +104,98 @@ export default class taskClass {
     }
   }
 
+  async deleteRecur(data) {
+    try {
+      await this.getExpDB();
+      let index = await this.getRecurIndex(data);
+      this.recurring_payment.splice(index, 1);
+      const tmp = await this.updateExpDB();
+      return tmp;
+    } catch (err) {
+      return err;
+    }
+  }
+
+  async formatCompleteTask(selectedTask) {
+    try {
+
+      let { yearIndex, monthIndex, dayIndex } = await this.getIndex(selectedTask, true);
+      if (yearIndex < 0) {
+        await this.addObj('year', selectedTask);
+      } else if (monthIndex < 0) {
+        await this.addObj('month', selectedTask);
+      } else if (dayIndex < 0) {
+        await this.addObj('day', selectedTask);
+      }
+
+      let index = await this.getIndex(selectedTask, true);
+      this.formatted_completed_tasks[index.yearIndex].data[index.monthIndex].data[index.dayIndex].data.push(selectedTask);
+      return 1;
+    } catch (err) {
+      console.log(err);
+      return err;
+    }
+  }
+
+  async addObj(string, data) {
+
+    try {
+      let { day, month, year } = utils.getSeperateDate(new Date());
+      let { yearIndex, monthIndex, dayIndex, dataIndex } = await this.getIndex(data, true);
+      if (string === 'year') {
+        if (!this.formatted_completed_tasks) {
+          this.formatted_completed_tasks = [];
+        }
+        this.formatted_completed_tasks.push(
+          {
+            year: year,
+            data: [
+              {
+                month: month,
+                data: [
+                  {
+                    day: day,
+                    date: new Date(),
+                    data: []
+                  }
+                ]
+              }
+            ],
+          }
+        );
+      } else if (string === 'month') {
+        this.formatted_completed_tasks[yearIndex].data.push(
+          {
+            month: month,
+            data: [
+              {
+                day: day,
+                date: new Date(),
+                data: []
+              }
+            ],
+          }
+        );
+      } else if (string === 'day') {
+        this.formatted_completed_tasks[yearIndex].data[monthIndex].data.push(
+          {
+            day: day,
+            date: new Date(),
+            data: [],
+          }
+        );
+      }
+
+    } catch (err) {
+      console.log(err);
+    }
+
+  }
+
   async completeRecurTask(selectedTask) {
     try {
       await this.getTaskDB();
-      const index = await this.getIndex(selectedTask);
+      const index = await this.getIndex(selectedTask, false);
       selectedTask.completed = true;
       if (!this.completed_tasks) {
         this.completed_tasks = [];
@@ -108,7 +208,6 @@ export default class taskClass {
       let expObj = new expenseClass();
       let tmpData = { recur_id: selectedTask.recur_id, type: 'recur_expense', date: new Date(), title: selectedTask.name, amount: selectedTask.amount, description: selectedTask.description, money_in: false, color: selectedTask.color, category: 'Recurring Payment' };
       let tmp = await expObj.addNewExpense(tmpData);
-      console.log(tmp)
       await this.updateTaskDB();
       return 1;
     } catch (err) {
@@ -120,7 +219,7 @@ export default class taskClass {
     try {
       let notifyObj = new notificationClass();
       await this.getTaskDB();
-      const index = await this.getIndex(data);
+      const index = await this.getIndex(data, false);
       data.hourNotify = true;
       this.tasks[index] = data;
 
@@ -159,6 +258,7 @@ export default class taskClass {
 
       this.tasks = res.data[0].tasks != null ? res.data[0].tasks : [];
       this.completed_tasks = res.data[0].completed_tasks != null ? res.data[0].completed_tasks : [];
+      this.formatted_completed_tasks = res.data[0].formatted_completed_tasks != null ? res.data[0].formatted_completed_tasks : [];
 
       return res.data;
     } catch (err) {
@@ -182,31 +282,40 @@ export default class taskClass {
   async setTime(data) {
     try {
       let time = {};
-    if (data.one_day) {
-      if (data.whole_day) {
-        time.start = data.start_date;
-        time.end = data.start_date;
+      if (data.one_day) {
+        if (data.whole_day) {
+          time.start = data.start_date;
+          time.end = data.start_date;
+        } else {
+          time.start = data.start_date + " " + data.start_time;
+          time.end = data.start_date + " " + data.end_time;
+        }
       } else {
         time.start = data.start_date + " " + data.start_time;
-        time.end = data.start_date + " " + data.end_time;
+        time.end = data.end_date + " " + data.end_time;
       }
-    } else {
-      time.start = data.start_date + " " + data.start_time;
-      time.end = data.end_date + " " + data.end_time;
-    }
 
-    time.format_start_date = utils.formatDate(data.start_date);
-    time.format_end_date = utils.formatDate(data.end_date);
-    return time;
-    } catch(err) {
+      time.format_start_date = utils.formatDate(data.start_date);
+      time.format_end_date = utils.formatDate(data.end_date);
+      return time;
+    } catch (err) {
       console.log(err);
       return err;
     }
   }
 
-  async getIndex(selectedTask) {
+  async getIndex(selectedTask, format) {
     try {
-      return this.tasks.findIndex(x => x.id === selectedTask.id);
+      if (format) {
+        let { day, month, year } = utils.getSeperateDate(new Date(selectedTask.completed_date));
+        let yearIndex = this.formatted_completed_tasks == null || this.formatted_completed_tasks.length < 1 ? parseInt('-1') : this.formatted_completed_tasks.findIndex(x => x.year == year);
+        let monthIndex = yearIndex < 0 ? parseInt('-1') : this.formatted_completed_tasks[yearIndex].data.findIndex(x => x.month == month);
+        let dayIndex = monthIndex < 0 ? parseInt('-1') : this.formatted_completed_tasks[yearIndex].data[monthIndex].data.findIndex(x => x.day == day);
+        let dataIndex = dayIndex < 0 ? parseInt('-1') : this.formatted_completed_tasks[yearIndex].data[monthIndex].data[dayIndex].data.findIndex(x => x.id == selectedTask.id);
+        return { yearIndex, monthIndex, dayIndex, dataIndex };
+      } else {
+        return this.tasks.findIndex(x => x.id === selectedTask.id);
+      }
     } catch (err) {
       console.log(err);
       return err;
@@ -216,19 +325,19 @@ export default class taskClass {
   async getTitles() {
     try {
       var tmp = [];
-    var com_tmp = [];
-    if (this.tasks) {
-      for (var i = 0; i < this.tasks.length; i++) {
-        tmp.push(this.tasks[i].name);
+      var com_tmp = [];
+      if (this.tasks) {
+        for (var i = 0; i < this.tasks.length; i++) {
+          tmp.push(this.tasks[i].name);
+        }
       }
-    }
 
-    if (this.completed_tasks) {
-      for (var j = 0; j < this.completed_tasks.length; j++) {
-        com_tmp.push(this.completed_tasks[j].name);
+      if (this.completed_tasks) {
+        for (var j = 0; j < this.completed_tasks.length; j++) {
+          com_tmp.push(this.completed_tasks[j].name);
+        }
       }
-    }
-    return { tmp, com_tmp };
+      return { tmp, com_tmp };
     } catch (err) {
       console.log(err);
       return err;

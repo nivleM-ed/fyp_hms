@@ -23,6 +23,7 @@
           :task_list="task_list"
           :selectedTask="selectedTask"
           :selectedEvent="selectedEvent"
+          :timestamp="timestamp"
           v-on:updateData="updateData"
           v-on:deleteTask="deleteTask"
           v-on:completeTask="completeTask"
@@ -32,8 +33,9 @@
       </v-tab-item>
 
       <v-tab-item key="completed_task">
-        <TaskView
+        <CompletedTask
           :tasks="completed_tasks"
+          :tasks_formatted="formatted_completed_tasks"
           :task_list="com_task_list"
           :selectedTask="selectedTask"
           :completed="true"
@@ -64,9 +66,10 @@ import taskClass from "@/js/task_class.js";
 
 import TaskCalendar from "@/pages/Task/TaskCalendar";
 import TaskView from "@/pages/Task/TaskView";
+import CompletedTask from "@/pages/Task/CompletedTask";
 
 export default {
-  components: { TaskCalendar, TaskView },
+  components: { TaskCalendar, TaskView, CompletedTask },
   data() {
     return {
       tab_open: 0,
@@ -78,6 +81,7 @@ export default {
 
       tasks: [],
       completed_tasks: [],
+      formatted_completed_tasks: [],
       task_list: [],
       com_task_list: [],
       taskObj: new taskClass(),
@@ -96,6 +100,7 @@ export default {
       await this.taskObj.getTaskDB();
       this.tasks = this.taskObj.tasks;
       this.completed_tasks = this.taskObj.completed_tasks;
+      this.formatted_completed_tasks = this.taskObj.formatted_completed_tasks;
 
       var { tmp, com_tmp } = await this.taskObj.getTitles();
       this.task_list = tmp;
@@ -122,6 +127,7 @@ export default {
           this.selectedTask = tmp;
         }
       } catch (err) {
+        console.log(err);
         alert(err);
       }
     },
@@ -138,6 +144,7 @@ export default {
           this.selectedTask = tmp;
         }
       } catch (err) {
+        console.log(err);
         alert(err);
       }
     },
@@ -157,6 +164,7 @@ export default {
           this.selectedTask = null;
         }
       } catch (err) {
+        console.log(err);
         alert(err);
       }
     },
@@ -170,6 +178,7 @@ export default {
           this.selectedTask = null;
         }
       } catch (err) {
+        console.log(err);
         alert(err);
       }
     },
