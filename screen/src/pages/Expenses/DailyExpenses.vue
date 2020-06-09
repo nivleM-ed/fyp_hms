@@ -1,140 +1,13 @@
 <template>
   <div class="m-4">
-    <v-overlay :value="addUpdateMenu"></v-overlay>
-
-    <v-dialog v-model="addUpdateMenu" persistent max-width="400px">
-      <v-card color="grey lighten-4" min-width="400px" flat>
-        <v-toolbar :color="new_expense.color" dark>
-          <v-toolbar-title v-if="!isUpdate">New Expense</v-toolbar-title>
-          <v-toolbar-title v-else>Update Expense</v-toolbar-title>
-          <v-spacer></v-spacer>
-
-          <v-menu offset-y>
-            <template v-slot:activator="{ on: menu }">
-              <v-tooltip left>
-                <template v-slot:activator="{ on: tooltip }">
-                  <v-btn
-                    icon
-                    v-on="{ ...tooltip, ...menu }"
-                    class="float-right"
-                  >
-                    <v-icon>mdi-format-color-fill</v-icon>
-                  </v-btn>
-                </template>
-                <span>Change color</span>
-              </v-tooltip>
-            </template>
-            <v-color-picker
-              v-model="new_expense.color"
-              mode.sync="hexa"
-              hide-inputs
-            ></v-color-picker>
-          </v-menu>
-
-          <v-btn icon @click="addUpdateMenu = false" class="float-right">
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
-        </v-toolbar>
-
-        <v-form ref="add_form" v-model="add_valid" class="p-4" lazy-validation>
-          <p>Date: {{ date }}</p>
-          <v-text-field
-            v-model="new_expense.title"
-            :rules="inputRules"
-            label="Title"
-            required
-          ></v-text-field>
-
-          <v-text-field
-            v-model="new_expense.description"
-            :rules="inputRules"
-            label="Description"
-            required
-          ></v-text-field>
-
-          <v-row>
-            <v-select
-              :items="utils.toFirstUpperCase(all_categories, true)"
-              label="Category"
-              v-model="new_expense.category"
-              outlined
-              :rules="inputRules"
-              class="ma-2"
-            ></v-select>
-          </v-row>
-
-          <v-row>
-            <v-col cols="2">
-              <v-tooltip left>
-                <template v-slot:activator="{ on }">
-                  <v-btn
-                    fab
-                    outlined
-                    :disabled="!new_expense.money_in"
-                    small
-                    v-on="on"
-                    color="red"
-                    @click="new_expense.money_in = !new_expense.money_in"
-                    ><v-icon>
-                      mdi-minus
-                    </v-icon></v-btn
-                  >
-                </template>
-                <span>Spend</span>
-              </v-tooltip>
-            </v-col>
-            <v-col cols="2">
-              <v-tooltip right>
-                <template v-slot:activator="{ on }">
-                  <v-btn
-                    fab
-                    outlined
-                    :disabled="new_expense.money_in"
-                    small
-                    v-on="on"
-                    @click="new_expense.money_in = !new_expense.money_in"
-                    color="green"
-                    ><v-icon>
-                      mdi-plus
-                    </v-icon>
-                  </v-btn>
-                </template>
-                <span>Receive</span>
-              </v-tooltip>
-            </v-col>
-            <v-col>
-              <v-text-field
-                v-model="new_expense.amount"
-                :rules="inputRulesNum"
-                :label="
-                  new_expense.money_in ? 'Amount received' : 'Amount spent'
-                "
-                required
-              ></v-text-field>
-            </v-col>
-          </v-row>
-
-          <v-btn
-            color="success"
-            v-if="!isUpdate"
-            :disabled="!add_valid"
-            @click.prevent="validate()"
-          >
-            Add
-          </v-btn>
-          <v-btn
-            v-else
-            color="success"
-            :disabled="!add_valid"
-            class="mt-8"
-            @click.prevent="validate()"
-          >
-            Update
-          </v-btn>
-        </v-form>
-      </v-card>
-    </v-dialog>
-
+    <addUpdateExpenseDialog
+      :addUpdateMenu.sync="addUpdateMenu"
+      :date_pick="date_pick"
+      :selectedExpInner="selectedExpInner"
+      v-on:addNewExpense="addNewExpense"
+      v-on:updateExpenses="updateExpenses"
+      v-on:deleteExp="deleteExp"
+    />
     <v-flex>
       <v-card flat min-height="60vh">
         <v-row>
@@ -164,9 +37,7 @@
                   min-width="290px"
                 >
                   <template v-slot:activator="{ on }">
-                    <v-btn outlined v-on="on">{{
-                      date
-                    }}</v-btn>
+                    <v-btn outlined v-on="on">{{ date }}</v-btn>
                   </template>
                   <v-date-picker v-model="date_pick" no-title scrollable>
                     <v-spacer></v-spacer>
@@ -258,21 +129,6 @@
                   </v-list>
                 </v-card>
               </v-card>
-
-              <!-- <v-tooltip right>
-                      <template v-slot:activator="{ on }">
-                        <v-btn
-                          color="success"
-                          dark
-                          v-on="on"
-                          class="ml-4 mt-4"
-                          @click.prevent="addUpdateMenu = true"
-                        >
-                          Add Expense
-                        </v-btn>
-                      </template>
-                      <span>Add Expense</span>
-                    </v-tooltip> -->
             </v-row>
 
             <v-row v-else>
@@ -289,7 +145,7 @@
                             color="success"
                             dark
                             v-on="on"
-                            @click.prevent="addUpdateMenu = true"
+                            @click.prevent="openAddMenu()"
                           >
                             Add Expense
                           </v-btn>
@@ -310,7 +166,7 @@
                     dark
                     v-on="on"
                     class="ml-4 mt-4"
-                    @click.prevent="addUpdateMenu = true"
+                    @click.prevent="openAddMenu()"
                   >
                     Add Expense
                   </v-btn>
@@ -324,95 +180,17 @@
 
           <v-col>
             <v-card height="100%" flat min-height="70vh">
-              <v-expand-transition>
-                <v-card v-show="!expDetailsShow" height="60vh" flat>
-                  <v-container fill-height fluid>
-                    <v-row style="height:100%">
-                      <v-col cols="6">
-                        <GChart
-                          type="PieChart"
-                          :data="chartDataSpent"
-                          :options="chartOptionsSpent"
-                          v-if="daily_total_spent > 0"
-                        />
-                        <v-overlay :absolute="true" :value="true" v-else>
-                          <p>You did not spent</p>
-                        </v-overlay>
-                      </v-col>
-                      <v-col cols="6">
-                        <GChart
-                          type="PieChart"
-                          :data="chartDataReceived"
-                          :options="chartOptionsReceived"
-                          v-if="daily_total_received > 0"
-                        />
-                        <v-overlay :absolute="true" :value="true" v-else>
-                          <p>You did not receive anything</p>
-                        </v-overlay>
-                      </v-col>
-                    </v-row>
-                  </v-container>
-                </v-card>
-              </v-expand-transition>
-              <v-expand-transition>
-                <v-card v-show="selectedExp" outlined height="70vh">
-                  <div
-                    v-if="selectedExp"
-                    class="d-flex align-start flex-column mb-6 ma-4"
-                    height="100%"
-                  >
-                    <div class="mb-auto">
-                      <h3>
-                        {{ selectedExp.title }}
-                      </h3>
-                      <p>
-                        {{ selectedExp.amount }} <br />{{
-                          selectedExp.description
-                        }}
-                        <br />{{ new Date(selectedExp.date) }} <br />
-                        {{ selectedExp.money_in }} <br />
-                        {{ selectedExp.category }}
-                      </p>
-                    </div>
-                    <div class="mb-auto">
-                      <div class="align-self-end">
-                        <div>
-                          <v-btn
-                            class="mr-2"
-                            color="yellow"
-                            dark
-                            @click.prevent="updateButton()"
-                          >
-                            Update
-                          </v-btn>
-                          <v-dialog v-model="deleteAuth" width="500">
-                            <template v-slot:activator="{ on }">
-                              <v-btn color="red" dark v-on="on">
-                                Delete
-                              </v-btn>
-                            </template>
-                            <v-card>
-                              <v-card-text class="p-4">
-                                Are you sure you want to delete this?
-                              </v-card-text>
-                              <v-card-actions>
-                                <v-spacer></v-spacer>
-                                <v-btn
-                                  color="primary"
-                                  text
-                                  @click="deleteExp(selectedExp)"
-                                >
-                                  I accept
-                                </v-btn>
-                              </v-card-actions>
-                            </v-card>
-                          </v-dialog>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </v-card>
-              </v-expand-transition>
+              <expenseDailyPieChart
+                :expDetailsShow="expDetailsShow"
+                :chartDataReceived="chartDataReceived"
+                :chartDataSpent="chartDataSpent"
+                :daily_total_spent="daily_total_spent"
+                :daily_total_received="daily_total_received"
+              />
+              <viewExpense
+                :selectedExpInner="selectedExpInner"
+                v-on:updateButton="addUpdateMenu = true"
+              />
             </v-card>
           </v-col>
         </v-row>
@@ -423,33 +201,20 @@
 <script>
 import utils from "@/js/utils.js";
 import expenseClass from "@/js/expense_class.js";
+import addUpdateExpenseDialog from "@/components/addUpdateExpenseDialog";
+import expenseDailyPieChart from "@/components/expenseDailyPieChart";
+import viewExpense from "@/components/viewExpense";
 
 export default {
   name: "DailyExpenses",
+  components: { addUpdateExpenseDialog, expenseDailyPieChart, viewExpense },
   data() {
     return {
       addUpdateMenu: false,
-
       item: null,
-      inputRules: [(v) => !!v || "Required!"],
-      inputRulesNum: [
-        (v) => !!v || "Required!",
-        (v) => !isNaN(v) || "Must be a number!",
-      ],
       add_valid: false,
       isUpdate: false,
       deleteAuth: false,
-
-      new_expense: {
-        title: null,
-        description: null,
-        amount: null,
-        category: null,
-        color: "#228B22",
-        money_in: true,
-        date: null,
-      },
-      selectedExp: null,
       expDetailsShow: false,
 
       date_menu: false,
@@ -459,42 +224,20 @@ export default {
       date_pick: new Date().toISOString().substr(0, 10),
       today: new Date().toISOString().substr(0, 10),
 
-      expObj: new expenseClass(),
-      // expenses: [],
+      selectedExpInner: null,
       now_expense: {},
       daily_total_spent: 0,
       daily_total_received: 0,
-      // all_categories: [],
 
       chartDataSpent: [],
       chartDataReceived: [],
-      chartOptionsSpent: {
-        title: "Amount Spent",
-        legend: { position: "bottom" },
-        height: utils.toPX(60, "vh"),
-        width: utils.toPX(25, "vw"),
-      },
-      chartOptionsReceived: {
-        title: "Amount Received",
-        legend: { position: "bottom" },
-        height: utils.toPX(60, "vh"),
-        width: utils.toPX(25, "vw"),
-      },
     };
   },
-  props: ["logged","expenses","all_categories"],
+  props: ["expenses", "selectedExp"],
   async created() {
-    this.$emit("checkLogged", 1);
-    // if (this.logged) {
-      this.expObj = new expenseClass();
-    //   const data = await this.expObj.getExpDB();
-    //   this.expenses = data.expenses;
-    //   this.all_categories = data.all_categories;
-      await this.getDailyExp();
+    // this.$emit("checkLogged");
+    await this.getDailyExp();
     // }
-  },
-  mounted: function() {
-    //deleted
   },
   computed: {
     date() {
@@ -502,6 +245,20 @@ export default {
     },
   },
   methods: {
+    openAddMenu() {
+      try {
+        if (this.selectedExpInner) {
+          this.item = null;
+          setTimeout(() => {
+            this.addUpdateMenu = true;
+          }, 500);
+        } else {
+          this.addUpdateMenu = true;
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    },
     setToday() {
       this.date_pick = this.today;
     },
@@ -509,72 +266,20 @@ export default {
       const tmp = "/main/" + page;
       this.$router.push(tmp);
     },
-    async validate() {
-      this.$refs.add_form.validate();
-      let new_expense = JSON.parse(JSON.stringify(this.new_expense));
-      if (
-        new_expense.title &&
-        new_expense.description &&
-        new_expense.amount
-      ) {
-        new_expense.date = new Date(this.date_pick);
-        if (!this.isUpdate) {
-          try {
-            await this.expObj.addNewExpense(new_expense);
-            this.$emit("update",1);
-            await this.getDailyExp();
-          } catch (err) {
-            alert(err);
-          }
-        } else {
-          try {
-            const tmp = await this.expObj.updateExpense(
-              this.selectedExp,
-              new_expense
-            );
-            if (tmp.err) {
-              console.log(tmp);
-            } else {
-              this.$emit("update",1);
-              await this.getDailyExp();
-              this.selectedExp = this.now_expense.data[tmp.dataIndex];
-            }
-          } catch (err) {
-            alert(err);
-          }
-        }
-        setTimeout(() => {
-          this.addUpdateMenu = false;
-        }, 100);
-      }
+    async addNewExpense(new_expense) {
+      this.$emit("addNewExpense", new_expense);
+    },
+    async updateExpenses(data) {
+      this.$emit("updateExpenses", data);
     },
     async deleteExp(selectedExp) {
-      try {
-        const tmp = await this.expObj.deleteExpense(selectedExp);
-        if (tmp.err) {
-          console.log(tmp);
-        } else {
-          this.$emit("update",1);
-          await this.getDailyExp();
-          this.selectedExp = null;
-        }
-      } catch (err) {
-        alert(err);
-      }
-      this.deleteAuth = false;
-    },
-    updateButton() {
-      this.addUpdateMenu = true;
-      this.isUpdate = true;
-      this.new_expense = JSON.parse(JSON.stringify(this.selectedExp));
-      this.new_expense.category = utils.toFirstUpperCase(
-        this.new_expense.category,
-        false
-      );
+      this.$emit("deleteExp", selectedExp);
+      this.addUpdateMenu = false;
+      this.selectedExpInner = null;
     },
     async getDailyExp() {
       let date = new Date(this.date_pick);
-      let daily = await this.expObj.getDailyExp(date);
+      let daily = await new expenseClass().getDailyExp(date);
       if (daily == "noData") {
         this.now_expense = [];
         this.chartDataSpent = null;
@@ -593,34 +298,45 @@ export default {
       if (created) {
         console.log("NO GO SET DETAILS");
       } else {
-        this.selectedExp = this.now_expense.data[id];
+        this.selectedExpInner = this.now_expense.data[id];
       }
+    },
+    async setToExp(data) {
+      console.log(this.now_expense); //now_expense not updated first
+      console.log(data);
+      this.date_pick = data.date;
+      let index = this.now_expense.data.findIndex((x) => x.id == data.id);
+      this.item = index;
     },
   },
   watch: {
     item: async function(val) {
       if (val == null) {
-        this.selectedExp = null;
+        this.selectedExpInner = null;
       } else {
         this.setDetails(false, val);
       }
     },
-    selectedExp() {
-      if (this.selectedExp) {
+    selectedExpInner() {
+      if (this.selectedExpInner) {
         this.expDetailsShow = true;
       } else {
         this.expDetailsShow = false;
       }
     },
-    date_pick: async function() {
-      this.item = null;
-      this.getDailyExp();
-    },
-    addUpdateMenu: function() {
-      if (!this.addUpdateMenu) {
-        this.$refs.add_form.reset();
-        this.isUpdate = false;
+    async selectedExp(val) {
+      if (val) {
+        this.item = null;
+        await this.setToExp(val);
       }
+    },
+    async date_pick() {
+      console.log("DailyExpenses: Changed Date");
+      this.item = null;
+      await this.getDailyExp();
+    },
+    async expenses() {
+      await this.getDailyExp(new Date(this.date_pick));
     },
   },
 };

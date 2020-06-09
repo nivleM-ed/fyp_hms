@@ -10,7 +10,7 @@ export default class expenseClass {
     constructor() {
         var expenses = [];
         var recurring_payment = [];
-        var all_categories = [];
+        var all_categories = ['Transportation','Food','Utilities','Insurance','Housing','Healthcare','Entertainment','Miscellaneous','Recurring Payment'];
         var all_time_amount_spent = { total: 0 };
         var all_time_amount_received = { total: 0 };
     }
@@ -54,6 +54,7 @@ export default class expenseClass {
     async addNewExpense(data) {
         try {
             await this.getExpDB();
+            data.id = null;
             let { yearIndex, monthIndex, dayIndex } = await this.getIndex(data);
             let tmpData = await this.toData(data);
 
@@ -69,7 +70,7 @@ export default class expenseClass {
             this.expenses[index.yearIndex].data[index.monthIndex].data[index.dayIndex].data.push(tmpData);
             await this.syncTotalSpending();
             const tmp = await this.updateExpDB();
-            return tmp;
+            return tmpData;
         } catch (err) {
             return err;
         }
@@ -84,7 +85,7 @@ export default class expenseClass {
 
             await this.syncTotalSpending();
             await this.updateExpDB();
-            return index;
+            return new_data;
         } catch (err) {
             return err;
         }
@@ -128,10 +129,10 @@ export default class expenseClass {
             let tmpData = await this.toRecurData(data);
             this.recurring_payment.push(tmpData);
             await this.setRecurNext();
-            console.log(this.recurring_payment)
             const tmp = await this.updateExpDB();
             return tmp;
         } catch (err) {
+            console.log(err);
             return err;
         }
     }
@@ -144,9 +145,9 @@ export default class expenseClass {
             this.recurring_payment[index] = tmpData;
             await this.setRecurNext();
             await this.updateExpDB();
-            console.log(this.recurring_payment)
             return tmpData;
         } catch (err) {
+            console.log(err);
             return err;
         }
     }
@@ -159,6 +160,7 @@ export default class expenseClass {
             const tmp = await this.updateExpDB();
             return tmp;
         } catch (err) {
+            console.log(err);
             return err;
         }
     }
@@ -333,6 +335,7 @@ export default class expenseClass {
                 }
             }
         } catch (err) {
+            console.log(err);
             return err;
         }
     }
@@ -370,11 +373,13 @@ export default class expenseClass {
             this.expenses = res.data.expenses != null ? res.data.expenses : [];
             this.all_time_amount_spent = res.data.all_time_amount_spent != null ? parseInt(res.data.all_time_amount_spent) : { total: 0 };
             this.all_time_amount_received = res.data.all_time_amount_received != null ? parseInt(res.data.all_time_amount_received) : { total: 0 };
-            this.all_categories = utils.toFirstUpperCase(res.data.all_categories, true);
+            // this.all_categories = utils.toFirstUpperCase(res.data.all_categories, true);
+            this.all_categories = ['Transportation','Food','Utilities','Insurance','Housing','Healthcare','Entertainment','Miscellaneous','Recurring Payment']
             this.recurring_payment = res.data.recurring_payment != null ? res.data.recurring_payment : [];
             await this.setRecurNext();
             return res.data;
         } catch (err) {
+            console.log(err);
             return err;
         }
     }
@@ -393,7 +398,6 @@ export default class expenseClass {
 
                 tmp_received.push(this.all_categories[i]);
                 tmp_received.push(this.expenses[index.yearIndex].data[index.monthIndex].data[index.dayIndex].day_total_received[this.all_categories[i]]);
-
                 spent.push(JSON.parse(JSON.stringify(tmp_spent)));
                 received.push(JSON.parse(JSON.stringify(tmp_received)));
             }
