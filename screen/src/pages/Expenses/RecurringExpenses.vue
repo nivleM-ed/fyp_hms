@@ -437,7 +437,7 @@ export default {
   },
   props: ["recurring_payment"],
   async created() {
-    this.$emit("checkLogged", 1);
+    // this.$emit("checkLogged");
   },
   methods: {
     async validate() {

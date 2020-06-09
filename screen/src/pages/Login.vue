@@ -172,7 +172,7 @@ export default {
   props:["user"],
   async created() {
     this.userObj = new userClass();
-    this.$emit("checkLogged", 1);
+    this.$emit("checkLogged");
       this.versionB = await this.userObj.versionB();
   },
   methods: {

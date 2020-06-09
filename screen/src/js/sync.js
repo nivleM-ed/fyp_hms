@@ -10,7 +10,6 @@ import utils from './utils';
 
 class syncClass {
     constructor() {
-
         var notification = {};
         var latest_notification = {};
         var recurring_payment = {};

@@ -204,7 +204,7 @@ export default {
     "selectedEvent",
   ],
   async created() {
-    this.$emit("checkLogged", 1);
+    // this.$emit("checkLogged");
     // this.setTaskPages(1);
   },
   methods: {
@@ -386,9 +386,11 @@ export default {
       }
     },
     async selectedTask(val) {
-      this.item = null;
-      let index = await this.checkPage(val);
-      this.item = index < -2 ? null : index;
+      if (val) {
+        this.item = null;
+        let index = await this.checkPage(val);
+        this.item = index < -2 ? null : index;
+      }
     },
     async selectedEvent(val) {
       this.item = await this.checkPage(val.selectedEvent);

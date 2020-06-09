@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <v-container>
     <v-expand-transition>
       <v-card
         v-show="selectedTaskInner"
@@ -41,6 +41,7 @@
             <p class="font-regular title">Description</p>
             {{ selectedTaskInner.description }}
             {{ selectedTaskInner.type }}
+            <br/>{{selectedTaskInner.id}}
           </v-card-text>
         </v-card>
 
@@ -90,7 +91,7 @@
         </v-card-actions>
       </v-card>
     </v-expand-transition>
-  </div>
+  </v-container>
 </template>
 <script>
 const moment = require("moment");

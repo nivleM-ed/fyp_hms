@@ -89,7 +89,7 @@ export default {
   },
   props: ["timestamp", "task_notify", "logged"],
   async created() {
-    this.$emit("checkLogged", 1);
+    this.$emit("checkLogged");
     if (this.logged) {
       this.taskObj = new taskClass();
       await this.updateData();
@@ -185,7 +185,7 @@ export default {
   },
   watch: {
     async tab_open() {
-      this.$emit("checkLogged", 1);
+      this.$emit("checkLogged");
       await this.updateData();
     },
   },

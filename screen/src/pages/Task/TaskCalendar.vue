@@ -117,9 +117,12 @@
                   </v-dialog>
                 </v-toolbar>
                 <v-card-text>
-                  <span v-html="selectedEvent.start"></span><br />
+                  <!-- <span v-html="selectedEvent.start"></span><br />
                   <span v-html="selectedEvent.end"></span><br />
-                  <span v-html="selectedEvent.description"></span>
+                  <span v-html="selectedEvent.description"></span> -->
+                  <span v-if="selectedEvent.completed" class="font-weight-bold">Task Completed<br/></span>
+                  <span>Date: {{utils.momentFormatDate(false,selectedEvent.start)}}</span>
+                  <span><br/>Description: {{selectedEvent.description}}</span>
                 </v-card-text>
                 <v-card-actions>
                   <v-btn text color="secondary" @click="selectedOpen = false">
@@ -167,7 +170,7 @@ export default {
   },
   props: ["logged","tasks","completed_tasks","events"],
   async created() {
-    this.$emit("checkLogged", 1);
+    // this.$emit("checkLogged");
   },
   mounted: function() {
     // this.$refs.calendar.checkChange();

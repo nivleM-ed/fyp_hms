@@ -151,7 +151,11 @@
               </v-card-text>
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="primary" text @click="deleteExp(selectedExp)">
+                <v-btn
+                  color="primary"
+                  text
+                  @click="deleteExp(selectedExpInner)"
+                >
                   I accept
                 </v-btn>
               </v-card-actions>
@@ -168,7 +172,7 @@ import utils from "@/js/utils.js";
 
 export default {
   name: "addUpdateExpenseDialog",
-  props: ["addUpdateMenu", "date_pick", "selectedExp"],
+  props: ["addUpdateMenu", "date_pick", "selectedExpInner"],
   data() {
     return {
       inputRules: [(v) => !!v || "Required!"],
@@ -215,13 +219,11 @@ export default {
       if (new_expense.title && new_expense.description && new_expense.amount) {
         new_expense.date = new Date(this.date_pick);
         if (!this.isUpdate) {
-            console.log('ADD EXPENSE')
           this.$emit("addNewExpense", new_expense);
         } else {
           try {
-              console.log('UPDATE EXPENSE')
-            let tmp = JSON.parse(JSON.stringify(this.selectedExp));
-            this.$emit("updateExpenses", { tmp, new_expense });
+            let selectedExp = JSON.parse(JSON.stringify(this.selectedExpInner));
+            this.$emit("updateExpenses", { selectedExp, new_expense });
           } catch (err) {
             alert(err);
           }
@@ -231,32 +233,45 @@ export default {
         }, 100);
       }
     },
-    async deleteExp(selectedExp) {
+    deleteExp(selectedExpInner) {
       try {
-        this.$emit("deleteExp", JSON.parse(JSON.stringify(selectedExp)));
+        this.addUpdateMenu = false;
+        this.deleteAuth = false;
+        this.$emit("deleteExp", JSON.parse(JSON.stringify(selectedExpInner)));
       } catch (err) {
         alert(err);
       }
-      this.deleteAuth = false;
     },
-    watch: {
-      selectedExp(val) {
-        console.log(val);
-        if (val) {
-          this.isUpdate = true;
-          this.new_expense = JSON.parse(JSON.stringify(val));
-        } else {
-          this.$ref.add_form.reset();
-        }
-      },
-      addUpdateMenu(val) {
-        console.log(val);
-        this.$emit('update:addUpdateMenu', val);
+    resetDialog() {
+      if (!this.selectedTaskInner) {
         if (!this.addUpdateMenu) {
           this.$refs.add_form.reset();
           this.isUpdate = false;
         }
-      },
+        setTimeout(() => {
+          if (!this.isUpdate) {
+            this.new_expense.color = "#228B22";
+          }
+        }, 500);
+      }
+    },
+  },
+  watch: {
+    selectedExpInner(val) {
+      if (val) {
+        this.isUpdate = true;
+        this.new_expense = JSON.parse(JSON.stringify(val));
+      } else {
+        this.resetDialog();
+      }
+    },
+    addUpdateMenu: function(val) {
+      console.log("addUpdateMenu: ", val);
+      this.$emit("update:addUpdateMenu", val);
+      if (!this.addUpdateMenu) {
+        this.resetDialog();
+        this.isUpdate = false;
+      }
     },
   },
 };

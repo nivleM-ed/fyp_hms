@@ -55,6 +55,7 @@ export default {
       task_notify: 0,
       expenses: [],
       recurring_payment: [],
+      utils: utils,
 
       notifications: [],
       notify_message: null,
@@ -72,17 +73,17 @@ export default {
     this.syncObj = new syncClass();
     await this.updateData();
     
-    this.intervalSet = setInterval(() => {
-      this.timestamp = utils.getToday(true);
-      this.notifications = this.syncObj.latest_notification;
-      this.syncObj.runSync();
-      // this.setTaskNotify();
-      // this.setExpNotify();
-    }, 1000);
+    // this.intervalSet = setInterval(() => {
+    //   this.timestamp = utils.getToday(true);
+    //   this.notifications = this.syncObj.latest_notification;
+    //   this.syncObj.runSync();
+    //   // this.setTaskNotify();
+    //   // this.setExpNotify();
+    // }, 1000);
   },
   methods: {
     async checkLogged() {
-      this.$emit("checkLogged", 1);
+      this.$emit("checkLogged");
     },
     test(data) {
       return data++

@@ -339,7 +339,7 @@ export default {
     "selectedEvent",
     "selectedTaskInner",
     "addUpdateMenu",
-    "addRecTask"
+    "addRecTask",
   ],
   async created() {},
   methods: {
@@ -355,10 +355,11 @@ export default {
         check
       ) {
         if (!this.isUpdate) {
+          console.log(new_task);
           await this.$emit("addTask", new_task);
         } else {
           await this.$emit("updateTask", {
-            selectedTask: this.selectedTaskInner,
+            selectedTask: JSON.parse(JSON.stringify(this.selectedTaskInner)),
             new_task: new_task,
           });
         }
@@ -397,28 +398,28 @@ export default {
       this.end_date = utils.parseDate(this.end_dateFormatted);
     },
     resetDialog() {
-      if(!this.selectedTaskInner) {
+      if (this.$refs.add_form) {
         if (!this.addUpdateMenu) {
-        this.$refs.add_form.reset();
-        this.isUpdate = false;
-      }
-      setTimeout(() => {
-        if (!this.isUpdate) {
-          this.color = "#228B22";
-          this.new_task.format_start_date = utils.formatDate(this.today_date);
-          this.new_task.format_end_date = utils.formatDate(this.tmr_date);
-          this.start_dateFormatted = utils.formatDate(this.today_date);
-          this.end_dateFormatted = utils.formatDate(this.tmr_date);
-          this.start_date = utils.parseDate(this.start_dateFormatted);
-          this.end_date = utils.parseDate(this.end_dateFormatted);
+          this.$refs.add_form.reset();
+          this.isUpdate = false;
         }
-      }, 500);
+        setTimeout(() => {
+          if (!this.isUpdate) {
+            this.color = "#228B22";
+            this.new_task.format_start_date = utils.formatDate(this.today_date);
+            this.new_task.format_end_date = utils.formatDate(this.tmr_date);
+            this.start_dateFormatted = utils.formatDate(this.today_date);
+            this.end_dateFormatted = utils.formatDate(this.tmr_date);
+            this.start_date = utils.parseDate(this.start_dateFormatted);
+            this.end_date = utils.parseDate(this.end_dateFormatted);
+          }
+        }, 500);
       }
-    }
+    },
   },
   watch: {
     addUpdateMenu: function(val) {
-      this.$emit('update:addUpdateMenu', val);
+      this.$emit("update:addUpdateMenu", val);
       this.resetDialog();
     },
     start_date: function() {
@@ -447,10 +448,10 @@ export default {
     },
     selectedTaskInner(val) {
       // this.addUpdateMenu = true;
-      if(val) {
+      if (val) {
         this.isUpdate = true;
-      this.new_task = JSON.parse(JSON.stringify(val));
-      this.setDateBlur(this.new_task);
+        this.new_task = JSON.parse(JSON.stringify(val));
+        this.setDateBlur(this.new_task);
       } else {
         this.resetDialog();
       }
@@ -461,9 +462,9 @@ export default {
       this.new_task.one_day = val.one_day;
       this.new_task.whole_day = val.whole_day;
       this.new_task.start_time = val.start_time;
-      this.new_task.end_time = val.end_time
-    }
-  }
+      this.new_task.end_time = val.end_time;
+    },
+  },
 };
 </script>
 <style></style>
