@@ -93,13 +93,16 @@ export default {
       }
     },
     async setSeen(index) {
-      if (!this.notification[index].seen) {
+      setTimeout(async () => {
+          if (!this.notification[index].seen) {
         this.notifyObj = new notificationClass();
         this.notification = await this.notifyObj.setSeen(
           this.notification[index]
         );
         await this.getUnseen(); 
       }
+        }, 500);
+      
     },
   },
   watch: {

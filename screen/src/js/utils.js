@@ -151,19 +151,42 @@ class utils {
         return hashFunction.digest('hex');
     }
 
-    static checkRange(data, choose) {
-        var prevDay = null,
+    // static checkRange(data, choose) {
+    //     var prevDay = null,
+    //         rangeDay = null,
+    //         today = moment();
+    //     if(choose === 'day') { //1 days range
+    //         prevDay = moment(data.date).subtract(1,'days');
+    //         rangeDay = moment(data.date).add(1,'minutes');
+    //     } else if ( choose === 'hour') { //2 hours range
+    //         prevDay = moment(data.date).subtract(2, 'hours');
+    //         rangeDay = moment(data.date).add(1,'hours');
+    //     }
+    //     // console.log('prev',prevDay.format("MMM Do YY"),'today',today.format("MMM Do YY"),'rangeDay',rangeDay.format("MMM Do YY"));
+    //     return today.isBetween(prevDay, rangeDay);
+    // }
+
+    static checkTime(time, type) {
+        time = new Date(time);
+        let prevDay = null,
             rangeDay = null,
             today = moment();
-        if(choose === 'day') { //2 days range
-            prevDay = moment(data.date).subtract(2,'days');
-            rangeDay = moment(data.date).add(1,'days');
-        } else if ( choose === 'hour') { //2 hours range
-            prevDay = moment(data.date).subtract(2, 'hours');
-            rangeDay = moment(data.date).add(1,'hours');
+        const tmp = moment(time, "YYYYMMDD HH:mm").fromNow();
+        if(type == "second") {
+            if(tmp === "a few seconds ago") return true;
+            else return false;
+        } else if (type == "hour") {
+            prevDay = moment(time).subtract(1, 'hours');
+            rangeDay = moment(time).add(1, 'minutes');
+            return today.isBetween(prevDay, rangeDay);
+        } else if (type === "ago") {
+            return tmp.includes('ago');
+        } else if (type === "day") {
+            prevDay = moment(time).subtract(1,'days');
+            rangeDay = moment(time).add(1,'minutes');
+            return today.isBetween(prevDay, rangeDay);
         }
-        // console.log('prev',prevDay.format("MMM Do YY"),'today',today.format("MMM Do YY"),'rangeDay',rangeDay.format("MMM Do YY"));
-        return today.isBetween(prevDay, rangeDay);
+        return false;
     }
 
     static findExist(data) {

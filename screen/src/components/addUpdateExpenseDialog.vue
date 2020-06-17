@@ -266,7 +266,6 @@ export default {
       }
     },
     addUpdateMenu: function(val) {
-      console.log("addUpdateMenu: ", val);
       this.$emit("update:addUpdateMenu", val);
       if (!this.addUpdateMenu) {
         this.resetDialog();

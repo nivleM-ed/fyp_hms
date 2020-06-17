@@ -69,7 +69,7 @@ import TaskView from "@/pages/Task/TaskView";
 import CompletedTask from "@/pages/Task/CompletedTask";
 
 export default {
-  components: { TaskCalendar, TaskView, CompletedTask },
+  components: { TaskCalendar, TaskView, CompletedTask},
   data() {
     return {
       tab_open: 0,
@@ -105,7 +105,7 @@ export default {
       var { tmp, com_tmp } = await this.taskObj.getTitles();
       this.task_list = tmp;
       this.com_task_list = com_tmp;
-      this.$emit("updateData", 1);
+      this.$emit("updateData");
     },
     tabChange(val) {
       this.tab_open = parseInt(val);
@@ -121,14 +121,15 @@ export default {
       try {
         const tmp = await this.taskObj.addNewTask(new_task);
         if (tmp.err) {
-          alert(tmp.err);
+          this.$emit("errorAlert", tmp.err);
         } else {
           await this.updateData();
+          this.$emit("viewAlert", {type:"new_task",data:new_task})
           this.selectedTask = tmp;
         }
       } catch (err) {
         console.log(err);
-        alert(err);
+        this.$emit("errorAlert", err);
       }
     },
     async updateTask(tasks) {
@@ -138,14 +139,15 @@ export default {
           tasks.new_task
         );
         if (tmp.err) {
-          alert(tmp.err);
+          this.$emit("errorAlert", tmp.err);
         } else {
           await this.updateData();
+          this.$emit("viewAlert", {type:"update_task",data:tasks.new_task});
           this.selectedTask = tmp;
         }
       } catch (err) {
         console.log(err);
-        alert(err);
+        this.$emit("errorAlert", err);
       }
     },
     async completeTask(selectedTask) {
@@ -158,14 +160,15 @@ export default {
         }
         
         if (tmp.err) {
-          alert(tmp.err);
+          this.$emit("errorAlert", tmp.err);
         } else {
           await this.updateData();
+          this.$emit("viewAlert", {type:"complete_task",data:selectedTask});
           this.selectedTask = null;
         }
       } catch (err) {
         console.log(err);
-        alert(err);
+        this.$emit("errorAlert", err);
       }
     },
     async deleteTask(selectedTask) {
@@ -175,11 +178,12 @@ export default {
           alert(tmp);
         } else {
           this.updateData();
+          this.$emit("viewAlert", {type:"delete_task",data:selectedTask});
           this.selectedTask = null;
         }
       } catch (err) {
         console.log(err);
-        alert(err);
+        this.$emit("errorAlert", err);
       }
     },
   },

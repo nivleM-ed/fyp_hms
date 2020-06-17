@@ -46,7 +46,7 @@ export default {
   components: { DailyExpenses, RecurringExpenses, ExpenseStatistics },
   data() {
     return {
-      tab_open: 1,
+      tab_open: 0,
       utils: utils,
 
       expObj: new expenseClass(),
@@ -80,7 +80,7 @@ export default {
           alert(tmp.err);
         } else {
           await this.updateData();
-          console.log(tmp);
+          this.$emit("viewAlert", {type:"new_expense",data:new_expense});
           this.selectedExp = tmp;
         }
       } catch (err) {
@@ -99,6 +99,7 @@ export default {
           alert(tmp.err);
         } else {
           await this.updateData();
+          this.$emit("viewAlert", {type:"update_daily_exp",data:data.new_expense});
           this.selectedExp = tmp;
         }
       } catch (err) {
@@ -113,6 +114,7 @@ export default {
           alert(tmp);
         } else {
           this.updateData();
+          this.$emit("viewAlert", {type:"delete_daily_exp",data:selectedExp});
           this.selectedExp = null;
         }
       } catch (err) {

@@ -11,7 +11,7 @@
     <v-flex>
       <v-card flat min-height="60vh">
         <v-row>
-          <v-col class="col-4">
+          <v-col cols="5">
             <v-sheet height="64">
               <v-toolbar flat color="white">
                 <v-btn outlined class="mr-4" @click="setToday">
@@ -178,7 +178,7 @@
 
           <v-divider class="mx-4" vertical></v-divider>
 
-          <v-col>
+          <v-col cols="6">
             <v-card height="100%" flat min-height="70vh">
               <expenseDailyPieChart
                 :expDetailsShow="expDetailsShow"
@@ -331,7 +331,6 @@ export default {
       }
     },
     async date_pick() {
-      console.log("DailyExpenses: Changed Date");
       this.item = null;
       await this.getDailyExp();
     },

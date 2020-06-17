@@ -122,11 +122,29 @@
             v-else
             color="success"
             :disabled="!add_valid"
-            class="mt-8"
+            class="mr-2"
             @click.prevent="validate()"
           >
             Update
           </v-btn>
+          <v-dialog v-model="deleteAuth" width="500">
+            <template v-slot:activator="{ on }">
+              <v-btn color="red" dark v-on="on">
+                Delete
+              </v-btn>
+            </template>
+            <v-card>
+              <v-card-text class="p-4">
+                Are you sure you want to delete this?
+              </v-card-text>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="primary" text @click="deleteExp(selectedExp)">
+                  I accept
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
         </v-form>
       </v-card>
     </v-dialog>
@@ -146,7 +164,9 @@
                             <v-list-item-title>
                               <v-row>
                                 <v-col cols="5">
-                                  {{ expense.title }}
+                                  {{
+                                    utils.toFirstUpperCase(expense.title, false)
+                                  }}
                                 </v-col>
                                 <v-col cols="1">
                                   <v-icon
@@ -253,7 +273,11 @@
               <v-expand-transition>
                 <v-card v-show="!expDetailsShow" height="60vh" flat>
                   <v-container fill-height fluid>
-                    <p>Recurring Payment</p>
+                    <v-row align="center" justify="center">
+                      <h3 class="text-center">
+                        Click to view details
+                      </h3>
+                    </v-row>
                   </v-container>
                 </v-card>
               </v-expand-transition>
@@ -266,17 +290,14 @@
                   >
                     <div class="mb-auto">
                       <h3>
-                        {{ selectedExp.title }}
+                        {{ utils.toFirstUpperCase(selectedExp.title, false) }}
                       </h3>
                       <p>
-                        Amount: {{ selectedExp.amount }} <br />{{
-                          selectedExp.description
-                        }}
-                        <br />Next Payment:
+                        Amount: RM{{ selectedExp.amount }} <br />
+                        Description: {{ selectedExp.description }} <br />
+                        Recur Type: {{ selectedExp.category }} Recur <br />Next
+                        Payment:
                         {{ utils.momentFormatDate(false, selectedExp.date) }}
-                        <br />
-                        {{ selectedExp.money_in }} <br />
-                        {{ selectedExp.category }}
                       </p>
                     </div>
                     <div class="mb-auto">
@@ -284,34 +305,12 @@
                         <div>
                           <v-btn
                             class="mr-2"
-                            color="yellow"
+                            color="orange"
                             dark
                             @click.prevent="updateButton()"
                           >
                             Update
                           </v-btn>
-                          <v-dialog v-model="deleteAuth" width="500">
-                            <template v-slot:activator="{ on }">
-                              <v-btn color="red" dark v-on="on">
-                                Delete
-                              </v-btn>
-                            </template>
-                            <v-card>
-                              <v-card-text class="p-4">
-                                Are you sure you want to delete this?
-                              </v-card-text>
-                              <v-card-actions>
-                                <v-spacer></v-spacer>
-                                <v-btn
-                                  color="primary"
-                                  text
-                                  @click="deleteExp(selectedExp)"
-                                >
-                                  I accept
-                                </v-btn>
-                              </v-card-actions>
-                            </v-card>
-                          </v-dialog>
                         </div>
                       </div>
                     </div>

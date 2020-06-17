@@ -105,17 +105,17 @@ export default class taskClass {
     }
   }
 
-  async deleteRecur(data) {
-    try {
-      await this.getExpDB();
-      let index = await this.getRecurIndex(data);
-      this.recurring_payment.splice(index, 1);
-      const tmp = await this.updateExpDB();
-      return tmp;
-    } catch (err) {
-      return err;
-    }
-  }
+  // async deleteRecur(data) {
+  //   try {
+  //     await this.getExpDB();
+  //     let index = await this.getRecurIndex(data);
+  //     this.recurring_payment.splice(index, 1);
+  //     const tmp = await this.updateExpDB();
+  //     return tmp;
+  //   } catch (err) {
+  //     return err;
+  //   }
+  // }
 
   async formatCompleteTask(selectedTask) {
     try {
@@ -197,7 +197,11 @@ export default class taskClass {
     try {
       await this.getTaskDB();
       const index = await this.getIndex(selectedTask, false);
+      
       selectedTask.completed = true;
+      selectedTask.completed_date = new Date();
+      selectedTask.color = "#EF5350";
+
       if (!this.completed_tasks) {
         this.completed_tasks = [];
         this.completed_tasks[0] = selectedTask;
@@ -205,6 +209,7 @@ export default class taskClass {
         this.completed_tasks.push(selectedTask);
       }
       this.tasks.splice(index, 1);
+      await this.formatCompleteTask(selectedTask);
 
       let expObj = new expenseClass();
       let tmpData = { recur_id: selectedTask.recur_id, type: 'recur_expense', date: new Date(), title: selectedTask.name, amount: selectedTask.amount, description: selectedTask.description, money_in: false, color: selectedTask.color, category: 'Recurring Payment' };

@@ -107,8 +107,21 @@
                             <v-col>
                               <span>{{ task.name }}</span>
                             </v-col>
-                            <v-col><b>Started on: </b>{{ utils.momentFormatDate(false, task.start_date) }}</v-col>
-                            <v-col><b>Completed on: </b>{{ utils.momentFormatDate(false, task.completed_date) }}</v-col>
+                            <v-col
+                              ><b>Started on: </b
+                              >{{
+                                utils.momentFormatDate(false, task.start_date)
+                              }}</v-col
+                            >
+                            <v-col
+                              ><b>Completed on: </b
+                              >{{
+                                utils.momentFormatDate(
+                                  false,
+                                  task.completed_date
+                                )
+                              }}</v-col
+                            >
                           </v-row>
                         </v-list-item-title>
                       </v-list-item-content>
@@ -220,12 +233,14 @@ export default {
     "selectedEvent",
     "tasks_formatted",
   ],
-  async created() {},
+  async created() {
+    await this.getComTaskDay();
+  },
   methods: {
     async setTaskPages(page) {
       try {
         await this.getComTaskDay();
-        if (this.task_day) {
+        if (this.task_day.length > 0) {
           this.task_total_page = Math.ceil(
             this.task_day.length / CONST.CONST_page_limit
           );
@@ -244,7 +259,7 @@ export default {
             this.task_page = parseInt(this.task_total_page);
           }
         } else {
-            this.show_task = null;
+          this.show_task = null;
         }
       } catch (err) {
         console.log(err);
@@ -295,7 +310,8 @@ export default {
         console.log(err);
       }
     },
-    searchTask() { //to be changed
+    searchTask() {
+      //to be changed
       try {
         this.show_task = [];
         this.show_task = this.tasks.reduce((data, x) => {
@@ -310,22 +326,32 @@ export default {
         console.log(err);
       }
     },
-    async getComTaskDay() {
+    async getComTaskDay() { 
       try {
-        let {year_index, month_index, day_index, data_index} = await this.findIndexFromDateOrId(this.date_pick, null);
+        if (this.tasks_formatted && this.tasks_formatted.length > 0) { 
+          let {
+            year_index,
+            month_index,
+            day_index,
+            data_index,
+          } = await this.findIndexFromDateOrId(this.date_pick, null);
 
-        if (day_index < 0) this.task_day = null;
-        else
-          this.task_day = this.tasks_formatted[year_index].data[month_index].data[day_index].data;
+          if (day_index < 0) this.task_day = [];
+          else
+            this.task_day = this.tasks_formatted[year_index].data[
+              month_index
+            ].data[day_index].data == null ? [] : this.tasks_formatted[year_index].data[
+              month_index
+            ].data[day_index].data;
+        }
       } catch (err) {
         console.log(err);
       }
     },
     async findIndexFromDateOrId(date, id) {
-        try {
-        let { day, month, year } = await utils.getSeperateDate(
-          new Date(date)
-        );
+      try {
+        let { day, month, year } = await utils.getSeperateDate(new Date(date));
+
         let year_index = this.tasks_formatted.findIndex((x) => x.year == year);
         let month_index = this.tasks_formatted[year_index].data.findIndex(
           (x) => x.month == month
@@ -333,11 +359,14 @@ export default {
         let day_index = this.tasks_formatted[year_index].data[
           month_index
         ].data.findIndex((x) => x.day == day);
-        let data_index = id == null ? -1 : this.tasks_formatted[year_index].data[
-          month_index
-        ].data[day_index].data.findIndex((x) => x.id == id);
+        let data_index =
+          id == null
+            ? -1
+            : this.tasks_formatted[year_index].data[month_index].data[
+                day_index
+              ].data.findIndex((x) => x.id == id);
 
-        return {year_index, month_index, day_index, data_index};
+        return { year_index, month_index, day_index, data_index };
       } catch (err) {
         console.log(err);
       }
@@ -345,8 +374,13 @@ export default {
     async checkPage(find) {
       try {
         // this.$emit("updateData", 1);
-        let {year_index, month_index, day_index, data_index} = await this.findIndexFromDateOrId(find.completed_date, find.id);
-        console.log(year_index, month_index, day_index, data_index)
+        let {
+          year_index,
+          month_index,
+          day_index,
+          data_index,
+        } = await this.findIndexFromDateOrId(find.completed_date, find.id);
+        console.log(year_index, month_index, day_index, data_index);
         this.date_pick = find.completed_date;
         for (var i = 1; i <= this.task_total_page; i++) {
           await this.setTaskPages(i);
@@ -383,7 +417,7 @@ export default {
       }
     },
     date_pick: async function() {
-      this.resetSearch();
+      await this.resetSearch();
       this.item = null;
       // this.setTaskPages(1);
     },
@@ -408,7 +442,7 @@ export default {
       }
     },
     async selectedEvent(val) {
-        this.item = await this.checkPage(val.selectedEvent);
+      this.item = await this.checkPage(val.selectedEvent);
     },
     async task_page(val) {
       this.item = null;

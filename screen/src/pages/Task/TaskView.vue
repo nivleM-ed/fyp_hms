@@ -12,7 +12,7 @@
     <v-flex>
       <v-card flat min-height="60vh">
         <v-row>
-          <v-col v-if="tasks.length != 0" class="col-5">
+          <v-col v-if="tasks.length != 0" cols="5">
             <v-row>
               <v-col cols="9">
                 <v-autocomplete

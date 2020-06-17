@@ -27,32 +27,37 @@ export default class notificationClass {
     //methods
     async addNotification(data, type) {
         try {
-            await this.getNotifyDB();
-            data.notify_date = new Date();
-            let { yearIndex, monthIndex, dayIndex } = await this.getIndex(data);
+            await this.getNotifyDB(); console.log(data)
+            if (!await this.checkExist(data)) {
+                data.notify_date = new Date();
+                let { yearIndex, monthIndex, dayIndex } = await this.getIndex(data);
 
-            if (yearIndex < 0) {
-                await this.addObj('year', data);
-            } else if (monthIndex < 0) {
-                await this.addObj('month', data);
-            } else if (dayIndex < 0) {
-                await this.addObj('day', data);
+                if (yearIndex < 0) {
+                    await this.addObj('year', data);
+                } else if (monthIndex < 0) {
+                    await this.addObj('month', data);
+                } else if (dayIndex < 0) {
+                    await this.addObj('day', data);
+                }
+
+                let index = await this.getIndex(data);
+                let tmpData;
+                let id = await utils.getHashId(`${new Date()}-${JSON.stringify(data)}`);
+
+                if (type === 'task') { //to change to switch case
+                    tmpData = { id: id, notify_type: "task", data_id: data.id, name: data.name, description: data.description, notify_date: data.notify_date, msg: 'You have a task scheduled', start: data.start, end: data.end, seen: false, page: `task_ov/?tid=${data.id}` };
+                } else if (type === 'recur_expense') {
+                    tmpData = { id: id, notify_type: "recur_expense", data_id: data.id, name: data.title, description: data.description, notify_date: data.notify_date, msg: 'A recurring payment task has been set', date: data.date, seen: false, page: `task_ov/?tid=${data.id}` };
+                } else if (type === 'upcoming_task') {
+                    tmpData = { id: id, notify_type: "upcoming_task", data_id: data.id, name: data.title, description: data.description, notify_date: data.notify_date, msg: 'You have a task starting soon...', start: data.start, end: data.end, seen: false, page: `task_ov/?tid=${data.id}` };
+                } else {
+                    return 'noTypeSet'; // should not happen
+                }
+                this.notification[index.yearIndex].data[index.monthIndex].data[index.dayIndex].data.push(tmpData);
+                await this.updateNotifyDB();
+                return 1;
             }
-
-            let index = await this.getIndex(data);
-            let tmpData;
-            let id = await utils.getHashId(`${Date.now()}-${JSON.stringify(data)}`);
-
-            if (type === 'task') {
-                tmpData = { id: id, data_id: data.id, name: data.name, description: data.description, notify_date: data.notify_date, msg: 'You have a task scheduled', start: data.start, end: data.end, seen: false, page: `task_ov/?tid=${data.id}` };
-            } else if (type === 'recur_expense') {
-                tmpData = { id: id, data_id: data.id, name: data.title, description: data.description, notify_date: data.notify_date, msg: 'A recurring payment task has been set', date: data.date, seen: false, page: `task_ov/?tid=${data.id}` };
-            } else {
-                return 'noTypeSet'; // should not happen
-            }
-            this.notification[index.yearIndex].data[index.monthIndex].data[index.dayIndex].data.push(tmpData);
-            await this.updateNotifyDB();
-            return 1;
+            return 0;
         } catch (err) {
             console.log(err);
             return err;
@@ -67,7 +72,8 @@ export default class notificationClass {
                     for (var j = this.notification[i].data.length - 1; j >= 0; j--) {
                         for (var k = this.notification[i].data[j].data.length - 1; k >= 0; k--) {
                             for (var l = this.notification[i].data[j].data[k].data.length - 1; l >= 0; l--) {
-                                tmp.push(this.notification[i].data[j].data[k].data[l]);
+                                if (!this.notification[i].data[j].data[k].data[l].seen)
+                                    tmp.push(this.notification[i].data[j].data[k].data[l]);
                                 if (tmp.length === 10) break;
                             }
                         }
@@ -129,6 +135,29 @@ export default class notificationClass {
                     }
                 );
             }
+        } catch (err) {
+            console.log(err);
+            return err;
+        }
+    }
+
+    async checkExist(data) {
+        try {
+            if (this.notification) {
+                for (let i = this.notification.length - 1; i >= 0; i--) {
+                    for (let j = this.notification[i].data.length - 1; j >= 0; j--) {
+                        for (let k = this.notification[i].data[j].data.length - 1; k >= 0; k--) {
+                            for (let l = this.notification[i].data[j].data[k].data.length - 1; l >= 0; l--) {
+                                let tmp = this.notification[i].data[j].data[k].data[l];
+                                if (tmp.data_id === data.id && new Date(tmp.start).getTime() == new Date(data.start).getTime()) {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return false;
         } catch (err) {
             console.log(err);
             return err;
