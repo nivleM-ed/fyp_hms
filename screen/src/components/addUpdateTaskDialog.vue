@@ -345,6 +345,7 @@ export default {
   methods: {
     async validate() {
       this.$refs.add_form.validate();
+
       const new_task = JSON.parse(JSON.stringify(this.new_task));
       let check = await this.checkTask(new_task);
 
@@ -355,7 +356,9 @@ export default {
         check
       ) {
         if (!this.isUpdate) {
-          console.log(new_task);
+          new_task.type = null;
+          new_task.recur_id = null;
+
           await this.$emit("addTask", new_task);
         } else {
           await this.$emit("updateTask", {
@@ -412,6 +415,9 @@ export default {
             this.end_dateFormatted = utils.formatDate(this.tmr_date);
             this.start_date = utils.parseDate(this.start_dateFormatted);
             this.end_date = utils.parseDate(this.end_dateFormatted);
+            this.new_task.type = null;
+            // this.new_task.name = null;
+            // this.new_task.description = null;
           }
         }, 500);
       }
@@ -453,6 +459,7 @@ export default {
         this.new_task = JSON.parse(JSON.stringify(val));
         this.setDateBlur(this.new_task);
       } else {
+        this.isUpdate = false;
         this.resetDialog();
       }
     },

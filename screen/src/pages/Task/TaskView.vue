@@ -390,6 +390,8 @@ export default {
         this.item = null;
         let index = await this.checkPage(val);
         this.item = index < -2 ? null : index;
+      } else {
+        this.selectedTaskInner = null;
       }
     },
     async selectedEvent(val) {

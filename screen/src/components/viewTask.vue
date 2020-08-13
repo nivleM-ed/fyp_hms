@@ -40,7 +40,7 @@
           <v-card-text>
             <p class="font-regular title">Description</p>
             {{ selectedTaskInner.description }}
-            {{ selectedTaskInner.type }}
+            <br/><br/>{{ selectedTaskInner.type }}
             <br/>{{selectedTaskInner.id}}
           </v-card-text>
         </v-card>

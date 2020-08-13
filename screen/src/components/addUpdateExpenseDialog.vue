@@ -139,7 +139,7 @@
           >
             Update
           </v-btn>
-          <v-dialog v-model="deleteAuth" width="500">
+          <v-dialog v-model="deleteAuth" v-if="isUpdate" width="500">
             <template v-slot:activator="{ on }">
               <v-btn color="red" dark v-on="on">
                 Delete

@@ -173,30 +173,40 @@ export default {
           task.one_day = true;
           task.whole_day = false;
           task.description = "Cook dishes for breakfast/lunch/dinner";
+          task.start_time = "12:00"
+          task.end_time = "14:00"
           break;
         case "buyGroceries":
           task.name = "Buy Groceries";
           task.one_day = true;
           task.whole_day = false;
           task.description = "Buy groceries for food inventory";
+          task.start_time = "12:00"
+          task.end_time = "14:00"
           break;
         case "takeTrash":
           task.name = "Take out thrash";
           task.one_day = true;
           task.whole_day = false;
           task.description = "Throw out the smelly rubbish";
+          task.start_time = "12:00"
+          task.end_time = "14:00"
           break;
         case "waterPlants":
           task.name = "Water the plants";
           task.one_day = true;
           task.whole_day = false;
           task.description = "Water the plants that is needed for transporting nutrient thorughout the plant";
+          task.start_time = "12:00"
+          task.end_time = "14:00"
           break;
         case "cleanRoom":
           task.name = "Clean the living room";
           task.one_day = true;
           task.whole_day = false;
           task.description = "Clean the living room so it is not dusty and dirty";
+          task.start_time = "12:00"
+          task.end_time = "14:00"
           break;
       }
       this.$emit("selectAddTask", task);

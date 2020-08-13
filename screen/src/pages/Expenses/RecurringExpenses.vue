@@ -466,6 +466,7 @@ export default {
             alert(err);
           }
         }
+        this.$emit("update");
         setTimeout(() => {
           this.addUpdateMenu = false;
         }, 100);

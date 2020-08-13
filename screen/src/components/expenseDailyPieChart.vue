@@ -16,7 +16,7 @@
               </v-overlay>
             </v-col>
             <v-col cols="6">
-              <GChart
+              <G Chart
                 type="PieChart"
                 :data="chartDataReceived"
                 :options="chartOptionsReceived"
