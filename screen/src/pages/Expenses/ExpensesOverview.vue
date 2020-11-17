@@ -10,7 +10,10 @@
       <v-tab key="recur_pay">Recurring Payment</v-tab>
 
       <v-tab-item>
-        <ExpenseStatistics />
+        <ExpenseStatistics 
+        :expenses="expenses"
+        :recurring_payment="recurring_payment"
+        />
       </v-tab-item>
 
       <v-tab-item>

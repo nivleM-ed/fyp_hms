@@ -1,7 +1,9 @@
 /* eslint-disable no-unused-vars */
 import utils from "@/js/utils.js";
 import axios from "axios";
-import { CONST } from './const';
+import {
+    CONST
+} from './const';
 import taskClass from './task_class';
 import notificationClass from './notification';
 const url = CONST.CONST_URL.concat('/expenses/');
@@ -10,9 +12,13 @@ export default class expenseClass {
     constructor() {
         var expenses = [];
         var recurring_payment = [];
-        var all_categories = ['Transportation','Food','Utilities','Insurance','Housing','Healthcare','Entertainment','Miscellaneous','Recurring Payment'];
-        var all_time_amount_spent = { total: 0 };
-        var all_time_amount_received = { total: 0 };
+        var all_categories = ['Transportation', 'Food', 'Utilities', 'Insurance', 'Housing', 'Healthcare', 'Entertainment', 'Miscellaneous', 'Recurring Payment'];
+        var all_time_amount_spent = {
+            total: 0
+        };
+        var all_time_amount_received = {
+            total: 0
+        };
     }
 
     get expenses() {
@@ -55,7 +61,11 @@ export default class expenseClass {
         try {
             await this.getExpDB();
             data.id = null;
-            let { yearIndex, monthIndex, dayIndex } = await this.getIndex(data);
+            let {
+                yearIndex,
+                monthIndex,
+                dayIndex
+            } = await this.getIndex(data);
             let tmpData = await this.toData(data);
 
             if (yearIndex < 0) {
@@ -94,7 +104,12 @@ export default class expenseClass {
     async deleteExpense(data) {
         try {
             await this.getExpDB();
-            let { yearIndex, monthIndex, dayIndex, dataIndex } = await this.getIndex(data);
+            let {
+                yearIndex,
+                monthIndex,
+                dayIndex,
+                dataIndex
+            } = await this.getIndex(data);
             this.expenses[yearIndex].data[monthIndex].data[dayIndex].data.splice(dataIndex, 1);
 
             await this.syncTotalSpending();
@@ -111,7 +126,18 @@ export default class expenseClass {
             let notifyObj = new notificationClass();
             let taskObj = new taskClass();
             let index = await this.getRecurIndex(data);
-            let tmpData = { recur_id: data.id, type: data.type, name: data.title, description: data.description, start_date: new Date(data.date).toISOString().substr(0, 10), end_date: new Date(data.date).toISOString().substr(0, 10), one_day: true, whole_day: true, color: 'green', amount: data.amount };
+            let tmpData = {
+                recur_id: data.id,
+                type: data.type,
+                name: data.title,
+                description: data.description,
+                start_date: new Date(data.date).toISOString().substr(0, 10),
+                end_date: new Date(data.date).toISOString().substr(0, 10),
+                one_day: true,
+                whole_day: true,
+                color: 'green',
+                amount: data.amount
+            };
 
             await taskObj.addNewTask(tmpData);
             await this.recordRecur(index);
@@ -166,76 +192,55 @@ export default class expenseClass {
     }
 
     async addObj(string, data) {
-        let { day, month, year } = utils.getSeperateDate(data.date);
-        let { yearIndex, monthIndex, dayIndex, dataIndex } = await this.getIndex(data);
+        let {
+            day,
+            month,
+            year
+        } = utils.getSeperateDate(data.date);
+        let {
+            yearIndex,
+            monthIndex,
+            dayIndex,
+            dataIndex
+        } = await this.getIndex(data);
         if (string === 'year') {
             if (!this.expenses) {
                 this.expenses = [];
             }
-            this.expenses.push(
-                {
-                    year: year,
-                    year_total_spent: {
-                        total: 0
-                    },
-                    year_total_received: {
-                        total: 0
-                    },
-                    data: [
-                        {
-                            month: month,
-                            month_total_spent: {
-                                total: 0
-                            },
-                            month_total_received: {
-                                total: 0
-                            },
-                            data: [
-                                {
-                                    day: day,
-                                    day_total_spent: {
-                                        total: 0
-                                    },
-                                    day_total_received: {
-                                        total: 0
-                                    },
-                                    date: data.date,
-                                    data: []
-                                }
-                            ]
-                        }
-                    ],
-                    total: {}
-                }
-            );
-        } else if (string === 'month') {
-            this.expenses[yearIndex].data.push(
-                {
+            this.expenses.push({
+                year: year,
+                year_total_spent: {
+                    total: 0
+                },
+                year_total_received: {
+                    total: 0
+                },
+                data: [{
                     month: month,
-                    data: [
-                        {
-                            day: day,
-                            day_total_spent: {
-                                total: 0
-                            },
-                            day_total_received: {
-                                total: 0
-                            },
-                            date: data.date,
-                            data: []
-                        }
-                    ],
                     month_total_spent: {
                         total: 0
                     },
                     month_total_received: {
                         total: 0
                     },
-                }
-            );
-        } else if (string === 'day') {
-            this.expenses[yearIndex].data[monthIndex].data.push(
-                {
+                    data: [{
+                        day: day,
+                        day_total_spent: {
+                            total: 0
+                        },
+                        day_total_received: {
+                            total: 0
+                        },
+                        date: data.date,
+                        data: []
+                    }]
+                }],
+                total: {}
+            });
+        } else if (string === 'month') {
+            this.expenses[yearIndex].data.push({
+                month: month,
+                data: [{
                     day: day,
                     day_total_spent: {
                         total: 0
@@ -244,9 +249,27 @@ export default class expenseClass {
                         total: 0
                     },
                     date: data.date,
-                    data: [],
-                }
-            );
+                    data: []
+                }],
+                month_total_spent: {
+                    total: 0
+                },
+                month_total_received: {
+                    total: 0
+                },
+            });
+        } else if (string === 'day') {
+            this.expenses[yearIndex].data[monthIndex].data.push({
+                day: day,
+                day_total_spent: {
+                    total: 0
+                },
+                day_total_received: {
+                    total: 0
+                },
+                date: data.date,
+                data: [],
+            });
         }
     }
 
@@ -270,12 +293,18 @@ export default class expenseClass {
                         }
                     }
                     let current = this.expenses[i].data[j].data;
-                    // this.expenses[i].data[j].month_total[current[k].day_total] += parseInt(current[k].amount);
+                    for (var n = 0; n < this.all_categories.length; n++) {
+                        this.expenses[i].data[j].month_total_received[this.all_categories[n]] += parseFloat(current[k].day_total_received[this.all_categories[n]]);
+                        this.expenses[i].data[j].month_total_spent[this.all_categories[n]] += parseFloat(current[k].day_total_spent[this.all_categories[n]]);
+                    }
                     this.expenses[i].data[j].month_total_received.total += parseFloat(current[k].day_total_received.total);
                     this.expenses[i].data[j].month_total_spent.total += parseFloat(current[k].day_total_spent.total);
                 }
                 let current = this.expenses[i].data;
-                // this.expenses[i].data[j].month_total[current[k].day_total] += parseInt(current[k].amount);
+                for (var o = 0; o < this.all_categories.length; o++) {
+                    this.expenses[i].year_total_received[this.all_categories[o]] += parseFloat(current[j].month_total_received[this.all_categories[o]]);
+                    this.expenses[i].year_total_spent[this.all_categories[o]] += parseFloat(current[j].month_total_spent[this.all_categories[o]]);
+                }
                 this.expenses[i].year_total_spent.total += parseFloat(current[j].month_total_spent.total);
                 this.expenses[i].year_total_received.total += parseFloat(current[j].month_total_received.total);
             }
@@ -289,21 +318,45 @@ export default class expenseClass {
             for (var j = 0; j < this.expenses[i].data.length; j++) {
                 for (var k = 0; k < this.expenses[i].data[j].data.length; k++) {
                     for (var l = 0; l < this.expenses[i].data[j].data[k].data.length; l++) {
-                        this.expenses[i].data[j].data[k].day_total_received = { total: 0 };
-                        this.expenses[i].data[j].data[k].day_total_spent = { total: 0 };
+                        this.expenses[i].data[j].data[k].day_total_received = {
+                            total: 0
+                        };
+                        this.expenses[i].data[j].data[k].day_total_spent = {
+                            total: 0
+                        };
                         for (var m = 0; m < this.all_categories.length; m++) {
                             this.expenses[i].data[j].data[k].day_total_received[this.all_categories[m]] = 0;
                             this.expenses[i].data[j].data[k].day_total_spent[this.all_categories[m]] = 0;
                         }
                     }
-                    this.expenses[i].data[j].month_total_received = { total: 0 };
-                    this.expenses[i].data[j].month_total_spent = { total: 0 };
+                    this.expenses[i].data[j].month_total_received = {
+                        total: 0
+                    };
+                    this.expenses[i].data[j].month_total_spent = {
+                        total: 0
+                    };
+                    for (var n = 0; n < this.all_categories.length; n++) {
+                        this.expenses[i].data[j].month_total_received[this.all_categories[n]] = 0;
+                        this.expenses[i].data[j].month_total_spent[this.all_categories[n]] = 0;
+                    }
                 }
-                this.expenses[i].year_total_spent = { total: 0 };
-                this.expenses[i].year_total_received = { total: 0 };
+                this.expenses[i].year_total_spent = {
+                    total: 0
+                };
+                this.expenses[i].year_total_received = {
+                    total: 0
+                };
+                for (var o = 0; o < this.all_categories.length; o++) {
+                    this.expenses[i].year_total_received[this.all_categories[o]] = 0;
+                    this.expenses[i].year_total_spent[this.all_categories[o]] = 0;
+                }
             }
-            this.all_time_amount_spent = { total: 0 };
-            this.all_time_amount_received = { total: 0 };
+            this.all_time_amount_spent = {
+                total: 0
+            };
+            this.all_time_amount_received = {
+                total: 0
+            };
         }
     }
 
@@ -341,12 +394,21 @@ export default class expenseClass {
     }
 
     async getIndex(data) {
-        let { day, month, year } = utils.getSeperateDate(new Date(data.date));
+        let {
+            day,
+            month,
+            year
+        } = utils.getSeperateDate(new Date(data.date));
         let yearIndex = this.expenses == null ? parseInt('-1') : this.expenses.findIndex(x => x.year == year);
         let monthIndex = yearIndex < 0 ? parseInt('-1') : this.expenses[yearIndex].data.findIndex(x => x.month == month);
         let dayIndex = monthIndex < 0 ? parseInt('-1') : this.expenses[yearIndex].data[monthIndex].data.findIndex(x => x.day == day);
         let dataIndex = dayIndex < 0 ? parseInt('-1') : this.expenses[yearIndex].data[monthIndex].data[dayIndex].data.findIndex(x => x.id == data.id);
-        return { yearIndex, monthIndex, dayIndex, dataIndex };
+        return {
+            yearIndex,
+            monthIndex,
+            dayIndex,
+            dataIndex
+        };
     }
 
     async getRecurIndex(data) {
@@ -355,13 +417,21 @@ export default class expenseClass {
 
     async getDailyExp(date) {
         await this.getExpDB();
-        let tmp = { date: date };
+        let tmp = {
+            date: date
+        };
         let index = await this.getIndex(tmp);
         if ((index.yearIndex < 0 || index.monthIndex < 0 || index.dayIndex < 0) || this.expenses[index.yearIndex].data[index.monthIndex].data[index.dayIndex].data.length == 0) {
             return 'noData';
         } else {
             let chart = await this.getChartData(index, 'daily');
-            return { expense: this.expenses[index.yearIndex].data[index.monthIndex].data[index.dayIndex], spent: chart.spent, received: chart.received, total_spent: this.expenses[index.yearIndex].data[index.monthIndex].data[index.dayIndex].day_total_spent.total, total_received: this.expenses[index.yearIndex].data[index.monthIndex].data[index.dayIndex].day_total_received.total };
+            return {
+                expense: this.expenses[index.yearIndex].data[index.monthIndex].data[index.dayIndex],
+                spent: chart.spent,
+                received: chart.received,
+                total_spent: this.expenses[index.yearIndex].data[index.monthIndex].data[index.dayIndex].day_total_spent.total,
+                total_received: this.expenses[index.yearIndex].data[index.monthIndex].data[index.dayIndex].day_total_received.total
+            };
         }
     }
 
@@ -371,10 +441,14 @@ export default class expenseClass {
                 withCredentials: true
             });
             this.expenses = res.data.expenses != null ? res.data.expenses : [];
-            this.all_time_amount_spent = res.data.all_time_amount_spent != null ? parseInt(res.data.all_time_amount_spent) : { total: 0 };
-            this.all_time_amount_received = res.data.all_time_amount_received != null ? parseInt(res.data.all_time_amount_received) : { total: 0 };
+            this.all_time_amount_spent = res.data.all_time_amount_spent != null ? parseInt(res.data.all_time_amount_spent) : {
+                total: 0
+            };
+            this.all_time_amount_received = res.data.all_time_amount_received != null ? parseInt(res.data.all_time_amount_received) : {
+                total: 0
+            };
             // this.all_categories = utils.toFirstUpperCase(res.data.all_categories, true);
-            this.all_categories = ['Transportation','Food','Utilities','Insurance','Housing','Healthcare','Entertainment','Miscellaneous','Recurring Payment']
+            this.all_categories = ['Transportation', 'Food', 'Utilities', 'Insurance', 'Housing', 'Healthcare', 'Entertainment', 'Miscellaneous', 'Recurring Payment'];
             this.recurring_payment = res.data.recurring_payment != null ? res.data.recurring_payment : [];
             await this.setRecurNext();
             return res.data;
@@ -388,8 +462,12 @@ export default class expenseClass {
         let spent = [];
         let received = [];
         if (type == 'daily') {
-            spent = [["Category", "Total"]];
-            received = [["Category", "Total"]];
+            spent = [
+                ["Category", "Total"]
+            ];
+            received = [
+                ["Category", "Total"]
+            ];
             for (var i = 0; i < this.all_categories.length; i++) {
                 let tmp_spent = [];
                 let tmp_received = [];
@@ -402,7 +480,10 @@ export default class expenseClass {
                 received.push(JSON.parse(JSON.stringify(tmp_received)));
             }
         }
-        return { spent, received };
+        return {
+            spent,
+            received
+        };
     }
 
     async updateExpDB() {
@@ -432,18 +513,273 @@ export default class expenseClass {
 
     async toData(data) {
         let id = data.id == null ? await utils.getHashId(`${Date.now()}-${JSON.stringify(data)}`) : data.id;
-        return { id: id, type: data.type ? data.type : 'expense', date: data.date, amount: utils.setFloat2Decimal(data.amount), title: data.title, description: data.description, category: data.category, money_in: data.money_in, color: data.color };
+        return {
+            id: id,
+            type: data.type ? data.type : 'expense',
+            date: data.date,
+            amount: utils.setFloat2Decimal(data.amount),
+            title: data.title,
+            description: data.description,
+            category: data.category,
+            money_in: data.money_in,
+            color: data.color
+        };
     }
 
     async toRecurData(data) {
         let id = data.id == null ? await utils.getHashId(`${Date.now()}-${JSON.stringify(data)}`) : data.id;
         return {
-            id: id, type: 'recur_expense', title: data.title, description: data.description, amount: utils.setFloat2Decimal(data.amount), category: data.category, color: data.color, day: data.day, month: data.month
+            id: id,
+            type: 'recur_expense',
+            title: data.title,
+            description: data.description,
+            amount: utils.setFloat2Decimal(data.amount),
+            category: data.category,
+            color: data.color,
+            day: data.day,
+            month: data.month
         };
     }
 
     toJson() {
         let temp = JSON.stringify(this);
         return JSON.parse(temp);
+    }
+
+    //methods for processing statistics
+    async setGraphData() {
+        await this.getExpDB();
+        let graph_expenditure_year = [];
+        let graph_savings_year = [];
+        let graph_expenditure_month = [];
+        let graph_savings_month = [];
+        let graph_expenditure_day = [];
+        let graph_savings_day = [];
+
+        let time = await utils.getSeperateDate(new Date());
+        let time_static = new Date();
+        let graph_year = [];
+        let graph_month = [];
+        let graph_day = [];
+
+        while (graph_year.length < 5) {
+            let year = this.expenses.findIndex((x) => x.year === time.year);
+            if (year >= 0) {
+                graph_year.push(this.expenses[year]);
+            } else {
+                graph_year.push(0);
+            }
+            time_static = await utils.previousDate(time_static, "year");
+            time = await utils.getSeperateDate(new Date(time_static));
+        }
+
+        time = await utils.getSeperateDate(new Date());
+        time_static = new Date();
+        // console.log(time)
+        while (graph_month.length < 6) {
+            let year = this.expenses.findIndex((x) => x.year === time.year);
+            if (year >= 0) {
+                let month = this.expenses[year].data.findIndex(
+                    (x) => x.month === time.month
+                );
+                if (month >= 0) {
+                    graph_month.push(this.expenses[year].data[month]);
+                } else {
+                    graph_month.push(0);
+                }
+                time_static = await utils.previousDate(time_static, "month");
+                time = await utils.getSeperateDate(new Date(time_static));
+            } else {
+                while (graph_month.length < 10) {
+                    graph_month.push(0);
+                }
+            }
+        }
+
+        time = await utils.getSeperateDate(new Date());
+        let tmp_date = new Date();
+        while (graph_day.length < 10) {
+            let year = this.expenses.findIndex((x) => x.year === time.year);
+            if (year >= 0) {
+                let month = this.expenses[year].data.findIndex(
+                    (x) => x.month === time.month
+                );
+                if (month >= 0) {
+                    let day = this.expenses[year].data[month].data.findIndex(
+                        (x) => x.day === time.day
+                    );
+                    if (day >= 0) {
+                        graph_day.push(this.expenses[year].data[month].data[day]);
+                    } else {
+                        graph_day.push(0);
+                    }
+                    tmp_date = await utils.previousDate(tmp_date, "day");
+                    time.day = await utils.getSeperateDate(new Date(tmp_date)).day;
+                } else {
+                    while (graph_day.length < 10) {
+                        graph_day.push(0);
+                    }
+                }
+            } else {
+                while (graph_day.length < 10) {
+                    graph_day.push(0);
+                }
+            }
+        }
+
+        //year
+        for (var i = graph_year.length - 1; i >= 0; i--) {
+            if (graph_year[i] == 0) {
+                graph_expenditure_year.push(0);
+                graph_savings_year.push(0);
+            } else {
+                graph_expenditure_year.push(
+                    graph_year[i].year_total_spent.total
+                );
+                graph_savings_year.push(graph_year[i].year_total_received.total);
+            }
+        }
+
+        //month
+        for (var j = graph_month.length - 1; j >= 0; j--) {
+            if (graph_month[j] == 0) {
+                graph_expenditure_month.push(0);
+                graph_savings_month.push(0);
+            } else {
+                graph_expenditure_month.push(
+                    graph_month[j].month_total_spent.total
+                );
+                graph_savings_month.push(
+                    graph_month[j].month_total_received.total
+                );
+            }
+        }
+
+        //day
+        for (var k = graph_day.length - 1; k >= 0; k--) {
+            if (graph_day[k] == 0) {
+                graph_expenditure_day.push(0);
+                graph_savings_day.push(0);
+            } else {
+                graph_expenditure_day.push(graph_day[k].day_total_spent.total);
+                graph_savings_day.push(graph_day[k].day_total_received.total);
+            }
+        }
+
+        return {
+            graph_expenditure_year,
+            graph_savings_year,
+            graph_expenditure_month,
+            graph_savings_month,
+            graph_expenditure_day,
+            graph_savings_day
+        };
+        //   graph_savings = graph_savings_year;
+        //   graph_expenditure = graph_expenditure_year;
+    }
+
+    async getStatsData() {
+        await this.getExpDB();
+        let stats_tmp = [];
+        let year, month, day;
+        let time = await utils.getSeperateDate(new Date());
+        let tmp;
+        var i;
+
+        year = this.expenses.findIndex((x) => x.year === time.year);
+        if (year >= 0) {
+            month = this.expenses[year].data.findIndex((x) => x.month === time.month);
+            if (month >= 0) {
+                day = this.expenses[year].data[month].data.findIndex((x) => x.day === time.day);
+            }
+
+            //find most amount spend this year (month)
+            tmp = this.expenses[year].data;
+            let year_spend_highest = {
+                month_total_spent: {
+                    total: 0
+                }
+            };
+            let year_received_highest = {
+                month_total_received: {
+                    total: 0
+                }
+            };
+            console.log(tmp)
+            for (i = 0; i < tmp.length; i++) {
+                if (tmp[i].month_total_spent.total > year_spend_highest.month_total_spent.total) {
+                    year_spend_highest = tmp[i];
+                }
+                if (tmp[i].month_total_received.total > year_received_highest.month_total_received.total) {
+                    year_received_highest = tmp[i];
+                }
+
+            }
+            stats_tmp.push(`You spent the most in ${utils.changeToMonth(year_spend_highest.month)} with an amount of RM${year_spend_highest.month_total_spent.total}`);
+            stats_tmp.push(`You received the most money in ${utils.changeToMonth(year_received_highest.month)} with an amount of RM${year_received_highest.month_total_received.total}`);
+
+        }
+
+
+        //check if any amount spend today
+        if (day < 0 || month < 0 || year < 0) {
+            stats_tmp.push("You have not spent or received anything today.");
+        } else {
+            if (this.expenses[year].data[month].data[day].day_total_spent.total == 0) {
+                stats_tmp.push("You have not spend anything today.");
+            } else {
+                //find amount spend today compared to the day before
+                let yesterday = this.expenses[year].data[month].data.findIndex((x) => x.day === (time.day - 1));
+                if (yesterday >= 0) {
+                    if (this.expenses[year].data[month].data[yesterday].day_total_spent.total > 0) {
+                        let today = this.expenses[year].data[month].data[day].day_total_spent.total;
+                        let before = this.expenses[year].data[month].data[yesterday].day_total_spent.total;
+
+                        if (today > before) {
+                            stats_tmp.push(`You have spent ${((today-before)/before)*100}% more compared to yesterday.`);
+                        } else {
+                            stats_tmp.push(`You have spent ${((before-today)/today)*100}% less compared to yesterday.`);
+                        }
+
+                    }
+                }
+            }
+            if (this.expenses[year].data[month].data[day].day_total_received.total == 0) {
+                stats_tmp.push("You have not received anything today.");
+            }
+
+
+        }
+
+        //find most amount spend this month (day)
+        if (month < 0 || year < 0) {
+            console.log("Month is -1");
+        } else {
+            tmp = this.expenses[year].data[month].data;
+            let month_spend_highest = {
+                day_total_spent: {
+                    total: 0
+                }
+            };
+            let month_received_highest = {
+                day_total_received: {
+                    total: 0
+                }
+            };
+            for (i = 0; i < tmp.length; i++) {
+                if (tmp[i].day_total_spent.total > month_spend_highest.day_total_spent.total) {
+                    month_spend_highest = tmp[i];
+                }
+                if (tmp[i].day_total_received.total > month_received_highest.day_total_received.total) {
+                    month_received_highest = tmp[i];
+                }
+
+            }
+            stats_tmp.push(`You spent the most amount on ${utils.formatDate2(new Date(month_spend_highest.date))} with an amount of RM${month_spend_highest.day_total_spent.total}`);
+            stats_tmp.push(`You received the most money on ${utils.formatDate2(new Date(month_received_highest.date))} with an amount of RM${month_received_highest.day_total_received.total}`);
+        }
+
+
+        return stats_tmp;
     }
 }

@@ -110,7 +110,9 @@ setNewUser = (data) => {
     const setInventory = (data) => {
         return new Promise((resolve, reject) => {
             return models.inventory.create({
-                user_id: data.id
+                user_id: data.id,
+                all_categories: ["grams(g)", "kilograms(kg)","packets", "bottles", "boxes", "millilitres(ml)", "litres(l)"],
+                low_food_setting: {low_g: 100, low_kg: 1, low_bottle: 0, low_box: 0, low_ml: 100, low_l: 1, low_packet: 1},
             }).then(psr => {
                 resolve(psr);
             }).catch(err => {

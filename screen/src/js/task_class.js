@@ -277,7 +277,7 @@ export default class taskClass {
       let id = data.id == null ? await utils.getHashId(`${new Date()}-${JSON.stringify(data)}`) : data.id;
       let time = await this.setTime(data);
 
-      return { id: id, type: data.type ? data.type : 'task', name: data.name, description: data.description, start: time.start, end: time.end, start_date: data.start_date, start_time: data.start_time, end_date: data.end_date, end_time: data.end_time, one_day: data.one_day, whole_day: data.whole_day, color: data.color, format_start_date: time.format_start_date, format_end_date: time.format_end_date, notify_ack: data.notify_ack, completed: data.completed, amount: data.amount, recur_id: data.recur_id };
+      return { id: id, type: data.type ? data.type : 'task', name: data.name, description: data.description, start: time.start, end: time.end, start_date: data.start_date, start_time: data.start_time, end_date: data.end_date, end_time: data.end_time, one_day: data.one_day, whole_day: data.whole_day, color: data.color, format_start_date: time.format_start_date, format_end_date: time.format_end_date, notify_ack: data.notify_ack, completed: data.completed, amount: data.amount, recur_id: data.recur_id, shopping_list_id: data.shopping_list_id, shopping_list: data.shopping_list };
     } catch (err) {
       console.log(err);
       return err;

@@ -70,6 +70,11 @@ class utils {
         return `${day}/${month}/${year}`;
     }
 
+    static formatDate2(date) {
+        let temp = this.getSeperateDate(date);
+        return `${temp.day}/${temp.month}/${temp.year}`;
+    }
+
     static parseDate(date) {
         if (!date) return null;
         const [day, month, year] = date.split("/");
@@ -107,6 +112,24 @@ class utils {
             return dateTime;
         } else {
             return tmpdate;
+        }
+    }
+
+    //number to string (month)
+    static changeToMonth(num) {
+        switch(num) {
+            case 1: return "January";
+            case 2: return "February";
+            case 3: return "March";
+            case 4: return "April";
+            case 5: return "May";
+            case 6: return "June";
+            case 7: return "July";
+            case 8: return "August";
+            case 9: return "September";
+            case 10: return "October";
+            case 11: return "November";
+            case 12: return "December";
         }
     }
 
@@ -151,6 +174,19 @@ class utils {
         return hashFunction.digest('hex');
     }
 
+    static async previousDate(date, change) {
+        if(change == "day") {
+            return moment(date).subtract(1, 'days');
+        
+        }else if(change == "month") {
+            // console.log(date,"===",(moment(date).subtract(1, 'month'))._d)
+            return moment(date).subtract(1, 'months');
+        } else if (change == "year") {
+            return moment(date).subtract(1, 'years');
+        }
+        return 'error';
+    }
+
     // static checkRange(data, choose) {
     //     var prevDay = null,
     //         rangeDay = null,
@@ -187,6 +223,24 @@ class utils {
             return today.isBetween(prevDay, rangeDay);
         }
         return false;
+    }
+
+    static checkTimePast(task) {
+        try {
+            const past = "ago";
+            const tmp = moment(task.start, "YYYYMMDD HH:mm").fromNow();
+            if (tmp.includes(past)) {
+              return true;
+            }
+            return false;
+          } catch (err) {
+            console.log(err);
+            return err;
+          }
+    }
+
+    static dateDiff(first, second) {
+        return moment(first).diff(moment(second), 'days');
     }
 
     static findExist(data) {

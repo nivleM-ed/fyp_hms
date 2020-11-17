@@ -19,6 +19,22 @@ module.exports = (sequelize, DataTypes) => {
         food: {
             type: DataTypes.JSON,
             allowNull: true
+        },
+        recipe: {
+            type: DataTypes.JSON,
+            allowNull: true
+        },
+        all_categories: {
+            type: DataTypes.JSON,
+            allowNull: true
+        },
+        low_food_setting: {
+            type: DataTypes.JSON,
+            allowNull: true
+        },
+        shopping_list: {
+            type: DataTypes.JSON,
+            allowNull: true
         }
     }, {
         freezeTableName: true

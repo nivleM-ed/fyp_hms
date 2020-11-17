@@ -27,7 +27,23 @@ module.exports = {
             food: {
                 allowNull: true,
                 type: Sequelize.JSON
-            }
+            },
+            recipe: {
+                allowNull: true,
+                type: Sequelize.JSON
+            },
+            all_categories: {
+                allowNull: true,
+                type: Sequelize.JSON
+            },
+            low_food_setting: {
+                allowNull: true,
+                type: Sequelize.JSON
+            },
+            shopping_list: {
+                allowNull: true,
+                type: Sequelize.JSON
+            },
         }, {
             freezeTableName: true
         });

@@ -24,6 +24,7 @@
           :selectedTask="selectedTask"
           :selectedEvent="selectedEvent"
           :timestamp="timestamp"
+          :logged="logged"
           v-on:updateData="updateData"
           v-on:deleteTask="deleteTask"
           v-on:completeTask="completeTask"
@@ -40,6 +41,7 @@
           :selectedTask="selectedTask"
           :completed="true"
           :selectedEvent="selectedEvent"
+          :logged="logged"
           v-on:updateTask="updateTask"
           v-on:changeTab="tabChange"
         />
@@ -93,6 +95,9 @@ export default {
     if (this.logged) {
       this.taskObj = new taskClass();
       await this.updateData();
+
+      let task_id = this.$route.query.task_id;
+      if(task_id) this.selectedTask = {id:task_id};
     }
   },
   methods: {

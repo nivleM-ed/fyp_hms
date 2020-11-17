@@ -18,6 +18,33 @@
       </v-card>
     </v-dialog>
 
+    <!-- dialog to choose shopping list -->
+    <v-dialog v-model="chooseShoppingList" width="500">
+      <v-card>
+        <v-card-text class="p-4">
+          <p>Choose shopping list:</p>
+          <v-select
+            :items="shopping_list_titles"
+            label="List name"
+            v-model="sListChoose"
+            outlined
+            :rules="inputRules"
+            class="ma-2"
+            required
+          ></v-select>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="red darken-1" text @click="chooseShoppingList = false"
+            >Cancel</v-btn
+          >
+          <v-btn color="green" text @click="addToList()">
+            Yes
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <!-- dialog for adding item to shopping list -->
     <v-dialog v-model="addList" width="500">
       <v-card v-if="shoppingListTmp != null">
@@ -26,11 +53,14 @@
         </v-card-title>
         <v-card-text class="p-4">
           {{ utils.toFirstUpperCase(shoppingListTmp.name, false) }}
-          <br/><span v-if="checkExistInList(shoppingListTmp)">You have already added this into the shoppping list. Adding here will add extra quantity to the food item in the shopping list.</span>
+          <br /><span v-if="checkExistInList(shoppingListTmp)"
+            >You have already added this into the shoppping list. Adding here
+            will add extra quantity to the food item in the shopping list.</span
+          >
           <v-row>
             <v-col>
               <v-text-field
-                v-model="shoppingListTmp.quantity"
+                v-model="shoppingListTmp.add_quantity"
                 label="Quantity"
                 placeholder="Food Quantity"
                 :rules="inputRulesNum"
@@ -55,7 +85,7 @@
           <v-btn color="red darken-1" text @click="addList = false"
             >Cancel</v-btn
           >
-          <v-btn color="green" text @click="addToList()">
+          <v-btn color="green" text @click="chooseShoppingList = true">
             Add
           </v-btn>
         </v-card-actions>
@@ -219,12 +249,12 @@
                 :expanded.sync="expanded"
                 show-expand
               >
-                <template v-slot:item.quantity="{ item }">
-                  <v-chip :color="getColor(item.quantity)" dark>{{
+                <template v-slot:[`item.quantity`]="{ item }">
+                  <v-chip :color="getColor(item)" dark>{{
                     item.quantity
                   }}</v-chip>
                 </template>
-                <template v-slot:item.actions="{ item }">
+                <template v-slot:[`item.actions`]="{ item }">
                   <v-tooltip left>
                     <template v-slot:activator="{ on: tooltip }">
                       <v-icon
@@ -277,6 +307,7 @@
                     Description: <br />{{ item.description }} <br />
                     Date created: {{ item.date_created }} <br />
                     Date editted: {{ item.date_editted }}
+                    {{ item }}
                   </td>
                 </template>
               </v-data-table>
@@ -289,8 +320,15 @@
           <v-divider class="mx-4" vertical></v-divider>
 
           <v-col>
-            <v-card height="100%" flat min-height="70vh">
-              <foodAnalysis :food="food" />
+            <v-card outlined height="100%" flat min-height="70vh">
+              <foodAnalysis
+                :food="food"
+                :low_food_setting="low_food_setting"
+                :shopping_list="shopping_list"
+                :shopping_list_titles="shopping_list_titles"
+                v-on:addToList="addToList"
+                v-on:updateLowSetting="updateLowSetting"
+              />
             </v-card>
           </v-col>
         </v-row>
@@ -325,6 +363,7 @@ export default {
       search: null,
       select: null,
       selectedFoodInner: null,
+      sListChoose: "",
 
       page: 1,
       pageCount: 0,
@@ -333,7 +372,6 @@ export default {
       show_food: [],
 
       dialog: false,
-      all_categories: ["grams", "packet(s)", "bottle(s)"],
       headers: [
         {
           text: "Food ",
@@ -363,9 +401,16 @@ export default {
       },
       foodTmp: null,
       shoppingListTmp: null,
+      chooseShoppingList: false,
     };
   },
-  props: ["food", "shopping_list"],
+  props: [
+    "food",
+    "shopping_list",
+    "all_categories",
+    "shopping_list_titles",
+    "low_food_setting",
+  ],
   async created() {
     this.initialize();
   },
@@ -398,6 +443,7 @@ export default {
       } else if (type === "list") {
         this.shoppingListTmp = item;
         this.addList = true;
+        this.shoppingListTmp.add_quantity = 0;
       }
     },
 
@@ -410,15 +456,32 @@ export default {
       this.updateFood();
     },
 
-    addToList() {
-      let tmp = JSON.parse(JSON.stringify(this.shoppingListTmp));
-      this.$emit("addToList", tmp);
-      this.addList = false;
+    addToList(data) {
+      if (!data) {
+        let tmp = JSON.parse(JSON.stringify(this.shoppingListTmp));
+        this.$emit("addToList", {
+          list_id: this.sListChoose,
+          data: tmp,
+          array: false,
+        });
+        this.addList = false;
+        this.chooseShoppingList = false;
+      } else {
+        this.$emit("addToList", { list_id: data.list_id, data: data.data.data, array: data.data.array });
+      }
+      this.sListChoose = null;
+    },
+
+    updateLowSetting(data) {
+      this.$emit("updateLowSetting", data);
     },
 
     checkExistInList(data) {
-      if(this.shopping_list.findIndex(x => x.id === data.id) > 0) return true;
-      return false;
+      for (let i in this.shopping_list) {
+        if (this.shopping_list[i].data.findIndex((x) => x.id === data.id) >= 0)
+          return true;
+        return false;
+      }
     },
 
     close() {
@@ -447,7 +510,6 @@ export default {
             `${Date.now()}-${JSON.stringify(editedItem)}`
           );
           editedItem.date_created = new Date();
-          console.log(editedItem);
           this.food_items.push(editedItem);
         }
         this.updateFood();
@@ -507,13 +569,25 @@ export default {
         console.log(err);
       }
     },
-    getColor(quantity) {
-      if (quantity <= 1) return "red";
-      else if (quantity <= 10) return "orange";
-      else return "green";
-    },
-    test() {
-      console.log("test123");
+    getColor(x) {
+      if (x.category === "Grams(g)") {
+        if (x.quantity <= this.low_food_setting.low_g) return "red";
+      } else if (x.category === "Kilograms(kg)") {
+        if (x.quantity <= this.low_food_setting.low_kg) return "red";
+      } else if (x.category === "Packets") {
+        if (x.quantity <= this.low_food_setting.low_packet) return "red";
+      } else if (x.category === "Bottles") {
+        if (x.quantity <= this.low_food_setting.low_bottle) return "red";
+      } else if (x.category === "Boxes") {
+        if (x.quantity <= this.low_food_setting.low_box) return "red";
+      } else if (x.category === "Millilitres(ml)") {
+        if (x.quantity <= this.low_food_setting.low_ml) return "red";
+      } else if (x.category === "Litres(l)") {
+        if (x.quantity <= this.low_food_setting.low_l) return "red";
+      } else {
+        console.log("error: getLow (this shouldn't happen)");
+      }
+      return "green";
     },
   },
   watch: {
@@ -524,6 +598,7 @@ export default {
       val && val !== this.select && this.querySelections(val);
     },
     food(val) {
+      console.log(val);
       this.food_items = val == null ? [] : val;
       this.setTitles();
     },

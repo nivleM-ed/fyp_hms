@@ -3,7 +3,14 @@
     <v-expand-transition>
       <v-card v-show="!expDetailsShow" height="60vh" flat>
         <v-container fill-height fluid>
-          <v-row style="height:100%">
+          <v-row v-if="daily_total_spent <= 0 && daily_total_received <= 0" >
+            <!-- <v-col> -->
+              <v-overlay :absolute="true" :value="true" >
+                <p>You did not spent or receive anything today</p>
+              </v-overlay>
+            <!-- </v-col> -->
+          </v-row>
+          <v-row v-else>
             <v-col cols="6">
               <GChart
                 type="PieChart"
@@ -16,7 +23,7 @@
               </v-overlay>
             </v-col>
             <v-col cols="6">
-              <G Chart
+              <GChart
                 type="PieChart"
                 :data="chartDataReceived"
                 :options="chartOptionsReceived"
@@ -43,19 +50,20 @@ export default {
       chartOptionsSpent: {
         title: "Amount Spent",
         legend: { position: "bottom" },
-        height: utils.toPX(60, "vh"),
+        height: utils.toPX(55, "vh"),
         width: utils.toPX(25, "vw"),
       },
       chartOptionsReceived: {
         title: "Amount Received",
         legend: { position: "bottom" },
-        height: utils.toPX(60, "vh"),
+        height: utils.toPX(55, "vh"),
         width: utils.toPX(25, "vw"),
       },
     };
   },
   props: ["expDetailsShow", "chartDataSpent", "chartDataReceived", "daily_total_spent", "daily_total_received"],
-  async created() {},
+  async created() {
+  },
   methods: {},
   watch: {},
 };

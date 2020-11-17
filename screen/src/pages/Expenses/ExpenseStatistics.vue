@@ -1,313 +1,300 @@
 <template>
-  <v-container
-    fill-height
-    fluid
-    grid-list-xl
-  >
-    <v-layout wrap>
-      <v-flex
-        md12
-        sm12
-        lg4
-      >
-        <material-chart-card
-          :data="dailySalesChart.data"
-          :options="dailySalesChart.options"
-          color="info"
-          type="Line"
-        >
-          <h4 class="title font-weight-light">Daily Sales</h4>
-          <p class="category d-inline-flex font-weight-light">
-            <v-icon
-              color="green"
-              small
-            >
-              mdi-arrow-up
-            </v-icon>
-            <span class="green--text">55%</span>&nbsp;
-            increase in today's sales
-          </p>
+  <div class="m-4">
+    <v-card flat>
+      <v-row>
+        <v-col cols="5">
+          <v-card >
+            <v-tabs background-color="yellow darken-4" dark>
+              <v-tabs-slider color="purple"></v-tabs-slider>
+              <v-tab @click="graph_show = 0">
+                Day
+              </v-tab>
+              <v-tab @click="graph_show = 1">
+                Month
+              </v-tab>
+              <v-tab @click="graph_show = 2">
+                Year
+              </v-tab>
+            </v-tabs>
+            
+            <v-card flat class="p-2" color="yellow darken-1">
+              <v-sheet color="rgba(0, 0, 0, .12)" class="p-2">
+              <v-card-title>
+                {{ overview_graph_title }}
+              </v-card-title>
+              <v-card class="mx-auto text-center" color="red" dark max-width="600">
+                <v-card-title>
+                  Last Expenditure
+                </v-card-title>
+                <v-card-text>
+                  <v-sheet color="rgba(0, 0, 0, .12)">
+                    <v-sparkline
+                      :value="graph_expenditure"
+                      color="rgba(255, 255, 255, .7)"
+                      height="100"
+                      padding="24"
+                      stroke-linecap="round"
+                      smooth
+                    >
+                      <template v-slot:label="item">
+                        RM{{ item.value }}
+                      </template>
+                    </v-sparkline>
+                  </v-sheet>
+                </v-card-text>
+              </v-card>
 
-          <template slot="actions">
-            <v-icon
-              class="mr-2"
-              small
-            >
-              mdi-clock-outline
-            </v-icon>
-            <span class="caption grey--text font-weight-light">updated 4 minutes ago</span>
-          </template>
-        </material-chart-card>
-      </v-flex>
-      <v-flex
-        md12
-        sm12
-        lg4
-      >
-        <material-chart-card
-          :data="emailsSubscriptionChart.data"
-          :options="emailsSubscriptionChart.options"
-          :responsive-options="emailsSubscriptionChart.responsiveOptions"
-          color="red"
-          type="Bar"
-        >
-          <h4 class="title font-weight-light">Email Subscription</h4>
-          <p class="category d-inline-flex font-weight-light">Last Campaign Performance</p>
+              <v-card class="mx-auto text-center mt-3 mb-2" color="green" dark max-width="600">
+                <v-card-title>
+                  Last Savings
+                </v-card-title>
+                <v-card-text>
+                  <v-sheet color="rgba(0, 0, 0, .12)">
+                    <v-sparkline
+                      :value="graph_savings"
+                      color="rgba(255, 255, 255, .7)"
+                      height="100"
+                      padding="24"
+                      stroke-linecap="round"
+                      smooth
+                    >
+                      <template v-slot:label="item">
+                        RM{{ item.value }}
+                      </template>
+                    </v-sparkline>
+                  </v-sheet>
+                </v-card-text>
+              </v-card>
+              </v-sheet>
+            </v-card>
+          </v-card>
+        </v-col>
 
-          <template slot="actions">
-            <v-icon
-              class="mr-2"
-              small
-            >
-              mdi-clock-outline
-            </v-icon>
-            <span class="caption grey--text font-weight-light">updated 10 minutes ago</span>
-          </template>
-        </material-chart-card>
-      </v-flex>
-      <v-flex
-        md12
-        sm12
-        lg4
-      >
-        <material-chart-card
-          :data="dataCompletedTasksChart.data"
-          :options="dataCompletedTasksChart.options"
-          color="green"
-          type="Line"
-        >
-          <h3 class="title font-weight-light">Completed Tasks</h3>
-          <p class="category d-inline-flex font-weight-light">Last Last Campaign Performance</p>
-
-          <template slot="actions">
-            <v-icon
-              class="mr-2"
-              small
-            >
-              mdi-clock-outline
-            </v-icon>
-            <span class="caption grey--text font-weight-light">campaign sent 26 minutes ago</span>
-          </template>
-        </material-chart-card>
-      </v-flex>
-      
-      <v-flex
-        sm6
-        xs12
-        md6
-        lg3
-      >
-        <material-stats-card
-          color="green"
-          icon="mdi-store"
-          title="Revenue"
-          value="$34,245"
-          sub-icon="mdi-calendar"
-          sub-text="Last 24 Hours"
-        />
-      </v-flex>
-      <v-flex
-        sm6
-        xs12
-        md6
-        lg3
-      >
-        <material-stats-card
-          color="orange"
-          icon="mdi-content-copy"
-          title="Used Space"
-          value="49/50"
-          small-value="GB"
-          sub-icon="mdi-alert"
-          sub-icon-color="error"
-          sub-text="Get More Space..."
-          sub-text-color="text-primary"
-        />
-      </v-flex>
-      <v-flex
-        sm6
-        xs12
-        md6
-        lg3
-      >
-        <material-stats-card
-          color="red"
-          icon="mdi-information-outline"
-          title="Fixed Issues"
-          value="75"
-          sub-icon="mdi-tag"
-          sub-text="Tracked from Github"
-        />
-      </v-flex>
-      <v-flex
-        sm6
-        xs12
-        md6
-        lg3
-      >
-        <material-stats-card
-          color="info"
-          icon="mdi-twitter"
-          title="Followers"
-          value="+245"
-          sub-icon="mdi-update"
-          sub-text="Just Updated"
-        />
-      </v-flex>
-      
-    </v-layout>
-  </v-container>
+        <v-divider class="mx-4" vertical></v-divider>
+        <v-col>
+          <v-row>
+            <v-card class="mt-2" color="teal darken-3" dark max-width="600">
+              <v-card-title>
+                Some statistics for you
+              </v-card-title>
+              <v-card-text>
+                <v-sheet color="rgba(0, 0, 0, .12)">
+                  <p v-for="item in stats_data" :key="item" class="p-2">
+                    - {{ item }}
+                  </p>
+                </v-sheet>
+              </v-card-text>
+            </v-card>
+          </v-row>
+          <v-divider></v-divider>
+          <v-row>
+            <v-card class="mt-2" color="teal darken-3" dark max-width="600">
+              <v-card-title>
+                Recurring Payment
+              </v-card-title>
+              <v-card-text>
+                <v-sheet color="rgba(0, 0, 0, .12)">
+                  <div class="p-2">
+                    Your next bill payment is in {{ recur_shortest_time }} days.
+                    <p v-for="item in recur_shortest" :key="item">
+                      - {{ item.title }} ({{ new Date(item.date) }})
+                    </p>
+                  </div>
+                </v-sheet>
+              </v-card-text>
+            </v-card>
+          </v-row>
+        </v-col>
+      </v-row>
+    </v-card>
+  </div>
 </template>
 
 <script>
-export default {
-  data () {
-    return {
-      dailySalesChart: {
-        data: {
-          labels: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
-          series: [
-            [12, 17, 7, 17, 23, 18, 38]
-          ]
-        },
-        options: {
-          lineSmooth: this.$chartist.Interpolation.cardinal({
-            tension: 0
-          }),
-          low: 0,
-          high: 50, // creative tim: we recommend you to set the high sa the biggest value + something for a better look
-          chartPadding: {
-            top: 0,
-            right: 0,
-            bottom: 0,
-            left: 0
-          }
-        }
-      },
-      dataCompletedTasksChart: {
-        data: {
-          labels: ['12am', '3pm', '6pm', '9pm', '12pm', '3am', '6am', '9am'],
-          series: [
-            [230, 750, 450, 300, 280, 240, 200, 190]
-          ]
-        },
-        options: {
-          lineSmooth: this.$chartist.Interpolation.cardinal({
-            tension: 0
-          }),
-          low: 0,
-          high: 1000, // creative tim: we recommend you to set the high sa the biggest value + something for a better look
-          chartPadding: {
-            top: 0,
-            right: 0,
-            bottom: 0,
-            left: 0
-          }
-        }
-      },
-      emailsSubscriptionChart: {
-        data: {
-          labels: ['Ja', 'Fe', 'Ma', 'Ap', 'Mai', 'Ju', 'Jul', 'Au', 'Se', 'Oc', 'No', 'De'],
-          series: [
-            [542, 443, 320, 780, 553, 453, 326, 434, 568, 610, 756, 895]
+import utils from "@/js/utils.js";
+// import expenseDailyPieChart from "@/components/expenseDailyPieChart";
+import expenseClass from "@/js/expense_class.js";
 
-          ]
+export default {
+  name: "ExpenseStatistics",
+  // components: { expenseDailyPieChart },
+  data() {
+    return {
+      stats_data: [],
+      overview_graph_title: "Data for the past 10 days",
+      graph_savings: [],
+      graph_expenditure: [],
+      graph_expenditure_year: [],
+      graph_savings_year: [],
+      graph_expenditure_month: [],
+      graph_savings_month: [],
+      graph_expenditure_day: [],
+      graph_savings_day: [],
+      graph_show: 0,
+
+      recur_shortest_time: 0,
+      recur_shortest: [],
+
+      monthlyExpenses: {
+        data: {
+          labels: ["M", "T", "W", "T", "F", "S", "S"],
+          series: [[12, 17, 7, 17, 23, 18, 38]],
         },
         options: {
-          axisX: {
-            showGrid: false
-          },
+          lineSmooth: this.$chartist.Interpolation.cardinal({
+            tension: 0,
+          }),
           low: 0,
-          high: 1000,
+          high: 75, // creative tim: we recommend you to set the high sa the biggest value + something for a better look
+          // width: '300px',
+          fullWidth: true,
           chartPadding: {
             top: 0,
-            right: 5,
+            right: 0,
             bottom: 0,
-            left: 0
-          }
+            left: 0,
+          },
         },
-        responsiveOptions: [
-          ['screen and (max-width: 640px)', {
-            seriesBarDistance: 5,
-            axisX: {
-              labelInterpolationFnc: function (value) {
-                return value[0]
-              }
-            }
-          }]
-        ]
       },
-      headers: [
-        {
-          sortable: false,
-          text: 'ID',
-          value: 'id'
-        },
-        {
-          sortable: false,
-          text: 'Name',
-          value: 'name'
-        },
-        {
-          sortable: false,
-          text: 'Salary',
-          value: 'salary',
-          align: 'right'
-        },
-        {
-          sortable: false,
-          text: 'Country',
-          value: 'country',
-          align: 'right'
-        },
-        {
-          sortable: false,
-          text: 'City',
-          value: 'city',
-          align: 'right'
-        }
-      ],
-      items: [
-        {
-          name: 'Dakota Rice',
-          country: 'Niger',
-          city: 'Oud-Tunrhout',
-          salary: '$35,738'
-        },
-        {
-          name: 'Minerva Hooper',
-          country: 'Curaçao',
-          city: 'Sinaai-Waas',
-          salary: '$23,738'
-        }, {
-          name: 'Sage Rodriguez',
-          country: 'Netherlands',
-          city: 'Overland Park',
-          salary: '$56,142'
-        }, {
-          name: 'Philip Chanley',
-          country: 'Korea, South',
-          city: 'Gloucester',
-          salary: '$38,735'
-        }, {
-          name: 'Doris Greene',
-          country: 'Malawi',
-          city: 'Feldkirchen in Kārnten',
-          salary: '$63,542'
-        }
-      ],
-      tabs: 0,
       list: {
         0: false,
         1: false,
-        2: false
-      }
-    }
+        2: false,
+      },
+      date: {},
+      year_expenses: {},
+      month_expenses: {},
+      day_expenses: {},
+      utils: utils,
+      daily_total_spent: 0,
+      daily_total_received: 0,
+      chartDataSpent: [],
+      chartDataReceived: [],
+    };
+  },
+  props: ["expenses", "recurring_payment"],
+  async created() {
+    this.date = this.utils.getSeperateDate(new Date());
+    await this.getExpensesData();
+    await this.setGraph();
+    await this.setStatsInfo();
+    await this.getDailyExp();
+    await this.getRecurNext();
   },
   methods: {
-    complete (index) {
-      this.list[index] = !this.list[index]
-    }
-  }
-}
+    async getDailyExp() {
+      let daily = await new expenseClass().getDailyExp(new Date());
+      if (daily == "noData") {
+        this.now_expense = [];
+        this.chartDataSpent = null;
+        this.chartDataReceived = null;
+        this.daily_total_spent = 0;
+        this.daily_total_received = 0;
+      } else {
+        this.now_expense = daily.expense;
+        this.chartDataSpent = daily.spent;
+        this.chartDataReceived = daily.received;
+        this.daily_total_spent = daily.total_spent;
+        this.daily_total_received = daily.total_received;
+      }
+    },
+    async getRecurNext() {
+      let tmp = [];
+      let shortest_time = Infinity;
+      let shortest;
+      for (var i in this.recurring_payment) {
+        //get shortest time first
+        if (
+          this.utils.dateDiff(this.recurring_payment[i].date, new Date()) <
+          shortest_time
+        ) {
+          shortest = this.recurring_payment[i];
+          shortest_time = this.utils.dateDiff(
+            this.recurring_payment[i].date,
+            new Date()
+          );
+        }
+      }
+      tmp.push(shortest);
+      for (i in this.recurring_payment) {
+        if (
+          this.utils.dateDiff(this.recurring_payment[i].date, new Date()) ==
+            shortest_time &&
+          this.recurring_payment[i].id != shortest.id
+        ) {
+          tmp.push(this.recurring_payment[i]);
+        }
+      }
+
+      this.recur_shortest_time = shortest_time;
+      this.recur_shortest = tmp;
+    },
+    async getExpensesData() {
+      let year, month, day;
+      if (this.expenses) {
+        year = this.expenses[
+          this.expenses.findIndex((x) => x.year === this.date.year)
+        ];
+        if (year) {
+          month =
+            year.data[year.data.findIndex((x) => x.month === this.date.month)];
+          if (month) {
+            day =
+              month.data[month.data.findIndex((x) => x.day === this.date.day)];
+          }
+        }
+
+        this.year_expenses = year == null ? null : year;
+        this.month_expenses = month == null ? null : month;
+        this.day_expenses = day == null ? null : day;
+      }
+    },
+    async setGraph() {
+      let graph_data = await new expenseClass().setGraphData();
+      this.graph_expenditure_year = graph_data.graph_expenditure_year;
+      this.graph_savings_year = graph_data.graph_savings_year;
+      this.graph_expenditure_month = graph_data.graph_expenditure_month;
+      this.graph_savings_month = graph_data.graph_savings_month;
+      this.graph_expenditure_day = graph_data.graph_expenditure_day;
+      this.graph_savings_day = graph_data.graph_savings_day;
+
+      this.graph_savings = this.graph_savings_day;
+      this.graph_expenditure = this.graph_expenditure_day;
+    },
+    async setStatsInfo() {
+      this.stats_data = await new expenseClass().getStatsData();
+      console.log(this.stats_data);
+    },
+    // test() {
+    //   if (this.graph_show == 2) this.graph_show = 0;
+    //   else this.graph_show++;
+    // },
+  },
+  watch: {
+    graph_show(val) {
+      if (val == 0) {
+        this.graph_savings = this.graph_savings_day;
+        this.graph_expenditure = this.graph_expenditure_day;
+        this.overview_graph_title = "Data for the past 10 days";
+      } else if (val == 1) {
+        this.graph_savings = this.graph_savings_month;
+        this.graph_expenditure = this.graph_expenditure_month;
+        this.overview_graph_title = "Data for the past 6 months";
+      } else if (val == 2) {
+        this.graph_savings = this.graph_savings_year;
+        this.graph_expenditure = this.graph_expenditure_year;
+        this.overview_graph_title = "Data for the past 5 years";
+      }
+    },
+    async expenses() {
+      await this.getExpensesData();
+      await this.setGraph();
+      await this.setStatsInfo();
+      await this.getDailyExp();
+    },
+    async recurring_payment() {
+      await this.getRecurNext();
+    },
+  },
+};
 </script>

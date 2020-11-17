@@ -178,7 +178,7 @@
 
           <v-divider class="mx-4" vertical></v-divider>
 
-          <v-col cols="6">
+          <v-col>
             <v-card height="100%" flat min-height="70vh">
               <expenseDailyPieChart
                 :expDetailsShow="expDetailsShow"
@@ -235,9 +235,7 @@ export default {
   },
   props: ["expenses", "selectedExp"],
   async created() {
-    // this.$emit("checkLogged");
     await this.getDailyExp();
-    // }
   },
   computed: {
     date() {
@@ -293,6 +291,7 @@ export default {
         this.daily_total_spent = daily.total_spent;
         this.daily_total_received = daily.total_received;
       }
+      console.log(daily)
     },
     setDetails(created, id) {
       if (created) {

@@ -5,10 +5,11 @@
         v-show="selectedExpInner"
         v-if="selectedExpInner"
         outlined
-        height="70vh"
+        height="65vh"
+        max-width="45vw"
       >
         <v-img class="white--text align-end" height="200px" :src="imgSrc">
-          <div class="fill-height bottom-gradient"></div>
+          <!-- <div class="fill-height bottom-gradient"></div> -->
           <v-card-title class="display-2 font-weight-medium">{{
             utils.toFirstUpperCase(selectedExpInner.title, false)
           }}</v-card-title>

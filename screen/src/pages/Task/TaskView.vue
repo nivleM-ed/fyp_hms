@@ -203,10 +203,7 @@ export default {
     "selectedTask",
     "selectedEvent",
   ],
-  async created() {
-    // this.$emit("checkLogged");
-    // this.setTaskPages(1);
-  },
+  async created() {},
   methods: {
     openAddMenu() {
       try {

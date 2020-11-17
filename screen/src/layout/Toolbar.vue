@@ -1,5 +1,5 @@
 <template>
-  <v-toolbar>
+  <v-toolbar flat>
     <v-btn icon @click.prevent="$router.go(-1)" class="hidden-xs-only">
       <v-icon>mdi-arrow-left</v-icon>
     </v-btn>

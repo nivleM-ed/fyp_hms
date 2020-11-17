@@ -15,12 +15,24 @@
         :shopping_list="shopping_list"
         :low_food_setting="low_food_setting"
         :all_categories="all_categories"
+        :shopping_list_titles="shopping_list_titles"
         v-on:updateFood="updateFood"
         v-on:addToList="addToList"
+        v-on:updateLowSetting="updateLowSetting"
+        v-on:viewAlert="viewAlert"
         />
       </v-tab-item>
 
-      <v-tab-item key="shoppinglist"> </v-tab-item>
+      <v-tab-item key="shoppinglist"> 
+        <ShoppingList
+        :food="food"
+        :shopping_list="shopping_list"
+        :all_categories="all_categories"
+        v-on:updateShoppingList="updateShoppingList"
+        v-on:addToTask="addToTask"
+        v-on:viewAlert="viewAlert"
+        />
+      </v-tab-item>
 
       <v-tab-item key="recipe"> </v-tab-item>
     </v-tabs>
@@ -28,10 +40,11 @@
 </template>
 <script>
 import FoodInventory from "@/pages/Inventory/FoodInventory.vue";
+import ShoppingList from "@/pages/Inventory/ShoppingList.vue";
 import invClass from "@/js/inventory_class.js";
 
 export default {
-  components: { FoodInventory },
+  components: { FoodInventory, ShoppingList },
   data() {
     return {
       dailySalesChart: {
@@ -58,7 +71,9 @@ export default {
       shopping_list: [],
       low_food_setting: {},
       all_categories: [],
+      shopping_list_titles: [],
       invObj: null,
+      tab_open: 0,
     };
   },
   props: ["timestamp", "logged"],
@@ -68,6 +83,7 @@ export default {
     if (this.logged) {
       this.invObj = new invClass();
       await this.updateData();
+      this.tab_open = this.$route.query.tab == null ? 0 : parseInt(this.$route.query.tab);
     }
   },
   mounted: function() {
@@ -76,10 +92,11 @@ export default {
   methods: {
     async updateData() {
       await this.invObj.getInvDB();
-      this.food = this.invObj.food;
-      this.shopping_list = this.invObj.shopping_list;
-      this.low_food_setting = this.invObj.low_food_setting;
-      this.all_categories = this.invObj.all_categories;
+      this.food = this.invObj._food;
+      this.shopping_list = this.invObj._shopping_list;
+      this.shopping_list_titles = await this.getShoppingListTitles(this.invObj._shopping_list);
+      this.low_food_setting = this.invObj._low_food_setting;
+      this.all_categories = this.invObj._all_categories;
     },
 
     async updateFood(data){
@@ -87,9 +104,35 @@ export default {
       await this.updateData();
     },
 
-    async addToList(data) {
-      await this.invObj.addShoppingList(data, false);
+    async updateLowSetting(data) {
+      await this.invObj.updateLowSetting(data);
       await this.updateData();
+    },
+
+    async updateShoppingList(data) {
+      await this.invObj.updateShoppingList(data);
+      await this.updateData();
+    },
+
+    async getShoppingListTitles(data) {
+      let tmp = [];
+      for (let item in data) {
+        tmp.push({text: data[item].name, value: data[item].id});
+      }
+      console.log(tmp);
+      return tmp;
+    },
+
+    async addToList(data) {
+      await this.invObj.addShoppingList(data.list_id, data.data, data.array);
+      await this.updateData();
+      this.$emit("viewAlert", {type:"food_add_to_list",data:data})
+    },
+
+    async addToTask(data) {
+      await this.invObj.addShoppingTask(data);
+      await this.updateData();
+      this.$emit("viewAlert", {type:"shopping_add_to_task",data:data})
     },
 
     toPage(page, id) {
@@ -103,6 +146,8 @@ export default {
       this.$router.push(tmp);
     },
   },
+  watch: {
+  }
 };
 </script>
 <style></style>

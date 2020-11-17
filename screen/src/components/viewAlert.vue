@@ -25,6 +25,7 @@ export default {
   methods: {},
   watch: {
     data(val) {
+      console.log(val)
       let delay = 0;
       try {
         if (this.visible) {
@@ -75,6 +76,18 @@ export default {
               case "delete_daily_exp":
                 this.title = val.data.title;
                 this.sentence = "Daily Expense completed";
+                this.color = "success";
+                break;
+              case "food_add_to_list":
+                this.title = "Add food item to list";
+                this.sentence = "Item successfully added to list";
+                this.color = "success";
+                break;
+              case "shopping_add_to_task":
+                this.title = val.data.name;
+                this.sentence =
+                  "You have added a new task for " +
+                  utils.momentFormatDate(false, val.data.start_date) + " with shopping list";
                 this.color = "success";
                 break;
             }

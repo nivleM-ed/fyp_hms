@@ -164,6 +164,7 @@
                         v-model="new_task.start_time"
                         label="Start time"
                         prepend-icon="mdi-clock-outline"
+                        :rules="inputRules"
                         readonly
                         v-on="on"
                       ></v-text-field>
@@ -207,6 +208,7 @@
                         label="End time"
                         prepend-icon="mdi-clock-outline"
                         readonly
+                        :rules="inputRules"
                         v-on="on"
                       ></v-text-field>
                     </template>
@@ -303,9 +305,9 @@ export default {
         description: null,
         color: "#228B22",
         start_date: new Date().toISOString().substr(0, 10),
-        start_time: null,
+        start_time: "00:00",
         end_date: new Date().toISOString().substr(0, 10),
-        end_time: null,
+        end_time: "24:00",
         format_start_date: utils.formatDate(this.today_date),
         format_end_date: utils.formatDate(this.today_date),
       },
@@ -340,8 +342,24 @@ export default {
     "selectedTaskInner",
     "addUpdateMenu",
     "addRecTask",
+    "shopping_list",
   ],
-  async created() {},
+  async created() {
+    this.new_task.format_start_date = utils.formatDate(this.today_date);
+    this.new_task.format_end_date = utils.formatDate(this.tmr_date);
+    this.start_dateFormatted = utils.formatDate(this.today_date);
+    this.end_dateFormatted = utils.formatDate(this.tmr_date);
+    this.start_date = utils.parseDate(this.start_dateFormatted);
+    this.end_date = utils.parseDate(this.end_dateFormatted);
+
+    if (this.shopping_list) {
+      this.new_task.name = "Buy groceries based on shopping list";
+      this.new_task.description = "Shopping list: " + this.shopping_list.name;
+      this.new_task.one_day = true;
+      this.new_task.list_id = this.shopping_list.id;
+      this.new_task.type = "shopping_list";
+    }
+  },
   methods: {
     async validate() {
       this.$refs.add_form.validate();
@@ -359,6 +377,10 @@ export default {
           new_task.type = null;
           new_task.recur_id = null;
 
+          if (this.shopping_list) {
+            new_task.type = "shopping_list";
+            new_task.shopping_list = this.shopping_list.data;
+          }
           await this.$emit("addTask", new_task);
         } else {
           await this.$emit("updateTask", {
@@ -386,6 +408,12 @@ export default {
           alert("Start date need to be before the End date");
           return false;
         }
+      } else {
+        if (new_task.whole_day) {
+          if (!new_task.start_time && !new_task.end_time) {
+            return false;
+          }
+        }
       }
       return true;
     },
@@ -411,6 +439,8 @@ export default {
             this.color = "#228B22";
             this.new_task.format_start_date = utils.formatDate(this.today_date);
             this.new_task.format_end_date = utils.formatDate(this.tmr_date);
+            this.new_task.start_time = "00:00";
+            this.new_task.end_time = "24:00";
             this.start_dateFormatted = utils.formatDate(this.today_date);
             this.end_dateFormatted = utils.formatDate(this.tmr_date);
             this.start_date = utils.parseDate(this.start_dateFormatted);
@@ -418,6 +448,14 @@ export default {
             this.new_task.type = null;
             // this.new_task.name = null;
             // this.new_task.description = null;
+            if (this.shopping_list) {
+              this.new_task.name = "Buy groceries based on shopping list";
+              this.new_task.description =
+                "Shopping list: " + this.shopping_list.name;
+              this.new_task.one_day = true;
+              this.new_task.list_id = this.shopping_list.id;
+              this.new_task.type = "shopping_list";
+            }
           }
         }, 500);
       }
