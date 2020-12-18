@@ -84,6 +84,43 @@ export default class inventoryClass {
         }
     }
 
+    async setShopListComplete(id) {
+        try {
+            await this.getInvDB();
+            this.shopping_list[this.shopping_list.findIndex(x => x.id == id)].completed = true;
+            
+            await this.topUpFood(this.shopping_list[this.shopping_list.findIndex(x => x.id == id)].data);
+
+            await this.updateInvDB();
+        } catch (err) {
+            console.log(err);
+            return err;
+        }
+    }
+
+    async topUpFood(data) {
+        console.log(data)
+        for(let item in data) {
+            let itemNo = this.food.findIndex((x)=> x.id == data[item].id);
+            if(itemNo > -1) {
+                this.food[itemNo].quantity = parseInt(this.food[itemNo].quantity) + parseInt(data[item].shoplist_quantity);
+            }
+             
+        }
+    }
+
+    async removeTaskId(id) {
+        try {
+            await this.getInvDB();
+            this.shopping_list[this.shopping_list.findIndex(x => x.id == id)].task_id = null;
+
+            await this.updateInvDB();
+        } catch (err) {
+            console.log(err);
+            return err;
+        }
+    }
+
     async addShoppingList(list_id, data, array) {
         let list_index = this.shopping_list.findIndex(x => x.id === list_id);
         if (array) {

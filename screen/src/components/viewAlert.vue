@@ -25,7 +25,7 @@ export default {
   methods: {},
   watch: {
     data(val) {
-      console.log(val)
+      console.log(val);
       let delay = 0;
       try {
         if (this.visible) {
@@ -64,13 +64,18 @@ export default {
               case "new_expense":
                 this.money_in = val.data.money_in ? "gained" : "spent";
                 this.title = val.data.title;
-                this.sentence = "You have " + this.money_in + " RM" + val.data.amount;
+                this.sentence =
+                  "You have " + this.money_in + " RM" + val.data.amount;
                 this.color = "success";
                 break;
               case "update_daily_exp":
                 this.money_in = val.data.money_in ? "gained" : "spent";
                 this.title = val.data.title;
-                this.sentence = "Updated: You have " + this.money_in + " RM" + val.data.amount;
+                this.sentence =
+                  "Updated: You have " +
+                  this.money_in +
+                  " RM" +
+                  val.data.amount;
                 this.color = "success";
                 break;
               case "delete_daily_exp":
@@ -87,7 +92,30 @@ export default {
                 this.title = val.data.name;
                 this.sentence =
                   "You have added a new task for " +
-                  utils.momentFormatDate(false, val.data.start_date) + " with shopping list";
+                  utils.momentFormatDate(false, val.data.start_date) +
+                  " with shopping list";
+                this.color = "success";
+                break;
+              case "add_food":
+                this.title = "Added new food - " + val.data.name;
+                this.sentence = "Quantity: " + val.data.quantity;
+                this.color = "success";
+                break;
+              case "update_food":
+                this.title = "Updated food - " + val.data.name;
+                this.sentence = "Quantity: " + val.data.quantity;
+                this.color = "success";
+                break;
+              case "delete_food":
+                this.title = "Deleted food";
+                this.color = "success";
+                break;
+              case "delete_shopping_list":
+                this.title = "Deleted Shopping List - " + val.data.name;
+                this.color = "success";
+                break;
+              case "add_shopping_list":
+                this.title = "Added Shopping List - " + val.data;
                 this.color = "success";
                 break;
             }

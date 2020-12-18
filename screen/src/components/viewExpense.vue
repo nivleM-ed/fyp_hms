@@ -10,53 +10,58 @@
       >
         <v-img class="white--text align-end" height="200px" :src="imgSrc">
           <!-- <div class="fill-height bottom-gradient"></div> -->
-          <v-card-title class="display-2 font-weight-medium">{{
-            utils.toFirstUpperCase(selectedExpInner.title, false)
-          }}</v-card-title>
+          <v-card-title class="display-2 font-weight-medium">
+            <v-sheet color="rgba(0, 0, 0, .6)" dark class="p-2">{{
+              utils.toFirstUpperCase(selectedExpInner.title, false)
+            }}</v-sheet></v-card-title
+          >
         </v-img>
         <div
           v-if="selectedExpInner"
-          class="d-flex align-start flex-column mb-6 ma-4"
+          class="flex-column mb-6 ma-4"
           height="100%"
         >
-          <div class="mb-auto">
-            <p>{{ selectedExpInner.description }}</p>
-            <p v-if="selectedExpInner.money_in">
-              Received:
-              <v-icon color="green darken-2">
-                mdi-plus
-              </v-icon>
-              RM {{ selectedExpInner.amount }}
-            </p>
-            <p v-else>
-              Spend:
-              <v-icon color="red darken-2">
-                mdi-minus
-              </v-icon>
-              RM {{ selectedExpInner.amount }}
-            </p>
-            <p>
-              {{
-                utils.momentFormatDate(false, new Date(selectedExpInner.date))
-              }}
-            </p>
-            <p>Category: {{ selectedExpInner.category }}</p>
-          </div>
-          <div class="mb-auto">
-            <div class="align-self-end">
-              <div>
-                <v-btn
-                  class="mr-2"
-                  color="orange"
-                  dark
-                  @click.prevent="updateButton()"
-                >
-                  Update
-                </v-btn>
-              </div>
+          <v-sheet color="rgba(0, 0, 0, .12)" class="p-3" min-height="100px">
+            <div class="mb-auto">
+              <b>Title: </b>
+              {{ utils.toFirstUpperCase(selectedExpInner.title, false) }} <br />
+              <b>Description: </b>{{ selectedExpInner.description }} <br />
+              <span v-if="selectedExpInner.money_in">
+                <b>Received: </b>
+                <v-icon color="green darken-2">
+                  mdi-plus
+                </v-icon>
+                RM {{ selectedExpInner.amount }}
+              </span>
+              <span v-else>
+                <b>Spend: </b>
+                <v-icon color="red darken-2">
+                  mdi-minus
+                </v-icon>
+                RM {{ selectedExpInner.amount }}
+              </span>
+              <br />
+              <span>
+                <b>Date created: </b
+                >{{
+                  utils.momentFormatDate(true, new Date(selectedExpInner.date))
+                }}
+              </span>
+              <br />
+              <span><b>Category:</b> {{ selectedExpInner.category }}</span>
             </div>
-          </div>
+          </v-sheet>
         </div>
+        <v-card-actions>
+          <v-btn
+            class="mr-2"
+            color="orange"
+            dark
+            @click.prevent="updateButton()"
+          >
+            Update
+          </v-btn>
+        </v-card-actions>
       </v-card>
     </v-expand-transition>
   </v-container>

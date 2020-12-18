@@ -120,7 +120,7 @@ export default class expenseClass {
         }
     }
 
-    async addRecurTask(data) {
+    async addRecurTask(data, date) {
         try {
             await this.getExpDB();
             let notifyObj = new notificationClass();
@@ -131,8 +131,8 @@ export default class expenseClass {
                 type: data.type,
                 name: data.title,
                 description: data.description,
-                start_date: new Date(data.date).toISOString().substr(0, 10),
-                end_date: new Date(data.date).toISOString().substr(0, 10),
+                start_date: new Date(date).toISOString().substr(0, 10),
+                end_date: new Date(date).toISOString().substr(0, 10),
                 one_day: true,
                 whole_day: true,
                 color: 'green',
@@ -415,6 +415,56 @@ export default class expenseClass {
         return this.recurring_payment.findIndex(x => x.id == data.id);
     }
 
+    async checkRecurAvailability(data) { // return true to add
+        let token = false;
+        //check if task has already been added
+        let taskAdded = data.taskAdded == null ? [] : data.taskAdded;
+        let tmpDate = new Date(data.date);
+        if (taskAdded.length < 0) token = true;
+        else {
+            if (taskAdded.findIndex((x) => new Date(x).getTime() === tmpDate.getTime()) >= 0) token = false;
+        }
+
+        //check if almost time to recurring date
+        token = token == false ? false : utils.checkRange(data, 'day');
+
+        return token;
+    }
+
+    async checkMissedRecur(data) {
+        let taskAdded = data.taskAdded == null ? [] : data.taskAdded;
+        if (taskAdded.length < 0) return false;
+        else {
+            let latestDate = new Date(data.taskAdded[taskAdded.length - 1]);
+            let expDate = new Date(data.date);
+            switch (data.category) {
+                case 'Weekly':
+                    if (utils.checkDateBefore('Weekly', latestDate)) {
+                        if (taskAdded.findIndex((x) => new Date(x).getTime() === utils.getNextSelectDay(latestDate.getDay().getTime()) >= 0)) {
+                            this.addRecurTask(data, utils.getNextSelectDay(latestDate.getDay()));
+                        }
+                    }
+                    break;
+                case 'Monthly':
+                    if (utils.checkDateBefore('Monthly', latestDate)) {
+                        if (taskAdded.findIndex((x) => new Date(x).getTime() === latestDate.setMonth(latestDate.getMonth() + 1).getTime()) >= 0) {
+                            this.addRecurTask(data, latestDate.setMonth(latestDate.getMonth() + 1));
+                        }
+
+                    }
+                    break;
+                case 'Yearly':
+                    if (utils.checkDateBefore('Yearly', latestDate)) {
+                        if (taskAdded.findIndex((x) => new Date(x).getTime() === latestDate.setFullYear(latestDate.getFullYear() + 1).getTime()) >= 0) {
+                            this.addRecurTask(data, latestDate.setFullYear(latestDate.getFullYear() + 1));
+                        }
+
+                    }
+                    break;
+            }
+        }
+    }
+
     async getDailyExp(date) {
         await this.getExpDB();
         let tmp = {
@@ -679,107 +729,113 @@ export default class expenseClass {
     }
 
     async getStatsData() {
-        await this.getExpDB();
-        let stats_tmp = [];
-        let year, month, day;
-        let time = await utils.getSeperateDate(new Date());
-        let tmp;
-        var i;
+        try {
+            await this.getExpDB();
+            let stats_tmp = [];
+            let year, month, day;
+            let time = await utils.getSeperateDate(new Date());
+            let tmp;
+            var i;
 
-        year = this.expenses.findIndex((x) => x.year === time.year);
-        if (year >= 0) {
-            month = this.expenses[year].data.findIndex((x) => x.month === time.month);
-            if (month >= 0) {
-                day = this.expenses[year].data[month].data.findIndex((x) => x.day === time.day);
+            year = this.expenses.findIndex((x) => x.year === time.year);
+            if (year >= 0) {
+                month = this.expenses[year].data.findIndex((x) => x.month === time.month);
+                if (month >= 0) {
+                    day = this.expenses[year].data[month].data.findIndex((x) => x.day === time.day);
+                }
+
+                //find most amount spend this year (month)
+                tmp = this.expenses[year].data;
+                let year_spend_highest = {
+                    month_total_spent: {
+                        total: 0
+                    }
+                };
+                let year_received_highest = {
+                    month_total_received: {
+                        total: 0
+                    }
+                };
+                console.log(tmp)
+                for (i = 0; i < tmp.length; i++) {
+                    if (tmp[i].month_total_spent.total > year_spend_highest.month_total_spent.total) {
+                        year_spend_highest = tmp[i];
+                    }
+                    if (tmp[i].month_total_received.total > year_received_highest.month_total_received.total) {
+                        year_received_highest = tmp[i];
+                    }
+
+                }
+                stats_tmp.push(`You spent the most in ${utils.changeToMonth(year_spend_highest.month)} with an amount of RM${year_spend_highest.month_total_spent.total}`);
+                stats_tmp.push(`You received the most money in ${utils.changeToMonth(year_received_highest.month)} with an amount of RM${year_received_highest.month_total_received.total}`);
+
             }
 
-            //find most amount spend this year (month)
-            tmp = this.expenses[year].data;
-            let year_spend_highest = {
-                month_total_spent: {
-                    total: 0
-                }
-            };
-            let year_received_highest = {
-                month_total_received: {
-                    total: 0
-                }
-            };
-            console.log(tmp)
-            for (i = 0; i < tmp.length; i++) {
-                if (tmp[i].month_total_spent.total > year_spend_highest.month_total_spent.total) {
-                    year_spend_highest = tmp[i];
-                }
-                if (tmp[i].month_total_received.total > year_received_highest.month_total_received.total) {
-                    year_received_highest = tmp[i];
-                }
 
-            }
-            stats_tmp.push(`You spent the most in ${utils.changeToMonth(year_spend_highest.month)} with an amount of RM${year_spend_highest.month_total_spent.total}`);
-            stats_tmp.push(`You received the most money in ${utils.changeToMonth(year_received_highest.month)} with an amount of RM${year_received_highest.month_total_received.total}`);
-
-        }
-
-
-        //check if any amount spend today
-        if (day < 0 || month < 0 || year < 0) {
-            stats_tmp.push("You have not spent or received anything today.");
-        } else {
-            if (this.expenses[year].data[month].data[day].day_total_spent.total == 0) {
-                stats_tmp.push("You have not spend anything today.");
+            //check if any amount spend today
+            if (day < 0 || month < 0 || year < 0) {
+                stats_tmp.push("You have not spent or received anything today.");
             } else {
-                //find amount spend today compared to the day before
-                let yesterday = this.expenses[year].data[month].data.findIndex((x) => x.day === (time.day - 1));
-                if (yesterday >= 0) {
-                    if (this.expenses[year].data[month].data[yesterday].day_total_spent.total > 0) {
-                        let today = this.expenses[year].data[month].data[day].day_total_spent.total;
-                        let before = this.expenses[year].data[month].data[yesterday].day_total_spent.total;
+                if (this.expenses[year].data[month].data[day].day_total_spent.total == 0) {
+                    stats_tmp.push("You have not spend anything today.");
+                } else {
+                    //find amount spend today compared to the day before
+                    let yesterday = this.expenses[year].data[month].data.findIndex((x) => x.day === (time.day - 1));
+                    if (yesterday >= 0) {
+                        if (this.expenses[year].data[month].data[yesterday].day_total_spent.total > 0) {
+                            let today = this.expenses[year].data[month].data[day].day_total_spent.total;
+                            let before = this.expenses[year].data[month].data[yesterday].day_total_spent.total;
 
-                        if (today > before) {
-                            stats_tmp.push(`You have spent ${((today-before)/before)*100}% more compared to yesterday.`);
-                        } else {
-                            stats_tmp.push(`You have spent ${((before-today)/today)*100}% less compared to yesterday.`);
+                            if (today > before) {
+                                stats_tmp.push(`You have spent ${((today-before)/before)*100}% more compared to yesterday.`);
+                            } else {
+                                stats_tmp.push(`You have spent ${((before-today)/today)*100}% less compared to yesterday.`);
+                            }
+
                         }
-
                     }
                 }
+                if (this.expenses[year].data[month].data[day].day_total_received.total == 0) {
+                    stats_tmp.push("You have not received anything today.");
+                }
+
+
             }
-            if (this.expenses[year].data[month].data[day].day_total_received.total == 0) {
-                stats_tmp.push("You have not received anything today.");
+
+            //find most amount spend this month (day)
+            if (month < 0 || year < 0) {
+                return stats_tmp;
+            } else {
+                tmp = this.expenses[year].data[month].data;
+                let month_spend_highest = {
+                    day_total_spent: {
+                        total: 0
+                    }
+                };
+                let month_received_highest = {
+                    day_total_received: {
+                        total: 0
+                    }
+                };
+                for (i = 0; i < tmp.length; i++) {
+                    if (tmp[i].day_total_spent.total > month_spend_highest.day_total_spent.total) {
+                        month_spend_highest = tmp[i];
+                    }
+                    if (tmp[i].day_total_received.total > month_received_highest.day_total_received.total) {
+                        month_received_highest = tmp[i];
+                    }
+
+                }
+                if (month_spend_highest.day_total_spent.total != 0) stats_tmp.push(`You spent the most amount on ${utils.formatDate2(new Date(month_spend_highest.date))} with an amount of RM${month_spend_highest.day_total_spent.total}`);
+                if (month_received_highest.day_total_received.total != 0) stats_tmp.push(`You received the most money on ${utils.formatDate2(new Date(month_received_highest.date))} with an amount of RM${month_received_highest.day_total_received.total}`);
             }
 
 
+            return stats_tmp;
+        } catch (err) {
+            console.log(err);
+            return false;
         }
 
-        //find most amount spend this month (day)
-        if (month < 0 || year < 0) {
-            console.log("Month is -1");
-        } else {
-            tmp = this.expenses[year].data[month].data;
-            let month_spend_highest = {
-                day_total_spent: {
-                    total: 0
-                }
-            };
-            let month_received_highest = {
-                day_total_received: {
-                    total: 0
-                }
-            };
-            for (i = 0; i < tmp.length; i++) {
-                if (tmp[i].day_total_spent.total > month_spend_highest.day_total_spent.total) {
-                    month_spend_highest = tmp[i];
-                }
-                if (tmp[i].day_total_received.total > month_received_highest.day_total_received.total) {
-                    month_received_highest = tmp[i];
-                }
-
-            }
-            stats_tmp.push(`You spent the most amount on ${utils.formatDate2(new Date(month_spend_highest.date))} with an amount of RM${month_spend_highest.day_total_spent.total}`);
-            stats_tmp.push(`You received the most money on ${utils.formatDate2(new Date(month_received_highest.date))} with an amount of RM${month_received_highest.day_total_received.total}`);
-        }
-
-
-        return stats_tmp;
     }
 }

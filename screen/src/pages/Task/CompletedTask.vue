@@ -103,26 +103,17 @@
                     >
                       <v-list-item-content>
                         <v-list-item-title>
-                          <v-row>
-                            <v-col>
-                              <span>{{ task.name }}</span>
-                            </v-col>
-                            <v-col
-                              ><b>Started on: </b
-                              >{{
-                                utils.momentFormatDate(false, task.start_date)
-                              }}</v-col
-                            >
-                            <v-col
-                              ><b>Completed on: </b
-                              >{{
-                                utils.momentFormatDate(
-                                  false,
-                                  task.completed_date
-                                )
-                              }}</v-col
-                            >
-                          </v-row>
+                          <span
+                            ><b>{{ task.name }}</b></span
+                          >
+                          <span>
+                            ({{
+                              utils.momentFormatDate(
+                                false,
+                                task.completed_date
+                              )
+                            }})</span
+                          >
                         </v-list-item-title>
                       </v-list-item-content>
                     </v-list-item>
@@ -229,12 +220,19 @@ export default {
   props: [
     "tasks",
     "task_list",
-    // "selectedTask",
+    "selectedTask",
     "selectedEvent",
     "tasks_formatted",
   ],
   async created() {
     await this.getComTaskDay();
+    this.checkPage(
+      this.selectedEvent == null
+        ? this.selectedTask
+        : this.selectedTask == null
+        ? 0
+        : this.selectedTask
+    );
   },
   methods: {
     async setTaskPages(page) {
@@ -326,9 +324,9 @@ export default {
         console.log(err);
       }
     },
-    async getComTaskDay() { 
+    async getComTaskDay() {
       try {
-        if (this.tasks_formatted && this.tasks_formatted.length > 0) { 
+        if (this.tasks_formatted && this.tasks_formatted.length > 0) {
           let {
             year_index,
             month_index,
@@ -338,11 +336,13 @@ export default {
 
           if (day_index < 0) this.task_day = [];
           else
-            this.task_day = this.tasks_formatted[year_index].data[
-              month_index
-            ].data[day_index].data == null ? [] : this.tasks_formatted[year_index].data[
-              month_index
-            ].data[day_index].data;
+            this.task_day =
+              this.tasks_formatted[year_index].data[month_index].data[day_index]
+                .data == null
+                ? []
+                : this.tasks_formatted[year_index].data[month_index].data[
+                    day_index
+                  ].data;
         }
       } catch (err) {
         console.log(err);
@@ -372,24 +372,22 @@ export default {
       }
     },
     async checkPage(find) {
+      console.log(this.show_task);
       try {
-        // this.$emit("updateData", 1);
-        let {
-          year_index,
-          month_index,
-          day_index,
-          data_index,
-        } = await this.findIndexFromDateOrId(find.completed_date, find.id);
-        console.log(year_index, month_index, day_index, data_index);
-        this.date_pick = find.completed_date;
-        for (var i = 1; i <= this.task_total_page; i++) {
-          await this.setTaskPages(i);
-          const tmpShowTask = this.show_task.findIndex((x) => x.id === find.id);
-          if (tmpShowTask > -1) {
-            return tmpShowTask;
+        if (this.show_task.length > 0) {
+          for (var i = 1; i <= this.task_total_page; i++) {
+            await this.setTaskPages(i);
+            const tmpShowTask = this.show_task.findIndex(
+              (x) => x.id === find.id
+            );
+            this.item = tmpShowTask;
+            if (tmpShowTask > -1) {
+              return tmpShowTask;
+            }
           }
+        } else {
+          return -1; //happens when no data
         }
-        return -1; //should never happen
       } catch (err) {
         console.log(err);
         return err;

@@ -65,6 +65,7 @@ export default {
     if (this.logged) {
       this.expObj = new expenseClass();
       await this.updateData();
+      this.tab_open = this.$route.query.tab == null ? 0 : parseInt(this.$route.query.tab);
     }
   },
   methods: {
@@ -72,7 +73,8 @@ export default {
       const data = await this.expObj.getExpDB();
       this.expenses = data.expenses;
       this.all_categories = data.all_categories;
-      this.recurring_payment = data.recurring_payment;
+      this.recurring_payment = data.recurring_payment == null ? [] : data.recurring_payment;
+      
       await this.$emit("updateData", 1);
     },
     async addNewExpense(new_expense) {

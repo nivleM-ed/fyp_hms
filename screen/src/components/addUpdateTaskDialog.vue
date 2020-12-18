@@ -353,7 +353,7 @@ export default {
     this.end_date = utils.parseDate(this.end_dateFormatted);
 
     if (this.shopping_list) {
-      this.new_task.name = "Buy groceries based on shopping list";
+      this.new_task.name = "Buy groceries (Shop list)";
       this.new_task.description = "Shopping list: " + this.shopping_list.name;
       this.new_task.one_day = true;
       this.new_task.list_id = this.shopping_list.id;
@@ -376,7 +376,6 @@ export default {
         if (!this.isUpdate) {
           new_task.type = null;
           new_task.recur_id = null;
-
           if (this.shopping_list) {
             new_task.type = "shopping_list";
             new_task.shopping_list = this.shopping_list.data;
@@ -509,6 +508,10 @@ export default {
       this.new_task.start_time = val.start_time;
       this.new_task.end_time = val.end_time;
     },
+    shopping_list(val) {
+      this.new_task.description = "Shopping list: " + val.name;
+      this.new_task.list_id = val.id;
+    }
   },
 };
 </script>

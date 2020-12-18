@@ -159,7 +159,8 @@
           Add to Shopping List
         </v-card-title>
         <v-card-text class="p-4">
-          <v-list dense width="100%">
+          <div v-if="foodTmp.length > 0">
+            <v-list dense width="100%">
             <div v-for="item in foodTmp" :key="item.id">
               <v-row>
                 <v-col cols="4">
@@ -219,13 +220,18 @@
               </v-row>
             </div>
           </v-list>
+          </div>
+          <div v-else class="text-center">
+              <p class="pt-2">Nice! You have no food running low.</p>
+            </div>
+          
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="red darken-1" text @click="addList = false"
             >Cancel</v-btn
           >
-          <v-btn color="green" text @click="chooseShoppingList = true">
+          <v-btn color="green" v-if="foodTmp.length > 0" text @click="chooseShoppingList = true">
             Add
           </v-btn>
         </v-card-actions>
@@ -259,9 +265,17 @@
           </v-tooltip>
         </v-card-title>
         <v-card-text>
-          <div v-for="item in getLow(food)" :key="item.id">
-            {{ item.name }} - {{ item.quantity }} {{ item.category }} left
-          </div>
+          <v-sheet class="p-2" color="rgba(0, 0, 0, .12)" min-height="100px">
+            <div v-if="getLow(food).length > 0" class="text-center">
+              <div v-for="item in getLow(food)" :key="item.id">
+                - <b>{{ item.name }}</b> ({{ item.quantity }}
+                {{ item.category }} left)
+              </div>
+            </div>
+            <div v-else class="text-center">
+              <p class="pt-2">Nice! You have no food running low.</p>
+            </div>
+          </v-sheet>
         </v-card-text>
       </v-card>
       <v-divider v-if="!overview" class="mx-4" :inset="true"></v-divider>
@@ -296,7 +310,7 @@ export default {
 
       item: null,
       show_Food: [],
-      low_food_setting_tmp: []
+      low_food_setting_tmp: [],
     };
   },
   props: [
@@ -305,7 +319,7 @@ export default {
     "low_food_setting",
     "shopping_list",
     "shopping_list_titles",
-    "overview"
+    "overview",
   ],
   async created() {},
   methods: {
@@ -313,19 +327,25 @@ export default {
       let tmp = this.food.filter((x) => {
         //should i use switch case here?
         if (x.category === "Grams(g)") {
-          return x.quantity <= this.low_food_setting.low_g;
+          return parseInt(x.quantity) <= parseInt(this.low_food_setting.low_g);
         } else if (x.category === "Kilograms(kg)") {
-          return x.quantity <= this.low_food_setting.low_kg;
+          return parseInt(x.quantity) <= parseInt(this.low_food_setting.low_kg);
         } else if (x.category === "Packets") {
-          return x.quantity <= this.low_food_setting.low_packet;
+          return (
+            parseInt(x.quantity) <= parseInt(this.low_food_setting.low_packet)
+          );
         } else if (x.category === "Bottles") {
-          return x.quantity <= this.low_food_setting.low_bottle;
+          return (
+            parseInt(x.quantity) <= parseInt(this.low_food_setting.low_bottle)
+          );
         } else if (x.category === "Boxes") {
-          return x.quantity <= this.low_food_setting.low_box;
+          return (
+            parseInt(x.quantity) <= parseInt(this.low_food_setting.low_box)
+          );
         } else if (x.category === "Millilitres(ml)") {
-          return x.quantity <= this.low_food_setting.low_ml;
+          return parseInt(x.quantity) <= parseInt(this.low_food_setting.low_ml);
         } else if (x.category === "Litres(l)") {
-          return x.quantity <= this.low_food_setting.low_l;
+          return parseInt(x.quantity) <= parseInt(this.low_food_setting.low_l);
         } else {
           console.log("error: getLow (this shouldn't happen)");
         }
@@ -361,12 +381,12 @@ export default {
     updateLowSetting() {
       this.$emit("updateLowSetting", this.low_food_setting_tmp);
       this.lowSetting = false;
-    }
+    },
   },
   watch: {
     low_food_setting(val) {
       this.low_food_setting_tmp = JSON.parse(JSON.stringify(val));
-    }
+    },
   },
 };
 </script>

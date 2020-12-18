@@ -2,10 +2,10 @@
   <div class="p-4">
     <addUpdateTaskDialog
       :addUpdateMenu.sync="addListToTask"
-      :shopping_list="shopping_list_items_inner"
+      :shopping_list.sync="shopping_list_items_inner"
       v-on:addTask="addToTask"
     />
-    
+
     <!-- dialog to confirm item deletion -->
     <v-dialog v-model="deleteAuth" width="500">
       <v-card>
@@ -122,33 +122,6 @@
       </v-card>
     </v-dialog>
 
-    <!-- dialog to add shopping list to task -->
-    <!-- <v-dialog v-model="addListToTask" width="500">
-      <v-card>
-        <v-card-text class="p-4">
-          <p>Enter list name:</p>
-
-          <v-text-field
-            v-model="listName"
-            label="Name"
-            placeholder="Name"
-            :rules="inputRules"
-            required
-          ></v-text-field>
-        </v-card-text>
-
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="red darken-1" text @click="addShoppingItem = false"
-            >Cancel</v-btn
-          >
-          <v-btn color="green" text @click="newShoppingList(listName)">
-            Yes
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog> -->
-
     <!-- dialog to edit item quantity -->
     <v-dialog v-model="editQuant" width="500">
       <v-card>
@@ -206,6 +179,7 @@
                 <v-btn
                   color="success"
                   dark
+                  v-if="shopping_list_items.length > 0"
                   v-on="on"
                   @click.prevent="addShoppingItem = true"
                 >
@@ -216,7 +190,7 @@
             </v-tooltip>
           </v-row>
           <v-row>
-            <v-col v-if="shopping_list_items.length != 0">
+            <v-col v-if="shopping_list_items.length > 0">
               <v-row>
                 <v-card width="100%" min-height="55vh" flat>
                   <v-list dense>
@@ -257,8 +231,8 @@
                   <v-row align="center" justify="center">
                     <v-col class="text-center">
                       <p>
-                        You have no tasks for now. <br />
-                        Click the button to add a new task.
+                        You have no shopping list for now. <br />
+                        Click the button to add a new shopping list.
                       </p>
                       <v-tooltip right>
                         <template v-slot:activator="{ on }">
@@ -268,10 +242,10 @@
                             v-on="on"
                             @click.prevent="addShoppingItem = true"
                           >
-                            Add List
+                            Add Shopping List
                           </v-btn>
                         </template>
-                        <span>Add List</span>
+                        <span>Add Shopping List</span>
                       </v-tooltip>
                     </v-col>
                   </v-row>
@@ -287,24 +261,32 @@
                   <v-card v-show="showItems" flat outlined height="65vh">
                     <v-card-title>
                       <p v-if="shopping_list_items_inner">
-                        {{ shopping_list_items_inner.name }}
+                        {{ utils.toFirstUpperCase(shopping_list_items_inner.name) }}
                       </p>
                     </v-card-title>
                     <v-card-text>
-                      <p>
-                        This shopping list has not been added to your tasklist:
+                      <p v-if="!shopping_list_items_inner.task_id">
+                        This shopping list has not been added to your tasklist.
                       </p>
-                      <v-btn color="green" v-if="!shopping_list_items_inner.task_id" @click="addListToTask = true"
+                      <p v-else>
+                        You have added this shopping list to your tasklist.
+                        <span v-if="shopping_list_items_inner.completed"> The task related to this shopping list has been completed.</span>
+                      </p>
+                      <v-btn
+                        color="green"
+                        v-if="!shopping_list_items_inner.task_id"
+                        @click="addListToTask = true"
                         >Add to Task</v-btn
                       >
                       <v-btn color="yellow" v-else @click="viewTask()"
                         >View Task</v-btn
                       >
                       <v-btn
+                      v-if="!shopping_list_items_inner.completed"
                         color="blue"
                         class="ml-2"
                         @click="addShoppingItem2 = true"
-                        >Add Items to List</v-btn
+                        >Add Item to List</v-btn
                       >
                       <v-btn
                         class="ml-2"
@@ -361,17 +343,31 @@
                           </v-tooltip>
                         </template>
                         <template v-slot:no-data>
-                          <span>No data available</span><br /><br />
-                          <v-btn color="primary" @click="opensomethingtotrue"
-                            >Add Item To List</v-btn
-                          >
+                          <span>No Items Added</span><br /><br />
                         </template>
-                        <template v-slot:expanded-item="{ headers, item }">
-                          <td :colspan="headers.length">
-                            Description: <br />{{ item.description }} <br />
-                            Date created: {{ item.date_created }} <br />
-                            Date editted: {{ item.date_editted }}
-                            {{ item }}
+                        <template v-slot:expanded-item="{ headers, item }" >
+                          <td :colspan="headers.length" class="p-2">
+                            <v-sheet
+                              color="rgba(0, 0, 0, .12)"
+                              class="p-2"
+                            >
+                              <b>Food:</b>
+                              {{ utils.toFirstUpperCaseInner(item.name) }}
+                              <br />
+                              <b>Description:</b>
+                              {{
+                                utils.toFirstUpperCaseInner(item.description)
+                              }}
+                              <br />
+                              <b>Date created:</b>
+                              {{
+                                utils.momentFormatDate(false, item.date_created)
+                              }}
+                              <br />
+                              <b>Quantity:</b> {{ item.shoplist_quantity }}
+                              <br />
+                              <b>Quantity Type:</b> {{ item.category }}
+                            </v-sheet>
                           </td>
                         </template>
                       </v-data-table>
@@ -400,7 +396,7 @@ import addUpdateTaskDialog from "@/components/addUpdateTaskDialog";
 
 export default {
   name: "ShoppingList",
-  components: {addUpdateTaskDialog},
+  components: { addUpdateTaskDialog },
   data() {
     return {
       utils: utils,
@@ -460,10 +456,12 @@ export default {
     this.shopping_list_items =
       this.shopping_list == null ? [] : this.shopping_list;
     if (this.shopping_list_items.length > 0) {
-      this.item = 0;
-      this.shopping_list_items_inner = this.shopping_list_items[0];
+      let id = this.$route.query.id == null ? 0 : this.$route.query.id;
+      this.item = this.shopping_list_items.findIndex((x) => x.id == id) == -1 ? 0 : this.shopping_list_items.findIndex((x) => x.id == id);
+      this.shopping_list_items_inner = this.shopping_list_items[this.item];
       this.showItems = true;
     }
+    
   },
   computed: {
     formTitle() {
@@ -528,6 +526,7 @@ export default {
       await this.updateShoppingList();
       this.addShoppingItem = false;
       this.item = this.shopping_list_items.length - 1;
+      this.$emit("viewAlert", {type:"add_shopping_list",data:data});
     },
 
     async addToList() {
@@ -547,18 +546,21 @@ export default {
       this.$emit("addToTask", data);
     },
 
-    deleteList() {
+    async deleteList() {
       this.shopping_list_items.splice(this.item, 1);
-      this.item = null;
-      this.updateShoppingList();
+      this.item = this.item - 1;
+      await this.updateShoppingList();
       this.deleteAuth2 = false;
+      this.$emit("viewAlert", {type:"delete_shopping_list",data:this.editedItem});
     },
 
     viewTask() {
       let task_id = this.shopping_list_items_inner.task_id;
-      let url = "/main/task_ov?task_id=" + task_id;
+      let url = "";
+      if(this.shopping_list_items_inner.completed) url = "/main/task_ov?tab=1&task_id=" + task_id;
+      else url = "/main/task_ov?task_id=" + task_id;
       this.$router.push(url);
-    }
+    },
   },
   watch: {
     item(val) {
@@ -576,6 +578,8 @@ export default {
     },
     shopping_list(val) {
       this.shopping_list_items = val == null ? [] : val;
+      if(val != null) this.shopping_list_items_inner = this.shopping_list_items[this.item];
+      console.log(this.shopping_list_items_inner)
     },
   },
 };

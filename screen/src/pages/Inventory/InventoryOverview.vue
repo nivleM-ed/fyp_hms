@@ -7,7 +7,7 @@
     >
       <v-tab key="food">Food</v-tab>
       <v-tab key="shoppinglist">Shopping List</v-tab>
-      <v-tab key="recipe">Recipe</v-tab>
+      <!-- <v-tab key="recipe">Recipe</v-tab> -->
 
       <v-tab-item key="food">
         <FoodInventory 
@@ -34,7 +34,7 @@
         />
       </v-tab-item>
 
-      <v-tab-item key="recipe"> </v-tab-item>
+      <!-- <v-tab-item key="recipe"> </v-tab-item> -->
     </v-tabs>
   </v-card>
 </template>
@@ -117,9 +117,8 @@ export default {
     async getShoppingListTitles(data) {
       let tmp = [];
       for (let item in data) {
-        tmp.push({text: data[item].name, value: data[item].id});
+        if(!data[item].completed) tmp.push({text: data[item].name, value: data[item].id});
       }
-      console.log(tmp);
       return tmp;
     },
 
@@ -133,6 +132,10 @@ export default {
       await this.invObj.addShoppingTask(data);
       await this.updateData();
       this.$emit("viewAlert", {type:"shopping_add_to_task",data:data})
+    },
+
+    async viewAlert(data) {
+      this.$emit("viewAlert", data);
     },
 
     toPage(page, id) {

@@ -97,6 +97,7 @@ export default {
       await this.updateData();
 
       let task_id = this.$route.query.task_id;
+      this.tab_open = this.$route.query.tab == null ? 0 : parseInt(this.$route.query.tab);
       if(task_id) this.selectedTask = {id:task_id};
     }
   },
@@ -160,6 +161,8 @@ export default {
         let tmp;
         if(selectedTask.type === 'recur_expense') {
           tmp = await this.taskObj.completeRecurTask(selectedTask);
+        } else if(selectedTask.type === 'shopping_list') {
+          tmp = await this.taskObj.completeShopListTask(selectedTask);
         } else {
           tmp = await this.taskObj.completeTask(selectedTask);
         }
@@ -178,7 +181,8 @@ export default {
     },
     async deleteTask(selectedTask) {
       try {
-        const tmp = await this.taskObj.deleteTask(selectedTask);
+        let tmp = await this.taskObj.deleteTask(selectedTask);
+
         if (tmp.err) {
           alert(tmp);
         } else {

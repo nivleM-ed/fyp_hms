@@ -4,7 +4,7 @@
     "user": "postgres",
     "password": "password",
     "database": "fyp_db",
-    "host": "127.0.0.1",
+    "host": "192.168.193.88",
     "dialect": "postgres",
     "port": 5432
   },

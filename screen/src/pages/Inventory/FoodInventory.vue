@@ -64,7 +64,6 @@
                 label="Quantity"
                 placeholder="Food Quantity"
                 :rules="inputRulesNum"
-                required
               ></v-text-field>
             </v-col>
             <v-col>
@@ -226,8 +225,7 @@
                       <v-btn
                         color="blue darken-1"
                         text
-                        @click="save"
-                        :disabled="!add_valid"
+                        @click="saveFood"
                         >Save</v-btn
                       >
                     </v-card-actions>
@@ -299,15 +297,24 @@
                   </v-tooltip>
                 </template>
                 <template v-slot:no-data>
-                  <span>No data available</span>
-                  <v-btn color="primary" @click="initialize">Reset</v-btn>
+                  <span>You have not added any food item</span>
                 </template>
                 <template v-slot:expanded-item="{ headers, item }">
-                  <td :colspan="headers.length">
-                    Description: <br />{{ item.description }} <br />
-                    Date created: {{ item.date_created }} <br />
-                    Date editted: {{ item.date_editted }}
-                    {{ item }}
+                  <td :colspan="headers.length" class="p-2">
+                    <v-sheet
+                      color="rgba(0, 0, 0, .12)"
+                      class="p-2"
+                      min-height="100px"
+                    >
+                      <b>Food:</b> {{ utils.toFirstUpperCaseInner(item.name) }}
+                      <br />
+                      <b>Description:</b>
+                      {{ utils.toFirstUpperCaseInner(item.description) }} <br />
+                      <b>Date created:</b>
+                      {{ utils.momentFormatDate(false, item.date_created) }}
+                      <br />
+                      <b>Quantity Type:</b> {{ item.category }}
+                    </v-sheet>
                   </td>
                 </template>
               </v-data-table>
@@ -452,6 +459,7 @@ export default {
       const index = this.food_items.indexOf(this.foodTmp);
       // confirm("Are you sure you want to delete this item?") &&
       this.food_items.splice(index, 1);
+      this.$emit("viewAlert", {type:"delete_food",data:this.foodTmp});
       this.foodTmp = null;
       this.updateFood();
     },
@@ -467,7 +475,11 @@ export default {
         this.addList = false;
         this.chooseShoppingList = false;
       } else {
-        this.$emit("addToList", { list_id: data.list_id, data: data.data.data, array: data.data.array });
+        this.$emit("addToList", {
+          list_id: data.list_id,
+          data: data.data.data,
+          array: data.data.array,
+        });
       }
       this.sListChoose = null;
     },
@@ -493,24 +505,26 @@ export default {
       });
     },
 
-    async save() {
+    async saveFood() {
       this.$refs.add_form.validate();
       let editedItem = JSON.parse(JSON.stringify(this.editedItem));
       if (
         editedItem.name &&
         editedItem.description &&
-        editedItem.quantity &&
+        Number.isInteger(+editedItem.quantity) &&
         editedItem.category
       ) {
         if (this.editedIndex > -1) {
           this.editedItem.date_editted = new Date();
           Object.assign(this.food_items[this.editedIndex], editedItem);
+          this.$emit("viewAlert", {type:"update_food",data:editedItem});
         } else {
           editedItem.id = await utils.getHashId(
             `${Date.now()}-${JSON.stringify(editedItem)}`
           );
           editedItem.date_created = new Date();
           this.food_items.push(editedItem);
+          this.$emit("viewAlert", {type:"add_food",data:editedItem});
         }
         this.updateFood();
         this.close();
@@ -571,19 +585,19 @@ export default {
     },
     getColor(x) {
       if (x.category === "Grams(g)") {
-        if (x.quantity <= this.low_food_setting.low_g) return "red";
+        if (parseInt(x.quantity) <= parseInt(this.low_food_setting.low_g)) return "red";
       } else if (x.category === "Kilograms(kg)") {
-        if (x.quantity <= this.low_food_setting.low_kg) return "red";
+        if (parseInt(x.quantity) <= parseInt(this.low_food_setting.low_kg)) return "red";
       } else if (x.category === "Packets") {
-        if (x.quantity <= this.low_food_setting.low_packet) return "red";
+        if (parseInt(x.quantity) <= parseInt(this.low_food_setting.low_packet)) return "red";
       } else if (x.category === "Bottles") {
-        if (x.quantity <= this.low_food_setting.low_bottle) return "red";
+        if (parseInt(x.quantity) <= parseInt(this.low_food_setting.low_bottle)) return "red";
       } else if (x.category === "Boxes") {
-        if (x.quantity <= this.low_food_setting.low_box) return "red";
+        if (parseInt(x.quantity) <= parseInt(this.low_food_setting.low_box)) return "red";
       } else if (x.category === "Millilitres(ml)") {
-        if (x.quantity <= this.low_food_setting.low_ml) return "red";
+        if (parseInt(x.quantity) <= parseInt(this.low_food_setting.low_ml)) return "red";
       } else if (x.category === "Litres(l)") {
-        if (x.quantity <= this.low_food_setting.low_l) return "red";
+        if (parseInt(x.quantity) <= parseInt(this.low_food_setting.low_l)) return "red";
       } else {
         console.log("error: getLow (this shouldn't happen)");
       }
@@ -598,15 +612,11 @@ export default {
       val && val !== this.select && this.querySelections(val);
     },
     food(val) {
-      console.log(val);
       this.food_items = val == null ? [] : val;
       this.setTitles();
     },
     dialog(val) {
       val || this.close();
-    },
-    deleteAuth(val) {
-      console.log(val);
     },
   },
 };

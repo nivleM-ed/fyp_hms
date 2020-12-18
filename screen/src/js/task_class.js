@@ -1,8 +1,11 @@
 /* eslint-disable no-unused-vars */
 import utils from "@/js/utils.js";
 import axios from "axios";
-import { CONST } from './const';
+import {
+  CONST
+} from './const';
 import expenseClass from './expense_class';
+import inventoryClass from './inventory_class';
 import notificationClass from "@/js/notification.js";
 const url = CONST.CONST_URL.concat('/tasks/');
 
@@ -41,6 +44,11 @@ export default class taskClass {
       await this.getTaskDB();
       const index = await this.getIndex(selectedTask, false);
       this.tasks.splice(index, 1);
+
+      if (selectedTask.type === 'shopping_list') {
+        let invObj = new inventoryClass();
+        await invObj.removeTaskId(selectedTask.shopping_list_id);
+      }
 
       const tmp = await this.updateTaskDB();
       return this.tasks;
@@ -120,7 +128,11 @@ export default class taskClass {
   async formatCompleteTask(selectedTask) {
     try {
 
-      let { yearIndex, monthIndex, dayIndex } = await this.getIndex(selectedTask, true);
+      let {
+        yearIndex,
+        monthIndex,
+        dayIndex
+      } = await this.getIndex(selectedTask, true);
       if (yearIndex < 0) {
         await this.addObj('year', selectedTask);
       } else if (monthIndex < 0) {
@@ -141,63 +153,87 @@ export default class taskClass {
   async addObj(string, data) {
 
     try {
-      let { day, month, year } = utils.getSeperateDate(new Date());
-      let { yearIndex, monthIndex, dayIndex, dataIndex } = await this.getIndex(data, true);
+      let {
+        day,
+        month,
+        year
+      } = utils.getSeperateDate(new Date());
+      let {
+        yearIndex,
+        monthIndex,
+        dayIndex,
+        dataIndex
+      } = await this.getIndex(data, true);
       if (string === 'year') {
         if (!this.formatted_completed_tasks) {
           this.formatted_completed_tasks = [];
         }
-        this.formatted_completed_tasks.push(
-          {
-            year: year,
-            data: [
-              {
-                month: month,
-                data: [
-                  {
-                    day: day,
-                    date: new Date(),
-                    data: []
-                  }
-                ]
-              }
-            ],
-          }
-        );
-      } else if (string === 'month') {
-        this.formatted_completed_tasks[yearIndex].data.push(
-          {
+        this.formatted_completed_tasks.push({
+          year: year,
+          data: [{
             month: month,
-            data: [
-              {
-                day: day,
-                date: new Date(),
-                data: []
-              }
-            ],
-          }
-        );
-      } else if (string === 'day') {
-        this.formatted_completed_tasks[yearIndex].data[monthIndex].data.push(
-          {
+            data: [{
+              day: day,
+              date: new Date(),
+              data: []
+            }]
+          }],
+        });
+      } else if (string === 'month') {
+        this.formatted_completed_tasks[yearIndex].data.push({
+          month: month,
+          data: [{
             day: day,
             date: new Date(),
-            data: [],
-          }
-        );
+            data: []
+          }],
+        });
+      } else if (string === 'day') {
+        this.formatted_completed_tasks[yearIndex].data[monthIndex].data.push({
+          day: day,
+          date: new Date(),
+          data: [],
+        });
       }
 
     } catch (err) {
       console.log(err);
     }
+  }
 
+  async completeShopListTask(selectedTask) {
+    try {
+      await this.getTaskDB();
+      const index = await this.getIndex(selectedTask, false);
+
+      selectedTask.completed = true;
+      selectedTask.completed_date = new Date();
+      selectedTask.color = "#EF5350";
+
+      if (!this.completed_tasks) {
+        this.completed_tasks = [];
+        this.completed_tasks[0] = selectedTask;
+      } else {
+        this.completed_tasks.push(selectedTask);
+      }
+      this.tasks.splice(index, 1);
+      await this.formatCompleteTask(selectedTask);
+
+      let invObj = new inventoryClass();
+      await invObj.setShopListComplete(selectedTask.shopping_list_id);
+
+      await this.updateTaskDB();
+      return 1;
+    } catch (err) {
+      return err;
+    }
   }
 
   async completeRecurTask(selectedTask) {
     try {
       await this.getTaskDB();
       const index = await this.getIndex(selectedTask, false);
-      
+
       selectedTask.completed = true;
       selectedTask.completed_date = new Date();
       selectedTask.color = "#EF5350";
@@ -212,7 +248,17 @@ export default class taskClass {
       await this.formatCompleteTask(selectedTask);
 
       let expObj = new expenseClass();
-      let tmpData = { recur_id: selectedTask.recur_id, type: 'recur_expense', date: new Date(), title: selectedTask.name, amount: selectedTask.amount, description: selectedTask.description, money_in: false, color: selectedTask.color, category: 'Recurring Payment' };
+      let tmpData = {
+        recur_id: selectedTask.recur_id,
+        type: 'recur_expense',
+        date: new Date(),
+        title: selectedTask.name,
+        amount: selectedTask.amount,
+        description: selectedTask.description,
+        money_in: false,
+        color: selectedTask.color,
+        category: 'Recurring Payment'
+      };
       let tmp = await expObj.addNewExpense(tmpData);
       await this.updateTaskDB();
       return 1;
@@ -259,7 +305,9 @@ export default class taskClass {
       });
 
       if (res.data.err == 'notLoggedIn') {
-        return { err: 'notLoggedIn' };
+        return {
+          err: 'notLoggedIn'
+        };
       }
 
       this.tasks = res.data[0].tasks != null ? res.data[0].tasks : [];
@@ -277,7 +325,29 @@ export default class taskClass {
       let id = data.id == null ? await utils.getHashId(`${new Date()}-${JSON.stringify(data)}`) : data.id;
       let time = await this.setTime(data);
 
-      return { id: id, type: data.type ? data.type : 'task', name: data.name, description: data.description, start: time.start, end: time.end, start_date: data.start_date, start_time: data.start_time, end_date: data.end_date, end_time: data.end_time, one_day: data.one_day, whole_day: data.whole_day, color: data.color, format_start_date: time.format_start_date, format_end_date: time.format_end_date, notify_ack: data.notify_ack, completed: data.completed, amount: data.amount, recur_id: data.recur_id, shopping_list_id: data.shopping_list_id, shopping_list: data.shopping_list };
+      return {
+        id: id,
+        type: data.type ? data.type : 'task',
+        name: data.name,
+        description: data.description,
+        start: time.start,
+        end: time.end,
+        start_date: data.start_date,
+        start_time: data.start_time,
+        end_date: data.end_date,
+        end_time: data.end_time,
+        one_day: data.one_day,
+        whole_day: data.whole_day,
+        color: data.color,
+        format_start_date: time.format_start_date,
+        format_end_date: time.format_end_date,
+        notify_ack: data.notify_ack,
+        completed: data.completed,
+        amount: data.amount,
+        recur_id: data.recur_id,
+        shopping_list_id: data.shopping_list_id,
+        shopping_list: data.shopping_list
+      };
     } catch (err) {
       console.log(err);
       return err;
@@ -313,12 +383,21 @@ export default class taskClass {
   async getIndex(selectedTask, format) {
     try {
       if (format) {
-        let { day, month, year } = utils.getSeperateDate(new Date(selectedTask.completed_date));
+        let {
+          day,
+          month,
+          year
+        } = utils.getSeperateDate(new Date(selectedTask.completed_date));
         let yearIndex = this.formatted_completed_tasks == null || this.formatted_completed_tasks.length < 1 ? parseInt('-1') : this.formatted_completed_tasks.findIndex(x => x.year == year);
         let monthIndex = yearIndex < 0 ? parseInt('-1') : this.formatted_completed_tasks[yearIndex].data.findIndex(x => x.month == month);
         let dayIndex = monthIndex < 0 ? parseInt('-1') : this.formatted_completed_tasks[yearIndex].data[monthIndex].data.findIndex(x => x.day == day);
         let dataIndex = dayIndex < 0 ? parseInt('-1') : this.formatted_completed_tasks[yearIndex].data[monthIndex].data[dayIndex].data.findIndex(x => x.id == selectedTask.id);
-        return { yearIndex, monthIndex, dayIndex, dataIndex };
+        return {
+          yearIndex,
+          monthIndex,
+          dayIndex,
+          dataIndex
+        };
       } else {
         return this.tasks.findIndex(x => x.id === selectedTask.id);
       }
@@ -343,7 +422,10 @@ export default class taskClass {
           com_tmp.push(this.completed_tasks[j].name);
         }
       }
-      return { tmp, com_tmp };
+      return {
+        tmp,
+        com_tmp
+      };
     } catch (err) {
       console.log(err);
       return err;

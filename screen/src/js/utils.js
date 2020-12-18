@@ -56,12 +56,21 @@ class utils {
     }
 
     static toFirstUpperCaseInner(word) {
-        let wordSplit = word.toLowerCase().split(' ');
-        let formatted = '';
-        for (var i = 0; i < wordSplit.length; i++) {
-            formatted += wordSplit[i].charAt(0).toUpperCase() + wordSplit[i].substring(1) + ' ';
+        try {
+            if (word) {
+                let wordSplit = word.toLowerCase().split(' ');
+                let formatted = '';
+                for (var i = 0; i < wordSplit.length; i++) {
+                    formatted += wordSplit[i].charAt(0).toUpperCase() + wordSplit[i].substring(1) + ' ';
+                }
+                return formatted.trim();
+            }
+            return null;
+        } catch (err) {
+            console.log(err)
+            return false;
         }
-        return formatted.trim();
+
     }
 
     static formatDate(date) {
@@ -83,9 +92,9 @@ class utils {
 
     static momentFormatDate(withTime, date) {
         if (withTime) {
-            return date != null
-                ? moment(date).format("dddd, Do MMMM YYYY, h:mm a")
-                : null;
+            return date != null ?
+                moment(date).format("dddd, Do MMMM YYYY, h:mm a") :
+                null;
         } else {
             return date != null ? moment(date).format("dddd, Do MMMM YYYY") : null;
         }
@@ -117,19 +126,31 @@ class utils {
 
     //number to string (month)
     static changeToMonth(num) {
-        switch(num) {
-            case 1: return "January";
-            case 2: return "February";
-            case 3: return "March";
-            case 4: return "April";
-            case 5: return "May";
-            case 6: return "June";
-            case 7: return "July";
-            case 8: return "August";
-            case 9: return "September";
-            case 10: return "October";
-            case 11: return "November";
-            case 12: return "December";
+        switch (num) {
+            case 1:
+                return "January";
+            case 2:
+                return "February";
+            case 3:
+                return "March";
+            case 4:
+                return "April";
+            case 5:
+                return "May";
+            case 6:
+                return "June";
+            case 7:
+                return "July";
+            case 8:
+                return "August";
+            case 9:
+                return "September";
+            case 10:
+                return "October";
+            case 11:
+                return "November";
+            case 12:
+                return "December";
         }
     }
 
@@ -139,7 +160,11 @@ class utils {
         let month = date.getMonth() + 1;
         let day = date.getDate();
 
-        return { day, month, year };
+        return {
+            day,
+            month,
+            year
+        };
     }
 
     static async getNextSelectDay(day) {
@@ -148,15 +173,34 @@ class utils {
             d = new Date();
         // month = d.getMonth();
         d.setDate(dayNum);
-        switch (day.toLowerCase()) {
-            case 'monday': dayNum = 1; break;
-            case 'tuesday': dayNum = 2; break;
-            case 'wednesday': dayNum = 3; break;
-            case 'thursday': dayNum = 4; break;
-            case 'friday': dayNum = 5; break;
-            case 'saturday': dayNum = 6; break;
-            case 'sunday': dayNum = 7; break;
+        if (isNaN(day)) {
+            switch (day.toLowerCase()) {
+                case 'monday':
+                    dayNum = 1;
+                    break;
+                case 'tuesday':
+                    dayNum = 2;
+                    break;
+                case 'wednesday':
+                    dayNum = 3;
+                    break;
+                case 'thursday':
+                    dayNum = 4;
+                    break;
+                case 'friday':
+                    dayNum = 5;
+                    break;
+                case 'saturday':
+                    dayNum = 6;
+                    break;
+                case 'sunday':
+                    dayNum = 7;
+                    break;
+            }
+        } else {
+            dayNum = day;
         }
+
         while (d.getDay() !== dayNum) {
             d.setDate(d.getDate() + 1);
         }
@@ -175,10 +219,9 @@ class utils {
     }
 
     static async previousDate(date, change) {
-        if(change == "day") {
+        if (change == "day") {
             return moment(date).subtract(1, 'days');
-        
-        }else if(change == "month") {
+        } else if (change == "month") {
             // console.log(date,"===",(moment(date).subtract(1, 'month'))._d)
             return moment(date).subtract(1, 'months');
         } else if (change == "year") {
@@ -187,20 +230,20 @@ class utils {
         return 'error';
     }
 
-    // static checkRange(data, choose) {
-    //     var prevDay = null,
-    //         rangeDay = null,
-    //         today = moment();
-    //     if(choose === 'day') { //1 days range
-    //         prevDay = moment(data.date).subtract(1,'days');
-    //         rangeDay = moment(data.date).add(1,'minutes');
-    //     } else if ( choose === 'hour') { //2 hours range
-    //         prevDay = moment(data.date).subtract(2, 'hours');
-    //         rangeDay = moment(data.date).add(1,'hours');
-    //     }
-    //     // console.log('prev',prevDay.format("MMM Do YY"),'today',today.format("MMM Do YY"),'rangeDay',rangeDay.format("MMM Do YY"));
-    //     return today.isBetween(prevDay, rangeDay);
-    // }
+    static checkRange(data, choose) {
+        var prevDay = null,
+            rangeDay = null,
+            today = moment();
+        if (choose === 'day') { //1 days range
+            prevDay = moment(data.date).subtract(1, 'days');
+            rangeDay = moment(data.date).add(1, 'minutes');
+        } else if (choose === 'hour') { //2 hours range
+            prevDay = moment(data.date).subtract(2, 'hours');
+            rangeDay = moment(data.date).add(1, 'hours');
+        }
+        // console.log('prev',prevDay.format("MMM Do YY"),'today',today.format("MMM Do YY"),'rangeDay',rangeDay.format("MMM Do YY"));
+        return today.isBetween(prevDay, rangeDay);
+    }
 
     static checkTime(time, type) {
         time = new Date(time);
@@ -208,8 +251,8 @@ class utils {
             rangeDay = null,
             today = moment();
         const tmp = moment(time, "YYYYMMDD HH:mm").fromNow();
-        if(type == "second") {
-            if(tmp === "a few seconds ago") return true;
+        if (type == "second") {
+            if (tmp === "a few seconds ago") return true;
             else return false;
         } else if (type == "hour") {
             prevDay = moment(time).subtract(1, 'hours');
@@ -218,8 +261,8 @@ class utils {
         } else if (type === "ago") {
             return tmp.includes('ago');
         } else if (type === "day") {
-            prevDay = moment(time).subtract(1,'days');
-            rangeDay = moment(time).add(1,'minutes');
+            prevDay = moment(time).subtract(1, 'days');
+            rangeDay = moment(time).add(1, 'minutes');
             return today.isBetween(prevDay, rangeDay);
         }
         return false;
@@ -230,26 +273,52 @@ class utils {
             const past = "ago";
             const tmp = moment(task.start, "YYYYMMDD HH:mm").fromNow();
             if (tmp.includes(past)) {
-              return true;
+                return true;
             }
             return false;
-          } catch (err) {
+        } catch (err) {
             console.log(err);
             return err;
-          }
+        }
     }
 
-    static dateDiff(first, second) {
-        return moment(first).diff(moment(second), 'days');
+    static checkDateBefore(type, date) {
+        if (type === 'Weekly') {
+            date = this.getNextSelectDay(date.getDay());
+            if (moment().diff(date, "days") > -7) return true;
+        } else if (type === 'Monthly') {
+            date.setMonth(date.getMonth() + 1);
+            if (moment().diff(date, "months") > -1) return true;
+        } else if (type === 'Yearly') {
+            date.setFullYear(date.getFullYear() + 1);
+            if (moment().diff(date, "years") > -1) return true;
+        }
+        return false;
+    }
+
+    static dateDiff(first, second, day) {
+        if (day) return moment(first).diff(moment(second), 'days');
+        else return moment(first).diff(moment(second), 'hours');
     }
 
     static findExist(data) {
         data.taskAdded = data.taskAdded == null ? [] : data.taskAdded;
         let tmpDate = new Date(data.date);
         if (data.taskAdded == null) return false;
-        if(data.taskAdded.findIndex((x) => new Date(x).getTime() === tmpDate.getTime()) >= 0) return true;
+        if (data.taskAdded.findIndex((x) => new Date(x).getTime() === tmpDate.getTime()) >= 0) return true;
         return false;
-      }
+    }
+
+    static formatTaskTypeName(type) {
+        switch (type) {
+            case 'shopping_list':
+                return 'Shopping List';
+            case 'task':
+                return 'Home Task';
+            case 'recur_expense':
+                return 'Recurring Bill';
+        }
+    }
 }
 
 export default utils;

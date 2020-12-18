@@ -90,7 +90,7 @@ export default {
       // this.syncObj.runSync();
       this.setNotifyOuter();
       // this.setExpNotify();
-    }, 120000);
+    }, 120000); //120000
   },
   methods: {
     async checkLogged() {
@@ -118,7 +118,7 @@ export default {
       }, 1000);
     },
     viewAlert(data) {
-      console.log("viewAlert triggered")
+      console.log(data)
       this.alertData = data;
     },
     errorAlert(error) {
@@ -160,12 +160,12 @@ export default {
 
         if (this.recurring_payment) {
           for (var j = 0; j < this.recurring_payment.length; j++) {
+            await this.expObj.checkMissedRecur(this.recurring_payment[j])
             if (
-              utils.checkTime(this.recurring_payment[j].date, "day") &&
-              !utils.findExist(this.recurring_payment[j])
+              await this.expObj.checkRecurAvailability(this.recurring_payment[j])
             ) {
               // this.futureTask.push(this.tasks[j]);
-              await this.expObj.addRecurTask(this.recurring_payment[j]);
+              await this.expObj.addRecurTask(this.recurring_payment[j], this.recurring_payment[j].date);
               await this.updateData(true);
             }
           }

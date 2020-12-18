@@ -153,7 +153,7 @@
       <v-card flat min-height="60vh">
         <v-row>
           <v-col class="col-4">
-            <v-row v-if="rec_payment">
+            <v-row v-if="rec_payment.length > 0">
               <v-card outlined height="60vh" width="100%">
                 <v-card flat class="vuebar-element" v-bar>
                   <v-list dense width="100%">
@@ -248,7 +248,7 @@
               </v-card>
             </v-row>
 
-            <v-row v-if="rec_payment">
+            <v-row v-if="rec_payment.length > 0">
               <v-tooltip right>
                 <template v-slot:activator="{ on }">
                   <v-btn
@@ -293,10 +293,10 @@
                         {{ utils.toFirstUpperCase(selectedExp.title, false) }}
                       </h3>
                       <p>
-                        Amount: RM{{ selectedExp.amount }} <br />
-                        Description: {{ selectedExp.description }} <br />
-                        Recur Type: {{ selectedExp.category }} Recur <br />Next
-                        Payment:
+                        <b>Amount:</b> RM{{ selectedExp.amount }} <br />
+                        <b>Description:</b> {{ selectedExp.description }} <br />
+                        <b>Recurrence Type:</b> {{ selectedExp.category }} Recurrence <br />
+                        <b>Next Payment:</b>
                         {{ utils.momentFormatDate(false, selectedExp.date) }}
                       </p>
                     </div>
@@ -437,6 +437,15 @@ export default {
   props: ["recurring_payment"],
   async created() {
     // this.$emit("checkLogged");
+
+    let id = this.$route.query.id == null ? 0 : this.$route.query.id;
+    this.rec_payment = this.recurring_payment;
+    if(this.recurring_payment != null) {
+      this.item = this.recurring_payment.findIndex((x) => x.id == id) == -1 ? 0 : this.recurring_payment.findIndex((x) => x.id == id);
+      this.setDetails(false, this.item)
+      this.expDetailsShow = true;
+    }
+    
   },
   methods: {
     async validate() {
@@ -530,6 +539,9 @@ export default {
     recurring_payment(val) {
       this.rec_payment = val;
     },
+    expDetailsShow(val) {
+      console.log(val)
+    }
   },
 };
 </script>

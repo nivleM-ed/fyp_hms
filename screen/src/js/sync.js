@@ -44,15 +44,17 @@ class syncClass {
     async setExpNotify() {
         try {
             let expObj = new expClass();
+            
             if (this.recurring_payment) {
                 for (var i = 0; i < this.recurring_payment.length; i++) {
-                    if (
-                        utils.checkRange(this.recurring_payment[i], 'day') &&
-                        !utils.findExist(this.recurring_payment[i])) {
-                        console.log("NEW RECUR TASK ADDED");
-                        await expObj.addRecurTask(this.recurring_payment[i]);
-                        await this.updateSync();
-                    }
+                    // console.log(expObj.checkRecurAvailability(this.recurring_payment[i]))
+                    // if (
+                    //     utils.checkRange(this.recurring_payment[i], 'day') &&
+                    //     !utils.findExist(this.recurring_payment[i])) {
+                    //     console.log("NEW RECUR TASK ADDED");
+                    //     await expObj.addRecurTask(this.recurring_payment[i]);
+                    //     await this.updateSync();
+                    // }
                 }
             }
         } catch (err) {
