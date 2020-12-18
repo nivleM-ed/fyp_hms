@@ -17,12 +17,6 @@
     "port": 5432
   },
   "production": {
-    "username": "postgres",
-    "user": "postgres",
-    "password": "password",
-    "database": "fyp_db",
-    "host": "127.0.0.1",
-    "dialect": "postgres",
-    "port": 5432
+    "use_env_variable": "DATABASE_URL"
   }
 }
