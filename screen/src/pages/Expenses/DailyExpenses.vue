@@ -291,7 +291,7 @@ export default {
         this.daily_total_spent = daily.total_spent;
         this.daily_total_received = daily.total_received;
       }
-      console.log(daily)
+      console.log(daily);
     },
     setDetails(created, id) {
       if (created) {

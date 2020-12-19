@@ -21,22 +21,32 @@ class utils {
     }
 
     static toPX(value, type) {
-        var w = window,
-            d = document,
-            e = d.documentElement,
-            x = w.innerWidth || e.clientWidth,
-            y = w.innerHeight || e.clientHeight;
+        try {
+            var w = window,
+                d = document,
+                e = d.documentElement,
+                x = w.innerWidth || e.clientWidth,
+                y = w.innerHeight || e.clientHeight;
 
-        if (type == 'vw') {
-            return (x * value) / 100;
-        } else if (type == 'vh') {
-            return (y * value) / 100;
+            if (type == 'vw') {
+                return (x * value) / 100;
+            } else if (type == 'vh') {
+                return (y * value) / 100;
+            }
+        } catch (err) {
+            console.log(err);
+            return err;
         }
     }
 
     static countDecimals(value) {
-        if (Math.floor(value) === value) return 0;
-        return value.toString().split(".")[1].length || 0;
+        try {
+            if (Math.floor(value) === value) return 0;
+            return value.toString().split(".")[1].length || 0;
+        } catch (err) {
+            console.log(err);
+            return err;
+        }
     }
 
     static setFloat2Decimal(value) {
@@ -44,14 +54,19 @@ class utils {
     }
 
     static toFirstUpperCase(word, isArray) {
-        if (isArray) {
-            let formatted = [];
-            for (var i = 0; i < word.length; i++) {
-                formatted.push(this.toFirstUpperCaseInner(word[i]));
+        try {
+            if (isArray) {
+                let formatted = [];
+                for (var i = 0; i < word.length; i++) {
+                    formatted.push(this.toFirstUpperCaseInner(word[i]));
+                }
+                return formatted;
+            } else {
+                return this.toFirstUpperCaseInner(word);
             }
-            return formatted;
-        } else {
-            return this.toFirstUpperCaseInner(word);
+        } catch (err) {
+            console.log(err);
+            return err;
         }
     }
 
@@ -74,198 +89,267 @@ class utils {
     }
 
     static formatDate(date) {
-        if (!date) return null;
-        const [year, month, day] = date.split("-");
-        return `${day}/${month}/${year}`;
+        try {
+            if (!date) return null;
+            const [year, month, day] = date.split("-");
+            return `${day}/${month}/${year}`;
+        } catch (err) {
+            console.log(err);
+            return err;
+        }
     }
 
     static formatDate2(date) {
-        let temp = this.getSeperateDate(date);
-        return `${temp.day}/${temp.month}/${temp.year}`;
+        try {
+            let temp = this.getSeperateDate(date);
+            return `${temp.day}/${temp.month}/${temp.year}`;
+        } catch (err) {
+            console.log(err);
+            return err;
+        }
     }
 
     static parseDate(date) {
-        if (!date) return null;
-        const [day, month, year] = date.split("/");
-        return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+        try {
+            if (!date) return null;
+            const [day, month, year] = date.split("/");
+            return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+        } catch (err) {
+            console.log(err);
+            return err;
+        }
     }
 
     static momentFormatDate(withTime, date) {
-        if (withTime) {
-            return date != null ?
-                moment(date).format("dddd, Do MMMM YYYY, h:mm a") :
-                null;
-        } else {
-            return date != null ? moment(date).format("dddd, Do MMMM YYYY") : null;
+        try {
+            if (withTime) {
+                return date != null ?
+                    moment(date).format("dddd, Do MMMM YYYY, h:mm a") :
+                    null;
+            } else {
+                return date != null ? moment(date).format("dddd, Do MMMM YYYY") : null;
+            }
+        } catch (err) {
+            console.log(err);
+            return err;
         }
     }
 
     //Not moment time input (ISOString with substr 10)
     static nextDay(current) {
-        let tmp = moment(current, 'YYYY-MM-DD').add(1, 'days');
-        return moment(tmp).format('YYYY-MM-DD');
+        try {
+            let tmp = moment(current, 'YYYY-MM-DD').add(1, 'days');
+            return moment(tmp).format('YYYY-MM-DD');
+        } catch (err) {
+            console.log(err);
+            return err;
+        }
     }
 
     //Not moment time input (ISOString with substr 10)
     static prevDay(current) {
-        let tmp = moment(current, 'YYYY-MM-DD').subtract(1, 'days');
-        return moment(tmp).format('YYYY-MM-DD');
+        try {
+            let tmp = moment(current, 'YYYY-MM-DD').subtract(1, 'days');
+            return moment(tmp).format('YYYY-MM-DD');
+        } catch (err) {
+            console.log(err);
+            return err;
+        }
     }
 
     static getToday(withTime) {
-        const today = new Date();
-        const tmpdate = today.getDate().toString() + "-" + (today.getMonth() + 1) + "-" + today.getFullYear();
-        if (withTime) {
-            let tmptime = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-            let dateTime = tmpdate + " " + tmptime;
-            return dateTime;
-        } else {
-            return tmpdate;
+        try {
+            const today = new Date();
+            const tmpdate = today.getDate().toString() + "-" + (today.getMonth() + 1) + "-" + today.getFullYear();
+            if (withTime) {
+                let tmptime = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+                let dateTime = tmpdate + " " + tmptime;
+                return dateTime;
+            } else {
+                return tmpdate;
+            }
+        } catch (err) {
+            console.log(err);
+            return err;
         }
     }
 
     //number to string (month)
     static changeToMonth(num) {
-        switch (num) {
-            case 1:
-                return "January";
-            case 2:
-                return "February";
-            case 3:
-                return "March";
-            case 4:
-                return "April";
-            case 5:
-                return "May";
-            case 6:
-                return "June";
-            case 7:
-                return "July";
-            case 8:
-                return "August";
-            case 9:
-                return "September";
-            case 10:
-                return "October";
-            case 11:
-                return "November";
-            case 12:
-                return "December";
+        try {
+            switch (num) {
+                case 1:
+                    return "January";
+                case 2:
+                    return "February";
+                case 3:
+                    return "March";
+                case 4:
+                    return "April";
+                case 5:
+                    return "May";
+                case 6:
+                    return "June";
+                case 7:
+                    return "July";
+                case 8:
+                    return "August";
+                case 9:
+                    return "September";
+                case 10:
+                    return "October";
+                case 11:
+                    return "November";
+                case 12:
+                    return "December";
+            }
+        } catch (err) {
+            console.log(err);
+            return err;
         }
     }
 
     //Not moment time input (new Date)
     static getSeperateDate(date) {
-        let year = date.getFullYear();
-        let month = date.getMonth() + 1;
-        let day = date.getDate();
+        try {
+            let year = date.getFullYear();
+            let month = date.getMonth() + 1;
+            let day = date.getDate();
 
-        return {
-            day,
-            month,
-            year
-        };
+            return {
+                day,
+                month,
+                year
+            };
+        } catch (err) {
+            console.log(err);
+            return err;
+        }
     }
 
     static async getNextSelectDay(day) {
-        let dayNum = null,
-            today = new Date().getTime(),
-            d = new Date();
-        // month = d.getMonth();
-        d.setDate(dayNum);
-        if (isNaN(day)) {
-            switch (day.toLowerCase()) {
-                case 'monday':
-                    dayNum = 1;
-                    break;
-                case 'tuesday':
-                    dayNum = 2;
-                    break;
-                case 'wednesday':
-                    dayNum = 3;
-                    break;
-                case 'thursday':
-                    dayNum = 4;
-                    break;
-                case 'friday':
-                    dayNum = 5;
-                    break;
-                case 'saturday':
-                    dayNum = 6;
-                    break;
-                case 'sunday':
-                    dayNum = 7;
-                    break;
+        try {
+            let dayNum = null,
+                today = new Date().getTime(),
+                d = new Date();
+            // month = d.getMonth();
+            d.setDate(dayNum);
+            if (isNaN(day)) {
+                switch (day.toLowerCase()) {
+                    case 'monday':
+                        dayNum = 1;
+                        break;
+                    case 'tuesday':
+                        dayNum = 2;
+                        break;
+                    case 'wednesday':
+                        dayNum = 3;
+                        break;
+                    case 'thursday':
+                        dayNum = 4;
+                        break;
+                    case 'friday':
+                        dayNum = 5;
+                        break;
+                    case 'saturday':
+                        dayNum = 6;
+                        break;
+                    case 'sunday':
+                        dayNum = 7;
+                        break;
+                }
+            } else {
+                dayNum = day;
             }
-        } else {
-            dayNum = day;
-        }
 
-        while (d.getDay() !== dayNum) {
-            d.setDate(d.getDate() + 1);
-        }
-        while (true) {
-            if (d.getTime() > today) {
-                return new Date(d.getTime());
+            while (d.getDay() !== dayNum) {
+                d.setDate(d.getDate() + 1);
             }
-            d.setDate(d.getDate() + 7);
+            while (true) {
+                if (d.getTime() > today) {
+                    return new Date(d.getTime());
+                }
+                d.setDate(d.getDate() + 7);
+            }
+        } catch (err) {
+            console.log(err);
+            return err;
         }
     }
 
     static async getHashId(blockString) {
-        const hashFunction = crypto.createHash('sha256');
-        hashFunction.update(blockString);
-        return hashFunction.digest('hex');
+        try {
+            const hashFunction = crypto.createHash('sha256');
+            hashFunction.update(blockString);
+            return hashFunction.digest('hex');
+        } catch (err) {
+            console.log(err);
+            return err;
+        }
     }
 
     static async previousDate(date, change) {
-        if (change == "day") {
-            return moment(date).subtract(1, 'days');
-        } else if (change == "month") {
-            // console.log(date,"===",(moment(date).subtract(1, 'month'))._d)
-            return moment(date).subtract(1, 'months');
-        } else if (change == "year") {
-            return moment(date).subtract(1, 'years');
+        try {
+            if (change == "day") {
+                return moment(date).subtract(1, 'days');
+            } else if (change == "month") {
+                // console.log(date,"===",(moment(date).subtract(1, 'month'))._d)
+                return moment(date).subtract(1, 'months');
+            } else if (change == "year") {
+                return moment(date).subtract(1, 'years');
+            }
+            return 'error';
+        } catch (err) {
+            console.log(err);
+            return err;
         }
-        return 'error';
     }
 
     static checkRange(data, choose) {
-        var prevDay = null,
-            rangeDay = null,
-            today = moment();
-        if (choose === 'day') { //1 days range
-            prevDay = moment(data.date).subtract(1, 'days');
-            rangeDay = moment(data.date).add(1, 'minutes');
-        } else if (choose === 'hour') { //2 hours range
-            prevDay = moment(data.date).subtract(2, 'hours');
-            rangeDay = moment(data.date).add(1, 'hours');
+        try {
+            var prevDay = null,
+                rangeDay = null,
+                today = moment();
+            if (choose === 'day') { //1 days range
+                prevDay = moment(data.date).subtract(1, 'days');
+                rangeDay = moment(data.date).add(1, 'minutes');
+            } else if (choose === 'hour') { //2 hours range
+                prevDay = moment(data.date).subtract(2, 'hours');
+                rangeDay = moment(data.date).add(1, 'hours');
+            }
+            return today.isBetween(prevDay, rangeDay);
+        } catch (err) {
+            console.log(err);
+            return err;
         }
-        // console.log('prev',prevDay.format("MMM Do YY"),'today',today.format("MMM Do YY"),'rangeDay',rangeDay.format("MMM Do YY"));
-        return today.isBetween(prevDay, rangeDay);
     }
 
     static checkTime(time, type) {
-        time = new Date(time);
-        let prevDay = null,
-            rangeDay = null,
-            today = moment();
-        const tmp = moment(time, "YYYYMMDD HH:mm").fromNow();
-        if (type == "second") {
-            if (tmp === "a few seconds ago") return true;
-            else return false;
-        } else if (type == "hour") {
-            prevDay = moment(time).subtract(1, 'hours');
-            rangeDay = moment(time).add(1, 'minutes');
-            return today.isBetween(prevDay, rangeDay);
-        } else if (type === "ago") {
-            return tmp.includes('ago');
-        } else if (type === "day") {
-            prevDay = moment(time).subtract(1, 'days');
-            rangeDay = moment(time).add(1, 'minutes');
-            return today.isBetween(prevDay, rangeDay);
+        try {
+            time = new Date(time);
+            let prevDay = null,
+                rangeDay = null,
+                today = moment();
+            const tmp = moment(time, "YYYYMMDD HH:mm").fromNow();
+            if (type == "second") {
+                if (tmp === "a few seconds ago") return true;
+                else return false;
+            } else if (type == "hour") {
+                prevDay = moment(time).subtract(1, 'hours');
+                rangeDay = moment(time).add(1, 'minutes');
+                return today.isBetween(prevDay, rangeDay);
+            } else if (type === "ago") {
+                return tmp.includes('ago');
+            } else if (type === "day") {
+                prevDay = moment(time).subtract(1, 'days');
+                rangeDay = moment(time).add(1, 'minutes');
+                return today.isBetween(prevDay, rangeDay);
+            }
+            return false;
+        } catch (err) {
+            console.log(err);
+            return err;
         }
-        return false;
     }
 
     static checkTimePast(task) {
@@ -283,40 +367,60 @@ class utils {
     }
 
     static checkDateBefore(type, date) {
-        if (type === 'Weekly') {
-            date = this.getNextSelectDay(date.getDay());
-            if (moment().diff(date, "days") > -7) return true;
-        } else if (type === 'Monthly') {
-            date.setMonth(date.getMonth() + 1);
-            if (moment().diff(date, "months") > -1) return true;
-        } else if (type === 'Yearly') {
-            date.setFullYear(date.getFullYear() + 1);
-            if (moment().diff(date, "years") > -1) return true;
+        try {
+            if (type === 'Weekly') {
+                date = this.getNextSelectDay(date.getDay());
+                if (moment().diff(date, "days") > -7) return true;
+            } else if (type === 'Monthly') {
+                date.setMonth(date.getMonth() + 1);
+                if (moment().diff(date, "months") > -1) return true;
+            } else if (type === 'Yearly') {
+                date.setFullYear(date.getFullYear() + 1);
+                if (moment().diff(date, "years") > -1) return true;
+            }
+            return false;
+        } catch (err) {
+            console.log(err);
+            return err;
         }
-        return false;
     }
 
     static dateDiff(first, second, day) {
-        if (day) return moment(first).diff(moment(second), 'days');
-        else return moment(first).diff(moment(second), 'hours');
+        try {
+            if (day) return moment(first).diff(moment(second), 'days');
+            else return moment(first).diff(moment(second), 'hours');
+        } catch (err) {
+            console.log(err);
+            return err;
+        }
     }
 
     static findExist(data) {
-        data.taskAdded = data.taskAdded == null ? [] : data.taskAdded;
-        let tmpDate = new Date(data.date);
-        if (data.taskAdded == null) return false;
-        if (data.taskAdded.findIndex((x) => new Date(x).getTime() === tmpDate.getTime()) >= 0) return true;
-        return false;
+        try {
+            data.taskAdded = data.taskAdded == null ? [] : data.taskAdded;
+            let tmpDate = new Date(data.date);
+            if (data.taskAdded == null) return false;
+            if (data.taskAdded.findIndex((x) => new Date(x).getTime() === tmpDate.getTime()) >= 0) return true;
+            return false;
+        } catch (err) {
+            console.log(err);
+            return err;
+        }
     }
 
     static formatTaskTypeName(type) {
-        switch (type) {
-            case 'shopping_list':
-                return 'Shopping List';
-            case 'task':
-                return 'Home Task';
-            case 'recur_expense':
-                return 'Recurring Bill';
+        try {
+            switch (type) {
+                case 'shopping_list':
+                    return 'Shopping List';
+                case 'task':
+                    return 'Home Task';
+                case 'recur_expense':
+                    return 'Recurring Bill';
+            }
+        } catch (err) {
+            console.log(err);
+            return err;
         }
     }
 }

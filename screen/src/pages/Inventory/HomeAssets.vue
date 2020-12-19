@@ -86,8 +86,8 @@ export default {
   data() {
     return {
       addMenu: false,
-      x:0,
-      y:0,
+      x: 0,
+      y: 0,
       page: 1,
       total_page: 1,
       test: null,
@@ -95,46 +95,46 @@ export default {
       assets: [
         {
           name: "Frozen Yogurt",
-          id: 159
+          id: 159,
         },
         {
           name: "Ice cream sandwich",
-          id: 237
+          id: 237,
         },
         {
           name: "Eclair",
-          id: 262
+          id: 262,
         },
         {
           name: "Cupcake",
-          id: 305
+          id: 305,
         },
         {
           name: "Gingerbread",
-          id: 356
+          id: 356,
         },
         {
           name: "Jelly bean",
-          id: 375
+          id: 375,
         },
         {
           name: "Lollipop",
-          id: 392
+          id: 392,
         },
         {
           name: "Honeycomb",
-          id: 408
+          id: 408,
         },
         {
           name: "Donut",
-          id: 452
+          id: 452,
         },
         {
           name: "KitKat",
-          id: 518
-        }
+          id: 518,
+        },
       ],
-      food: []
+      food: [],
     };
   },
   async created() {
@@ -144,7 +144,7 @@ export default {
     //axios to get data for assets
   },
   mounted: function() {
-    document.documentElement.style.overflow = 'auto'
+    document.documentElement.style.overflow = "auto";
     var rect = this.$refs.ovref.getBoundingClientRect();
     this.x = rect.width / 2 - 100;
     this.y = rect.height / 2 - 100;
@@ -164,7 +164,7 @@ export default {
       } else {
         this.test = this.assets[id].name;
       }
-    }
+    },
   },
   watch: {
     item: async function(val) {
@@ -174,8 +174,8 @@ export default {
       } else {
         this.setDetails(false, val);
       }
-    }
-  }
+    },
+  },
 };
 </script>
 <style></style>

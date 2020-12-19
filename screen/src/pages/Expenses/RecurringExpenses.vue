@@ -295,7 +295,8 @@
                       <p>
                         <b>Amount:</b> RM{{ selectedExp.amount }} <br />
                         <b>Description:</b> {{ selectedExp.description }} <br />
-                        <b>Recurrence Type:</b> {{ selectedExp.category }} Recurrence <br />
+                        <b>Recurrence Type:</b>
+                        {{ selectedExp.category }} Recurrence <br />
                         <b>Next Payment:</b>
                         {{ utils.momentFormatDate(false, selectedExp.date) }}
                       </p>
@@ -440,12 +441,14 @@ export default {
 
     let id = this.$route.query.id == null ? 0 : this.$route.query.id;
     this.rec_payment = this.recurring_payment;
-    if(this.recurring_payment != null) {
-      this.item = this.recurring_payment.findIndex((x) => x.id == id) == -1 ? 0 : this.recurring_payment.findIndex((x) => x.id == id);
-      this.setDetails(false, this.item)
+    if (this.recurring_payment != null) {
+      this.item =
+        this.recurring_payment.findIndex((x) => x.id == id) == -1
+          ? 0
+          : this.recurring_payment.findIndex((x) => x.id == id);
+      this.setDetails(false, this.item);
       this.expDetailsShow = true;
     }
-    
   },
   methods: {
     async validate() {
@@ -540,8 +543,8 @@ export default {
       this.rec_payment = val;
     },
     expDetailsShow(val) {
-      console.log(val)
-    }
+      console.log(val);
+    },
   },
 };
 </script>

@@ -222,10 +222,7 @@
                       <v-btn color="blue darken-1" text @click="close"
                         >Cancel</v-btn
                       >
-                      <v-btn
-                        color="blue darken-1"
-                        text
-                        @click="saveFood"
+                      <v-btn color="blue darken-1" text @click="saveFood"
                         >Save</v-btn
                       >
                     </v-card-actions>
@@ -459,7 +456,7 @@ export default {
       const index = this.food_items.indexOf(this.foodTmp);
       // confirm("Are you sure you want to delete this item?") &&
       this.food_items.splice(index, 1);
-      this.$emit("viewAlert", {type:"delete_food",data:this.foodTmp});
+      this.$emit("viewAlert", { type: "delete_food", data: this.foodTmp });
       this.foodTmp = null;
       this.updateFood();
     },
@@ -517,14 +514,14 @@ export default {
         if (this.editedIndex > -1) {
           this.editedItem.date_editted = new Date();
           Object.assign(this.food_items[this.editedIndex], editedItem);
-          this.$emit("viewAlert", {type:"update_food",data:editedItem});
+          this.$emit("viewAlert", { type: "update_food", data: editedItem });
         } else {
           editedItem.id = await utils.getHashId(
             `${Date.now()}-${JSON.stringify(editedItem)}`
           );
           editedItem.date_created = new Date();
           this.food_items.push(editedItem);
-          this.$emit("viewAlert", {type:"add_food",data:editedItem});
+          this.$emit("viewAlert", { type: "add_food", data: editedItem });
         }
         this.updateFood();
         this.close();
@@ -585,19 +582,26 @@ export default {
     },
     getColor(x) {
       if (x.category === "Grams(g)") {
-        if (parseInt(x.quantity) <= parseInt(this.low_food_setting.low_g)) return "red";
+        if (parseInt(x.quantity) <= parseInt(this.low_food_setting.low_g))
+          return "red";
       } else if (x.category === "Kilograms(kg)") {
-        if (parseInt(x.quantity) <= parseInt(this.low_food_setting.low_kg)) return "red";
+        if (parseInt(x.quantity) <= parseInt(this.low_food_setting.low_kg))
+          return "red";
       } else if (x.category === "Packets") {
-        if (parseInt(x.quantity) <= parseInt(this.low_food_setting.low_packet)) return "red";
+        if (parseInt(x.quantity) <= parseInt(this.low_food_setting.low_packet))
+          return "red";
       } else if (x.category === "Bottles") {
-        if (parseInt(x.quantity) <= parseInt(this.low_food_setting.low_bottle)) return "red";
+        if (parseInt(x.quantity) <= parseInt(this.low_food_setting.low_bottle))
+          return "red";
       } else if (x.category === "Boxes") {
-        if (parseInt(x.quantity) <= parseInt(this.low_food_setting.low_box)) return "red";
+        if (parseInt(x.quantity) <= parseInt(this.low_food_setting.low_box))
+          return "red";
       } else if (x.category === "Millilitres(ml)") {
-        if (parseInt(x.quantity) <= parseInt(this.low_food_setting.low_ml)) return "red";
+        if (parseInt(x.quantity) <= parseInt(this.low_food_setting.low_ml))
+          return "red";
       } else if (x.category === "Litres(l)") {
-        if (parseInt(x.quantity) <= parseInt(this.low_food_setting.low_l)) return "red";
+        if (parseInt(x.quantity) <= parseInt(this.low_food_setting.low_l))
+          return "red";
       } else {
         console.log("error: getLow (this shouldn't happen)");
       }

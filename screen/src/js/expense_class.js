@@ -192,37 +192,55 @@ export default class expenseClass {
     }
 
     async addObj(string, data) {
-        let {
-            day,
-            month,
-            year
-        } = utils.getSeperateDate(data.date);
-        let {
-            yearIndex,
-            monthIndex,
-            dayIndex,
-            dataIndex
-        } = await this.getIndex(data);
-        if (string === 'year') {
-            if (!this.expenses) {
-                this.expenses = [];
-            }
-            this.expenses.push({
-                year: year,
-                year_total_spent: {
-                    total: 0
-                },
-                year_total_received: {
-                    total: 0
-                },
-                data: [{
+        try {
+            let {
+                day,
+                month,
+                year
+            } = utils.getSeperateDate(data.date);
+            let {
+                yearIndex,
+                monthIndex,
+                dayIndex,
+                dataIndex
+            } = await this.getIndex(data);
+            if (string === 'year') {
+                if (!this.expenses) {
+                    this.expenses = [];
+                }
+                this.expenses.push({
+                    year: year,
+                    year_total_spent: {
+                        total: 0
+                    },
+                    year_total_received: {
+                        total: 0
+                    },
+                    data: [{
+                        month: month,
+                        month_total_spent: {
+                            total: 0
+                        },
+                        month_total_received: {
+                            total: 0
+                        },
+                        data: [{
+                            day: day,
+                            day_total_spent: {
+                                total: 0
+                            },
+                            day_total_received: {
+                                total: 0
+                            },
+                            date: data.date,
+                            data: []
+                        }]
+                    }],
+                    total: {}
+                });
+            } else if (string === 'month') {
+                this.expenses[yearIndex].data.push({
                     month: month,
-                    month_total_spent: {
-                        total: 0
-                    },
-                    month_total_received: {
-                        total: 0
-                    },
                     data: [{
                         day: day,
                         day_total_spent: {
@@ -233,14 +251,16 @@ export default class expenseClass {
                         },
                         date: data.date,
                         data: []
-                    }]
-                }],
-                total: {}
-            });
-        } else if (string === 'month') {
-            this.expenses[yearIndex].data.push({
-                month: month,
-                data: [{
+                    }],
+                    month_total_spent: {
+                        total: 0
+                    },
+                    month_total_received: {
+                        total: 0
+                    },
+                });
+            } else if (string === 'day') {
+                this.expenses[yearIndex].data[monthIndex].data.push({
                     day: day,
                     day_total_spent: {
                         total: 0
@@ -249,114 +269,109 @@ export default class expenseClass {
                         total: 0
                     },
                     date: data.date,
-                    data: []
-                }],
-                month_total_spent: {
-                    total: 0
-                },
-                month_total_received: {
-                    total: 0
-                },
-            });
-        } else if (string === 'day') {
-            this.expenses[yearIndex].data[monthIndex].data.push({
-                day: day,
-                day_total_spent: {
-                    total: 0
-                },
-                day_total_received: {
-                    total: 0
-                },
-                date: data.date,
-                data: [],
-            });
+                    data: [],
+                });
+            }
+        } catch (err) {
+            console.log(err);
+            return err;
         }
     }
 
     //TO ADD CATEGORIES
     async syncTotalSpending() {
-        await this.setTotalNull();
+        try {
+            await this.setTotalNull();
 
-        for (var i = 0; i < this.expenses.length; i++) {
-            for (var j = 0; j < this.expenses[i].data.length; j++) {
-                for (var k = 0; k < this.expenses[i].data[j].data.length; k++) {
-                    for (var l = 0; l < this.expenses[i].data[j].data[k].data.length; l++) {
-                        let current = this.expenses[i].data[j].data[k].data;
-                        if (current[l].category != null) {
-                            if (current[l].money_in) {
-                                this.expenses[i].data[j].data[k].day_total_received[current[l].category] += parseFloat(current[l].amount);
-                                this.expenses[i].data[j].data[k].day_total_received.total += parseFloat(current[l].amount);
-                            } else {
-                                this.expenses[i].data[j].data[k].day_total_spent[current[l].category] += parseFloat(current[l].amount);
-                                this.expenses[i].data[j].data[k].day_total_spent.total += parseFloat(current[l].amount);
+            for (var i = 0; i < this.expenses.length; i++) {
+                for (var j = 0; j < this.expenses[i].data.length; j++) {
+                    for (var k = 0; k < this.expenses[i].data[j].data.length; k++) {
+                        for (var l = 0; l < this.expenses[i].data[j].data[k].data.length; l++) {
+                            let current = this.expenses[i].data[j].data[k].data;
+                            if (current[l].category != null) {
+                                if (current[l].money_in) {
+                                    this.expenses[i].data[j].data[k].day_total_received[current[l].category] += parseFloat(current[l].amount);
+                                    this.expenses[i].data[j].data[k].day_total_received.total += parseFloat(current[l].amount);
+                                } else {
+                                    this.expenses[i].data[j].data[k].day_total_spent[current[l].category] += parseFloat(current[l].amount);
+                                    this.expenses[i].data[j].data[k].day_total_spent.total += parseFloat(current[l].amount);
+                                }
                             }
                         }
+                        let current = this.expenses[i].data[j].data;
+                        for (var n = 0; n < this.all_categories.length; n++) {
+                            this.expenses[i].data[j].month_total_received[this.all_categories[n]] += parseFloat(current[k].day_total_received[this.all_categories[n]]);
+                            this.expenses[i].data[j].month_total_spent[this.all_categories[n]] += parseFloat(current[k].day_total_spent[this.all_categories[n]]);
+                        }
+                        this.expenses[i].data[j].month_total_received.total += parseFloat(current[k].day_total_received.total);
+                        this.expenses[i].data[j].month_total_spent.total += parseFloat(current[k].day_total_spent.total);
                     }
-                    let current = this.expenses[i].data[j].data;
-                    for (var n = 0; n < this.all_categories.length; n++) {
-                        this.expenses[i].data[j].month_total_received[this.all_categories[n]] += parseFloat(current[k].day_total_received[this.all_categories[n]]);
-                        this.expenses[i].data[j].month_total_spent[this.all_categories[n]] += parseFloat(current[k].day_total_spent[this.all_categories[n]]);
+                    let current = this.expenses[i].data;
+                    for (var o = 0; o < this.all_categories.length; o++) {
+                        this.expenses[i].year_total_received[this.all_categories[o]] += parseFloat(current[j].month_total_received[this.all_categories[o]]);
+                        this.expenses[i].year_total_spent[this.all_categories[o]] += parseFloat(current[j].month_total_spent[this.all_categories[o]]);
                     }
-                    this.expenses[i].data[j].month_total_received.total += parseFloat(current[k].day_total_received.total);
-                    this.expenses[i].data[j].month_total_spent.total += parseFloat(current[k].day_total_spent.total);
+                    this.expenses[i].year_total_spent.total += parseFloat(current[j].month_total_spent.total);
+                    this.expenses[i].year_total_received.total += parseFloat(current[j].month_total_received.total);
                 }
-                let current = this.expenses[i].data;
-                for (var o = 0; o < this.all_categories.length; o++) {
-                    this.expenses[i].year_total_received[this.all_categories[o]] += parseFloat(current[j].month_total_received[this.all_categories[o]]);
-                    this.expenses[i].year_total_spent[this.all_categories[o]] += parseFloat(current[j].month_total_spent[this.all_categories[o]]);
-                }
-                this.expenses[i].year_total_spent.total += parseFloat(current[j].month_total_spent.total);
-                this.expenses[i].year_total_received.total += parseFloat(current[j].month_total_received.total);
+                this.all_time_amount_spent.total += parseFloat(this.expenses[i].year_total_spent.total);
+                this.all_time_amount_received.total += parseFloat(this.expenses[i].year_total_received.total);
             }
-            this.all_time_amount_spent.total += parseFloat(this.expenses[i].year_total_spent.total);
-            this.all_time_amount_received.total += parseFloat(this.expenses[i].year_total_received.total);
+        } catch (err) {
+            console.log(err);
+            return err;
         }
     }
 
     async setTotalNull() {
-        for (var i = 0; i < this.expenses.length; i++) {
-            for (var j = 0; j < this.expenses[i].data.length; j++) {
-                for (var k = 0; k < this.expenses[i].data[j].data.length; k++) {
-                    for (var l = 0; l < this.expenses[i].data[j].data[k].data.length; l++) {
-                        this.expenses[i].data[j].data[k].day_total_received = {
+        try {
+            for (var i = 0; i < this.expenses.length; i++) {
+                for (var j = 0; j < this.expenses[i].data.length; j++) {
+                    for (var k = 0; k < this.expenses[i].data[j].data.length; k++) {
+                        for (var l = 0; l < this.expenses[i].data[j].data[k].data.length; l++) {
+                            this.expenses[i].data[j].data[k].day_total_received = {
+                                total: 0
+                            };
+                            this.expenses[i].data[j].data[k].day_total_spent = {
+                                total: 0
+                            };
+                            for (var m = 0; m < this.all_categories.length; m++) {
+                                this.expenses[i].data[j].data[k].day_total_received[this.all_categories[m]] = 0;
+                                this.expenses[i].data[j].data[k].day_total_spent[this.all_categories[m]] = 0;
+                            }
+                        }
+                        this.expenses[i].data[j].month_total_received = {
                             total: 0
                         };
-                        this.expenses[i].data[j].data[k].day_total_spent = {
+                        this.expenses[i].data[j].month_total_spent = {
                             total: 0
                         };
-                        for (var m = 0; m < this.all_categories.length; m++) {
-                            this.expenses[i].data[j].data[k].day_total_received[this.all_categories[m]] = 0;
-                            this.expenses[i].data[j].data[k].day_total_spent[this.all_categories[m]] = 0;
+                        for (var n = 0; n < this.all_categories.length; n++) {
+                            this.expenses[i].data[j].month_total_received[this.all_categories[n]] = 0;
+                            this.expenses[i].data[j].month_total_spent[this.all_categories[n]] = 0;
                         }
                     }
-                    this.expenses[i].data[j].month_total_received = {
+                    this.expenses[i].year_total_spent = {
                         total: 0
                     };
-                    this.expenses[i].data[j].month_total_spent = {
+                    this.expenses[i].year_total_received = {
                         total: 0
                     };
-                    for (var n = 0; n < this.all_categories.length; n++) {
-                        this.expenses[i].data[j].month_total_received[this.all_categories[n]] = 0;
-                        this.expenses[i].data[j].month_total_spent[this.all_categories[n]] = 0;
+                    for (var o = 0; o < this.all_categories.length; o++) {
+                        this.expenses[i].year_total_received[this.all_categories[o]] = 0;
+                        this.expenses[i].year_total_spent[this.all_categories[o]] = 0;
                     }
                 }
-                this.expenses[i].year_total_spent = {
+                this.all_time_amount_spent = {
                     total: 0
                 };
-                this.expenses[i].year_total_received = {
+                this.all_time_amount_received = {
                     total: 0
                 };
-                for (var o = 0; o < this.all_categories.length; o++) {
-                    this.expenses[i].year_total_received[this.all_categories[o]] = 0;
-                    this.expenses[i].year_total_spent[this.all_categories[o]] = 0;
-                }
             }
-            this.all_time_amount_spent = {
-                total: 0
-            };
-            this.all_time_amount_received = {
-                total: 0
-            };
+        } catch (err) {
+            console.log(err);
+            return err;
         }
     }
 
@@ -394,21 +409,26 @@ export default class expenseClass {
     }
 
     async getIndex(data) {
-        let {
-            day,
-            month,
-            year
-        } = utils.getSeperateDate(new Date(data.date));
-        let yearIndex = this.expenses == null ? parseInt('-1') : this.expenses.findIndex(x => x.year == year);
-        let monthIndex = yearIndex < 0 ? parseInt('-1') : this.expenses[yearIndex].data.findIndex(x => x.month == month);
-        let dayIndex = monthIndex < 0 ? parseInt('-1') : this.expenses[yearIndex].data[monthIndex].data.findIndex(x => x.day == day);
-        let dataIndex = dayIndex < 0 ? parseInt('-1') : this.expenses[yearIndex].data[monthIndex].data[dayIndex].data.findIndex(x => x.id == data.id);
-        return {
-            yearIndex,
-            monthIndex,
-            dayIndex,
-            dataIndex
-        };
+        try {
+            let {
+                day,
+                month,
+                year
+            } = utils.getSeperateDate(new Date(data.date));
+            let yearIndex = this.expenses == null ? parseInt('-1') : this.expenses.findIndex(x => x.year == year);
+            let monthIndex = yearIndex < 0 ? parseInt('-1') : this.expenses[yearIndex].data.findIndex(x => x.month == month);
+            let dayIndex = monthIndex < 0 ? parseInt('-1') : this.expenses[yearIndex].data[monthIndex].data.findIndex(x => x.day == day);
+            let dataIndex = dayIndex < 0 ? parseInt('-1') : this.expenses[yearIndex].data[monthIndex].data[dayIndex].data.findIndex(x => x.id == data.id);
+            return {
+                yearIndex,
+                monthIndex,
+                dayIndex,
+                dataIndex
+            };
+        } catch (err) {
+            console.log(err);
+            return err;
+        }
     }
 
     async getRecurIndex(data) {
@@ -416,72 +436,87 @@ export default class expenseClass {
     }
 
     async checkRecurAvailability(data) { // return true to add
-        let token = false;
-        //check if task has already been added
-        let taskAdded = data.taskAdded == null ? [] : data.taskAdded;
-        let tmpDate = new Date(data.date);
-        if (taskAdded.length < 0) token = true;
-        else {
-            if (taskAdded.findIndex((x) => new Date(x).getTime() === tmpDate.getTime()) >= 0) token = false;
+        try {
+            let token = false;
+            //check if task has already been added
+            let taskAdded = data.taskAdded == null ? [] : data.taskAdded;
+            let tmpDate = new Date(data.date);
+            if (taskAdded.length < 0) token = true;
+            else {
+                if (taskAdded.findIndex((x) => new Date(x).getTime() === tmpDate.getTime()) >= 0) token = false;
+            }
+
+            //check if almost time to recurring date
+            token = token == false ? false : utils.checkRange(data, 'day');
+
+            return token;
+        } catch (err) {
+            console.log(err);
+            return err;
         }
-
-        //check if almost time to recurring date
-        token = token == false ? false : utils.checkRange(data, 'day');
-
-        return token;
     }
 
     async checkMissedRecur(data) {
-        let taskAdded = data.taskAdded == null ? [] : data.taskAdded;
-        if (taskAdded.length < 0) return false;
-        else {
-            let latestDate = new Date(data.taskAdded[taskAdded.length - 1]);
-            let expDate = new Date(data.date);
-            switch (data.category) {
-                case 'Weekly':
-                    if (utils.checkDateBefore('Weekly', latestDate)) {
-                        if (taskAdded.findIndex((x) => new Date(x).getTime() === utils.getNextSelectDay(latestDate.getDay().getTime()) >= 0)) {
-                            this.addRecurTask(data, utils.getNextSelectDay(latestDate.getDay()));
+        try {
+            let taskAdded = data.taskAdded == null ? [] : data.taskAdded;
+            if (taskAdded.length <= 0) return false;
+            else {
+                let latestDate = new Date(data.taskAdded[taskAdded.length - 1]);
+                // let expDate = new Date(data.date);
+                switch (data.category) {
+                    case 'Weekly':
+                        if (utils.checkDateBefore('Weekly', latestDate)) {
+                            if (taskAdded.findIndex((x) => new Date(x).getTime() === utils.getNextSelectDay(latestDate.getDay().getTime()) >= 0)) {
+                                this.addRecurTask(data, utils.getNextSelectDay(latestDate.getDay()));
+                            }
                         }
-                    }
-                    break;
-                case 'Monthly':
-                    if (utils.checkDateBefore('Monthly', latestDate)) {
-                        if (taskAdded.findIndex((x) => new Date(x).getTime() === latestDate.setMonth(latestDate.getMonth() + 1).getTime()) >= 0) {
-                            this.addRecurTask(data, latestDate.setMonth(latestDate.getMonth() + 1));
-                        }
+                        break;
+                    case 'Monthly':
+                        if (utils.checkDateBefore('Monthly', latestDate)) {
+                            if (taskAdded.findIndex((x) => new Date(x).getTime() === latestDate.setMonth(latestDate.getMonth() + 1).getTime()) >= 0) {
+                                this.addRecurTask(data, latestDate.setMonth(latestDate.getMonth() + 1));
+                            }
 
-                    }
-                    break;
-                case 'Yearly':
-                    if (utils.checkDateBefore('Yearly', latestDate)) {
-                        if (taskAdded.findIndex((x) => new Date(x).getTime() === latestDate.setFullYear(latestDate.getFullYear() + 1).getTime()) >= 0) {
-                            this.addRecurTask(data, latestDate.setFullYear(latestDate.getFullYear() + 1));
                         }
+                        break;
+                    case 'Yearly':
+                        if (utils.checkDateBefore('Yearly', latestDate)) {
+                            if (taskAdded.findIndex((x) => new Date(x).getTime() === latestDate.setFullYear(latestDate.getFullYear() + 1).getTime()) >= 0) {
+                                this.addRecurTask(data, latestDate.setFullYear(latestDate.getFullYear() + 1));
+                            }
 
-                    }
-                    break;
+                        }
+                        break;
+                }
             }
+        } catch (err) {
+            console.log(err);
+            return err;
         }
     }
 
     async getDailyExp(date) {
-        await this.getExpDB();
-        let tmp = {
-            date: date
-        };
-        let index = await this.getIndex(tmp);
-        if ((index.yearIndex < 0 || index.monthIndex < 0 || index.dayIndex < 0) || this.expenses[index.yearIndex].data[index.monthIndex].data[index.dayIndex].data.length == 0) {
-            return 'noData';
-        } else {
-            let chart = await this.getChartData(index, 'daily');
-            return {
-                expense: this.expenses[index.yearIndex].data[index.monthIndex].data[index.dayIndex],
-                spent: chart.spent,
-                received: chart.received,
-                total_spent: this.expenses[index.yearIndex].data[index.monthIndex].data[index.dayIndex].day_total_spent.total,
-                total_received: this.expenses[index.yearIndex].data[index.monthIndex].data[index.dayIndex].day_total_received.total
+        try {
+            await this.getExpDB();
+            let tmp = {
+                date: date
             };
+            let index = await this.getIndex(tmp);
+            if ((index.yearIndex < 0 || index.monthIndex < 0 || index.dayIndex < 0) || this.expenses[index.yearIndex].data[index.monthIndex].data[index.dayIndex].data.length == 0) {
+                return 'noData';
+            } else {
+                let chart = await this.getChartData(index, 'daily');
+                return {
+                    expense: this.expenses[index.yearIndex].data[index.monthIndex].data[index.dayIndex],
+                    spent: chart.spent,
+                    received: chart.received,
+                    total_spent: this.expenses[index.yearIndex].data[index.monthIndex].data[index.dayIndex].day_total_spent.total,
+                    total_received: this.expenses[index.yearIndex].data[index.monthIndex].data[index.dayIndex].day_total_received.total
+                };
+            }
+        } catch (err) {
+            console.log(err);
+            return err;
         }
     }
 
@@ -509,31 +544,37 @@ export default class expenseClass {
     }
 
     async getChartData(index, type) {
-        let spent = [];
-        let received = [];
-        if (type == 'daily') {
-            spent = [
-                ["Category", "Total"]
-            ];
-            received = [
-                ["Category", "Total"]
-            ];
-            for (var i = 0; i < this.all_categories.length; i++) {
-                let tmp_spent = [];
-                let tmp_received = [];
-                tmp_spent.push(this.all_categories[i]);
-                tmp_spent.push(this.expenses[index.yearIndex].data[index.monthIndex].data[index.dayIndex].day_total_spent[this.all_categories[i]]);
+        try {
+            let spent = [];
+            let received = [];
+            if (type == 'daily') {
+                spent = [
+                    ["Category", "Total"]
+                ];
+                received = [
+                    ["Category", "Total"]
+                ];
+                for (var i = 0; i < this.all_categories.length; i++) {
+                    let tmp_spent = [];
+                    let tmp_received = [];
+                    tmp_spent.push(this.all_categories[i]);
+                    tmp_spent.push(this.expenses[index.yearIndex].data[index.monthIndex].data[index.dayIndex].day_total_spent[this.all_categories[i]]);
 
-                tmp_received.push(this.all_categories[i]);
-                tmp_received.push(this.expenses[index.yearIndex].data[index.monthIndex].data[index.dayIndex].day_total_received[this.all_categories[i]]);
-                spent.push(JSON.parse(JSON.stringify(tmp_spent)));
-                received.push(JSON.parse(JSON.stringify(tmp_received)));
+                    tmp_received.push(this.all_categories[i]);
+                    tmp_received.push(this.expenses[index.yearIndex].data[index.monthIndex].data[index.dayIndex].day_total_received[this.all_categories[i]]);
+                    spent.push(JSON.parse(JSON.stringify(tmp_spent)));
+                    received.push(JSON.parse(JSON.stringify(tmp_received)));
+                }
             }
+            return {
+                spent,
+                received
+            };
+        } catch (err) {
+            console.log(err);
+            return err;
         }
-        return {
-            spent,
-            received
-        };
+
     }
 
     async updateExpDB() {
@@ -598,134 +639,139 @@ export default class expenseClass {
 
     //methods for processing statistics
     async setGraphData() {
-        await this.getExpDB();
-        let graph_expenditure_year = [];
-        let graph_savings_year = [];
-        let graph_expenditure_month = [];
-        let graph_savings_month = [];
-        let graph_expenditure_day = [];
-        let graph_savings_day = [];
+        try {
+            await this.getExpDB();
+            let graph_expenditure_year = [];
+            let graph_savings_year = [];
+            let graph_expenditure_month = [];
+            let graph_savings_month = [];
+            let graph_expenditure_day = [];
+            let graph_savings_day = [];
 
-        let time = await utils.getSeperateDate(new Date());
-        let time_static = new Date();
-        let graph_year = [];
-        let graph_month = [];
-        let graph_day = [];
+            let time = await utils.getSeperateDate(new Date());
+            let time_static = new Date();
+            let graph_year = [];
+            let graph_month = [];
+            let graph_day = [];
 
-        while (graph_year.length < 5) {
-            let year = this.expenses.findIndex((x) => x.year === time.year);
-            if (year >= 0) {
-                graph_year.push(this.expenses[year]);
-            } else {
-                graph_year.push(0);
-            }
-            time_static = await utils.previousDate(time_static, "year");
-            time = await utils.getSeperateDate(new Date(time_static));
-        }
-
-        time = await utils.getSeperateDate(new Date());
-        time_static = new Date();
-        // console.log(time)
-        while (graph_month.length < 6) {
-            let year = this.expenses.findIndex((x) => x.year === time.year);
-            if (year >= 0) {
-                let month = this.expenses[year].data.findIndex(
-                    (x) => x.month === time.month
-                );
-                if (month >= 0) {
-                    graph_month.push(this.expenses[year].data[month]);
+            while (graph_year.length < 5) {
+                let year = this.expenses.findIndex((x) => x.year === time.year);
+                if (year >= 0) {
+                    graph_year.push(this.expenses[year]);
                 } else {
-                    graph_month.push(0);
+                    graph_year.push(0);
                 }
-                time_static = await utils.previousDate(time_static, "month");
+                time_static = await utils.previousDate(time_static, "year");
                 time = await utils.getSeperateDate(new Date(time_static));
-            } else {
-                while (graph_month.length < 10) {
-                    graph_month.push(0);
+            }
+
+            time = await utils.getSeperateDate(new Date());
+            time_static = new Date();
+            // console.log(time)
+            while (graph_month.length < 6) {
+                let year = this.expenses.findIndex((x) => x.year === time.year);
+                if (year >= 0) {
+                    let month = this.expenses[year].data.findIndex(
+                        (x) => x.month === time.month
+                    );
+                    if (month >= 0) {
+                        graph_month.push(this.expenses[year].data[month]);
+                    } else {
+                        graph_month.push(0);
+                    }
+                    time_static = await utils.previousDate(time_static, "month");
+                    time = await utils.getSeperateDate(new Date(time_static));
+                } else {
+                    while (graph_month.length < 10) {
+                        graph_month.push(0);
+                    }
                 }
             }
-        }
 
-        time = await utils.getSeperateDate(new Date());
-        let tmp_date = new Date();
-        while (graph_day.length < 10) {
-            let year = this.expenses.findIndex((x) => x.year === time.year);
-            if (year >= 0) {
-                let month = this.expenses[year].data.findIndex(
-                    (x) => x.month === time.month
-                );
-                if (month >= 0) {
-                    let day = this.expenses[year].data[month].data.findIndex(
-                        (x) => x.day === time.day
+            time = await utils.getSeperateDate(new Date());
+            let tmp_date = new Date();
+            while (graph_day.length < 10) {
+                let year = this.expenses.findIndex((x) => x.year === time.year);
+                if (year >= 0) {
+                    let month = this.expenses[year].data.findIndex(
+                        (x) => x.month === time.month
                     );
-                    if (day >= 0) {
-                        graph_day.push(this.expenses[year].data[month].data[day]);
+                    if (month >= 0) {
+                        let day = this.expenses[year].data[month].data.findIndex(
+                            (x) => x.day === time.day
+                        );
+                        if (day >= 0) {
+                            graph_day.push(this.expenses[year].data[month].data[day]);
+                        } else {
+                            graph_day.push(0);
+                        }
+                        tmp_date = await utils.previousDate(tmp_date, "day");
+                        time.day = await utils.getSeperateDate(new Date(tmp_date)).day;
                     } else {
-                        graph_day.push(0);
+                        while (graph_day.length < 10) {
+                            graph_day.push(0);
+                        }
                     }
-                    tmp_date = await utils.previousDate(tmp_date, "day");
-                    time.day = await utils.getSeperateDate(new Date(tmp_date)).day;
                 } else {
                     while (graph_day.length < 10) {
                         graph_day.push(0);
                     }
                 }
-            } else {
-                while (graph_day.length < 10) {
-                    graph_day.push(0);
+            }
+
+            //year
+            for (var i = graph_year.length - 1; i >= 0; i--) {
+                if (graph_year[i] == 0) {
+                    graph_expenditure_year.push(0);
+                    graph_savings_year.push(0);
+                } else {
+                    graph_expenditure_year.push(
+                        graph_year[i].year_total_spent.total
+                    );
+                    graph_savings_year.push(graph_year[i].year_total_received.total);
                 }
             }
-        }
 
-        //year
-        for (var i = graph_year.length - 1; i >= 0; i--) {
-            if (graph_year[i] == 0) {
-                graph_expenditure_year.push(0);
-                graph_savings_year.push(0);
-            } else {
-                graph_expenditure_year.push(
-                    graph_year[i].year_total_spent.total
-                );
-                graph_savings_year.push(graph_year[i].year_total_received.total);
+            //month
+            for (var j = graph_month.length - 1; j >= 0; j--) {
+                if (graph_month[j] == 0) {
+                    graph_expenditure_month.push(0);
+                    graph_savings_month.push(0);
+                } else {
+                    graph_expenditure_month.push(
+                        graph_month[j].month_total_spent.total
+                    );
+                    graph_savings_month.push(
+                        graph_month[j].month_total_received.total
+                    );
+                }
             }
-        }
 
-        //month
-        for (var j = graph_month.length - 1; j >= 0; j--) {
-            if (graph_month[j] == 0) {
-                graph_expenditure_month.push(0);
-                graph_savings_month.push(0);
-            } else {
-                graph_expenditure_month.push(
-                    graph_month[j].month_total_spent.total
-                );
-                graph_savings_month.push(
-                    graph_month[j].month_total_received.total
-                );
+            //day
+            for (var k = graph_day.length - 1; k >= 0; k--) {
+                if (graph_day[k] == 0) {
+                    graph_expenditure_day.push(0);
+                    graph_savings_day.push(0);
+                } else {
+                    graph_expenditure_day.push(graph_day[k].day_total_spent.total);
+                    graph_savings_day.push(graph_day[k].day_total_received.total);
+                }
             }
-        }
 
-        //day
-        for (var k = graph_day.length - 1; k >= 0; k--) {
-            if (graph_day[k] == 0) {
-                graph_expenditure_day.push(0);
-                graph_savings_day.push(0);
-            } else {
-                graph_expenditure_day.push(graph_day[k].day_total_spent.total);
-                graph_savings_day.push(graph_day[k].day_total_received.total);
-            }
+            return {
+                graph_expenditure_year,
+                graph_savings_year,
+                graph_expenditure_month,
+                graph_savings_month,
+                graph_expenditure_day,
+                graph_savings_day
+            };
+            //   graph_savings = graph_savings_year;
+            //   graph_expenditure = graph_expenditure_year;
+        } catch (err) {
+            console.log(err);
+            return err;
         }
-
-        return {
-            graph_expenditure_year,
-            graph_savings_year,
-            graph_expenditure_month,
-            graph_savings_month,
-            graph_expenditure_day,
-            graph_savings_day
-        };
-        //   graph_savings = graph_savings_year;
-        //   graph_expenditure = graph_expenditure_year;
     }
 
     async getStatsData() {

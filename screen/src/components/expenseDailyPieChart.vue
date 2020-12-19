@@ -3,11 +3,11 @@
     <v-expand-transition>
       <v-card v-show="!expDetailsShow" height="60vh" flat>
         <v-container fill-height fluid>
-          <v-row v-if="daily_total_spent <= 0 && daily_total_received <= 0" >
+          <v-row v-if="daily_total_spent <= 0 && daily_total_received <= 0">
             <!-- <v-col> -->
-              <v-overlay :absolute="true" :value="true" >
-                <p>You did not spent or receive anything today</p>
-              </v-overlay>
+            <v-overlay :absolute="true" :value="true">
+              <p>You did not spent or receive anything today</p>
+            </v-overlay>
             <!-- </v-col> -->
           </v-row>
           <v-row v-else>
@@ -61,9 +61,14 @@ export default {
       },
     };
   },
-  props: ["expDetailsShow", "chartDataSpent", "chartDataReceived", "daily_total_spent", "daily_total_received"],
-  async created() {
-  },
+  props: [
+    "expDetailsShow",
+    "chartDataSpent",
+    "chartDataReceived",
+    "daily_total_spent",
+    "daily_total_received",
+  ],
+  async created() {},
   methods: {},
   watch: {},
 };

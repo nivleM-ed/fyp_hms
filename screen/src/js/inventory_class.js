@@ -88,7 +88,7 @@ export default class inventoryClass {
         try {
             await this.getInvDB();
             this.shopping_list[this.shopping_list.findIndex(x => x.id == id)].completed = true;
-            
+
             await this.topUpFood(this.shopping_list[this.shopping_list.findIndex(x => x.id == id)].data);
 
             await this.updateInvDB();
@@ -100,12 +100,12 @@ export default class inventoryClass {
 
     async topUpFood(data) {
         console.log(data)
-        for(let item in data) {
-            let itemNo = this.food.findIndex((x)=> x.id == data[item].id);
-            if(itemNo > -1) {
+        for (let item in data) {
+            let itemNo = this.food.findIndex((x) => x.id == data[item].id);
+            if (itemNo > -1) {
                 this.food[itemNo].quantity = parseInt(this.food[itemNo].quantity) + parseInt(data[item].shoplist_quantity);
             }
-             
+
         }
     }
 
@@ -122,29 +122,34 @@ export default class inventoryClass {
     }
 
     async addShoppingList(list_id, data, array) {
-        let list_index = this.shopping_list.findIndex(x => x.id === list_id);
-        if (array) {
-            for (var i = 0; i < data.length; i++) {
-                let index = this.shopping_list[list_index].data.findIndex(x => x.id === data[i].id);
-                if (index < 0) {
-                    data[i].shoplist_quantity = data[i].add_quantity;
-                    this.shopping_list[list_index].data.push(data[i]);
-                } else {
-                    this.shopping_list[list_index].data[index].shoplist_quantity = parseInt(this.shopping_list[list_index].data[index].shoplist_quantity == null ? 0 : this.shopping_list[list_index].data[index].shoplist_quantity) + parseInt(data[i].add_quantity);
+        try {
+            let list_index = this.shopping_list.findIndex(x => x.id === list_id);
+            if (array) {
+                for (var i = 0; i < data.length; i++) {
+                    let index = this.shopping_list[list_index].data.findIndex(x => x.id === data[i].id);
+                    if (index < 0) {
+                        data[i].shoplist_quantity = data[i].add_quantity;
+                        this.shopping_list[list_index].data.push(data[i]);
+                    } else {
+                        this.shopping_list[list_index].data[index].shoplist_quantity = parseInt(this.shopping_list[list_index].data[index].shoplist_quantity == null ? 0 : this.shopping_list[list_index].data[index].shoplist_quantity) + parseInt(data[i].add_quantity);
+                    }
+                    this.food[this.food.findIndex(x => x.id === data[i].id)].add_quantity = 0;
                 }
-                this.food[this.food.findIndex(x => x.id === data[i].id)].add_quantity = 0;
-            }
-        } else {
-            let index = this.shopping_list[list_index].data.findIndex(x => x.id === data.id);
-            if (index < 0) {
-                data.shoplist_quantity = data.add_quantity;
-                this.shopping_list[list_index].data.push(data);
             } else {
-                this.shopping_list[list_index].data[index].shoplist_quantity = parseInt(this.shopping_list[list_index].data[index].shoplist_quantity == null ? 0 : this.shopping_list[list_index].data[index].shoplist_quantity) + parseInt(data.add_quantity);
+                let index = this.shopping_list[list_index].data.findIndex(x => x.id === data.id);
+                if (index < 0) {
+                    data.shoplist_quantity = data.add_quantity;
+                    this.shopping_list[list_index].data.push(data);
+                } else {
+                    this.shopping_list[list_index].data[index].shoplist_quantity = parseInt(this.shopping_list[list_index].data[index].shoplist_quantity == null ? 0 : this.shopping_list[list_index].data[index].shoplist_quantity) + parseInt(data.add_quantity);
+                }
+                this.food[this.food.findIndex(x => x.id === data.id)].add_quantity = 0;
             }
-            this.food[this.food.findIndex(x => x.id === data.id)].add_quantity = 0;
+            await this.updateInvDB();
+        } catch (err) {
+            console.log(err);
+            return err;
         }
-        await this.updateInvDB();
     }
 
     async addShoppingTask(data) { //todo almsot there   

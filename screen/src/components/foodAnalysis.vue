@@ -161,77 +161,81 @@
         <v-card-text class="p-4">
           <div v-if="foodTmp.length > 0">
             <v-list dense width="100%">
-            <div v-for="item in foodTmp" :key="item.id">
-              <v-row>
-                <v-col cols="4">
-                  <v-text-field
-                    v-model="item.name"
-                    solo
-                    dense
-                    flat
-                    readonly
-                  ></v-text-field>
-                </v-col>
-                <v-col class="pb-2">
-                  <v-text-field
-                    v-model="item.add_quantity"
-                    label="Quantity"
-                    placeholder="Food Quantity"
-                    solo
-                    dense
-                    :rules="inputRulesNum"
-                    required
-                  ></v-text-field>
-                </v-col>
-                <v-col>
-                  <v-text-field
-                    v-model="item.category"
-                    solo
-                    dense
-                    flat
-                    readonly
-                  ></v-text-field>
-                </v-col>
-                <v-col>
-                  <v-icon @click="removeFoodTmp(item)" color="red"
-                    >mdi-close</v-icon
-                  >
-                  <v-tooltip
-                    bottom
-                    max-width="400"
-                    v-if="checkExistInList(item)"
-                  >
-                    <template v-slot:activator="{ on: tooltip }">
-                      <v-btn
-                        icon
-                        v-on="{ ...tooltip, ...menu }"
-                        class="float-right"
-                      >
-                        <v-icon color="red">mdi-exclamation</v-icon>
-                      </v-btn>
-                    </template>
-                    {{ item.shoplist_quantity }}
-                    <span
-                      >This item has already been added to the shopping list.
-                      However, you can still add more to the list.</span
+              <div v-for="item in foodTmp" :key="item.id">
+                <v-row>
+                  <v-col cols="4">
+                    <v-text-field
+                      v-model="item.name"
+                      solo
+                      dense
+                      flat
+                      readonly
+                    ></v-text-field>
+                  </v-col>
+                  <v-col class="pb-2">
+                    <v-text-field
+                      v-model="item.add_quantity"
+                      label="Quantity"
+                      placeholder="Food Quantity"
+                      solo
+                      dense
+                      :rules="inputRulesNum"
+                      required
+                    ></v-text-field>
+                  </v-col>
+                  <v-col>
+                    <v-text-field
+                      v-model="item.category"
+                      solo
+                      dense
+                      flat
+                      readonly
+                    ></v-text-field>
+                  </v-col>
+                  <v-col>
+                    <v-icon @click="removeFoodTmp(item)" color="red"
+                      >mdi-close</v-icon
                     >
-                  </v-tooltip>
-                </v-col>
-              </v-row>
-            </div>
-          </v-list>
+                    <v-tooltip
+                      bottom
+                      max-width="400"
+                      v-if="checkExistInList(item)"
+                    >
+                      <template v-slot:activator="{ on: tooltip }">
+                        <v-btn
+                          icon
+                          v-on="{ ...tooltip, ...menu }"
+                          class="float-right"
+                        >
+                          <v-icon color="red">mdi-exclamation</v-icon>
+                        </v-btn>
+                      </template>
+                      {{ item.shoplist_quantity }}
+                      <span
+                        >This item has already been added to the shopping list.
+                        However, you can still add more to the list.</span
+                      >
+                    </v-tooltip>
+                  </v-col>
+                </v-row>
+              </div>
+            </v-list>
           </div>
           <div v-else class="text-center">
-              <p class="pt-2">Nice! You have no food running low.</p>
-            </div>
-          
+            <p class="pt-2">Nice! You have no food running low.</p>
+          </div>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="red darken-1" text @click="addList = false"
             >Cancel</v-btn
           >
-          <v-btn color="green" v-if="foodTmp.length > 0" text @click="chooseShoppingList = true">
+          <v-btn
+            color="green"
+            v-if="foodTmp.length > 0"
+            text
+            @click="chooseShoppingList = true"
+          >
             Add
           </v-btn>
         </v-card-actions>

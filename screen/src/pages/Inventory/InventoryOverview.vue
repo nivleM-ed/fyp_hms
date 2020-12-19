@@ -10,27 +10,27 @@
       <!-- <v-tab key="recipe">Recipe</v-tab> -->
 
       <v-tab-item key="food">
-        <FoodInventory 
-        :food="food"
-        :shopping_list="shopping_list"
-        :low_food_setting="low_food_setting"
-        :all_categories="all_categories"
-        :shopping_list_titles="shopping_list_titles"
-        v-on:updateFood="updateFood"
-        v-on:addToList="addToList"
-        v-on:updateLowSetting="updateLowSetting"
-        v-on:viewAlert="viewAlert"
+        <FoodInventory
+          :food="food"
+          :shopping_list="shopping_list"
+          :low_food_setting="low_food_setting"
+          :all_categories="all_categories"
+          :shopping_list_titles="shopping_list_titles"
+          v-on:updateFood="updateFood"
+          v-on:addToList="addToList"
+          v-on:updateLowSetting="updateLowSetting"
+          v-on:viewAlert="viewAlert"
         />
       </v-tab-item>
 
-      <v-tab-item key="shoppinglist"> 
+      <v-tab-item key="shoppinglist">
         <ShoppingList
-        :food="food"
-        :shopping_list="shopping_list"
-        :all_categories="all_categories"
-        v-on:updateShoppingList="updateShoppingList"
-        v-on:addToTask="addToTask"
-        v-on:viewAlert="viewAlert"
+          :food="food"
+          :shopping_list="shopping_list"
+          :all_categories="all_categories"
+          v-on:updateShoppingList="updateShoppingList"
+          v-on:addToTask="addToTask"
+          v-on:viewAlert="viewAlert"
         />
       </v-tab-item>
 
@@ -83,7 +83,8 @@ export default {
     if (this.logged) {
       this.invObj = new invClass();
       await this.updateData();
-      this.tab_open = this.$route.query.tab == null ? 0 : parseInt(this.$route.query.tab);
+      this.tab_open =
+        this.$route.query.tab == null ? 0 : parseInt(this.$route.query.tab);
     }
   },
   mounted: function() {
@@ -94,12 +95,14 @@ export default {
       await this.invObj.getInvDB();
       this.food = this.invObj._food;
       this.shopping_list = this.invObj._shopping_list;
-      this.shopping_list_titles = await this.getShoppingListTitles(this.invObj._shopping_list);
+      this.shopping_list_titles = await this.getShoppingListTitles(
+        this.invObj._shopping_list
+      );
       this.low_food_setting = this.invObj._low_food_setting;
       this.all_categories = this.invObj._all_categories;
     },
 
-    async updateFood(data){
+    async updateFood(data) {
       await this.invObj.updateFood(data);
       await this.updateData();
     },
@@ -117,7 +120,8 @@ export default {
     async getShoppingListTitles(data) {
       let tmp = [];
       for (let item in data) {
-        if(!data[item].completed) tmp.push({text: data[item].name, value: data[item].id});
+        if (!data[item].completed)
+          tmp.push({ text: data[item].name, value: data[item].id });
       }
       return tmp;
     },
@@ -125,13 +129,13 @@ export default {
     async addToList(data) {
       await this.invObj.addShoppingList(data.list_id, data.data, data.array);
       await this.updateData();
-      this.$emit("viewAlert", {type:"food_add_to_list",data:data})
+      this.$emit("viewAlert", { type: "food_add_to_list", data: data });
     },
 
     async addToTask(data) {
       await this.invObj.addShoppingTask(data);
       await this.updateData();
-      this.$emit("viewAlert", {type:"shopping_add_to_task",data:data})
+      this.$emit("viewAlert", { type: "shopping_add_to_task", data: data });
     },
 
     async viewAlert(data) {
@@ -149,8 +153,7 @@ export default {
       this.$router.push(tmp);
     },
   },
-  watch: {
-  }
+  watch: {},
 };
 </script>
 <style></style>

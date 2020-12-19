@@ -59,19 +59,21 @@
               /></span>
               <span v-else><b>Duration:</b> Whole Day<br /></span>
               <b>Task type: </b
-              >{{ utils.formatTaskTypeName(selectedTaskInner.type) }} <br/>
+              >{{ utils.formatTaskTypeName(selectedTaskInner.type) }} <br />
               <span v-if="completed">
-            <b>Task Completed on:</b>
-            {{ utils.momentFormatDate(true, selectedTaskInner.completed_date) }}
-          </span>
+                <b>Task Completed on:</b>
+                {{
+                  utils.momentFormatDate(true, selectedTaskInner.completed_date)
+                }}
+              </span>
             </v-sheet>
           </v-card-text>
         </v-card>
 
         <v-divider class="mx-4" :inset="true"></v-divider>
-        <v-card-actions >
+        <v-card-actions>
           <v-btn
-          v-if="!completed"
+            v-if="!completed"
             class="mr-2"
             color="orange"
             dark
@@ -126,9 +128,7 @@
             v-if="selectedTaskInner.type == 'recur_expense'"
             color="blue darken-3"
             dark
-            @click.prevent="
-              toPage('expense_ov', 2,  selectedTaskInner.recur_id)
-            "
+            @click.prevent="toPage('expense_ov', 2, selectedTaskInner.recur_id)"
           >
             View Recurring Bill
           </v-btn>
@@ -188,7 +188,7 @@ export default {
     },
     toPage(page, tab, id) {
       let tmp;
-      if(id != null) tmp = "/main/" + page + "?tab="+ tab + "&id=" + id;
+      if (id != null) tmp = "/main/" + page + "?tab=" + tab + "&id=" + id;
       else tmp = "/main/" + page;
       this.$router.push(tmp);
     },

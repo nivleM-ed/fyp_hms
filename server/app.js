@@ -14,13 +14,17 @@ const multer = require('multer');
 var storage = multer.diskStorage({
   destination: './public/img/uploads',
   filename: function (req, file, cb) {
-    cb( null,  Date.now() + '-' + file.originalname);
+    cb(null, Date.now() + '-' + file.originalname);
   }
 })
-const upload = multer({ storage: storage });
+const upload = multer({
+  storage: storage
+});
 
 require('./passport_setup')(passport);
-let {run_db} = require('./dbJoin');
+let {
+  run_db
+} = require('./dbJoin');
 
 var recipeRouter = require('./routes/recipe');
 var usersRouter = require('./routes/users');
@@ -30,17 +34,17 @@ var expensesRouter = require('./routes/expenses');
 var notificationRouter = require('./routes/notification');
 
 var app = express();
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   res.header('Access-Control-Allow-Credentials', true);
   res.header('Access-Control-Allow-Origin', req.headers.origin);
   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
   res.header('Access-Control-Allow-Headers', 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept, Authorization');
   if ('OPTIONS' == req.method) {
-       res.sendStatus(200);
-   } else {
-       next();
-   }
-  });
+    res.sendStatus(200);
+  } else {
+    next();
+  }
+});
 
 // view engine setup
 // app.set('views', path.join(__dirname, 'views'));
@@ -49,7 +53,9 @@ app.use(function(req, res, next) {
 const sessionDBaccess = new sessionPool(CONST.dbPool);
 app.use(logger('dev'));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({
+  extended: false
+}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -58,10 +64,14 @@ app.use(session({
     pool: sessionDBaccess,
     tableName: 'session'
   }),
-  secret:"apassword",
-  saveUninitialized:false,
-  resave:false,
-  cookie:{secure:false, httpOnly:true, path: '/'} //24 hours , maxAge: 24 * 100 * 60 * 60 
+  secret: "apassword",
+  saveUninitialized: false,
+  resave: false,
+  cookie: {
+    secure: false,
+    httpOnly: true,
+    path: '/'
+  } //24 hours , maxAge: 24 * 100 * 60 * 60 
 }));
 app.use(passport.initialize());
 app.use(passport.session());
@@ -74,7 +84,9 @@ app.use('/api/inventory', inventoryRouter);
 app.use('/api/expenses', expensesRouter);
 app.use('/api/notification', notificationRouter);
 app.post('/api/upload', upload.single('file'), (req, res) => {
-  res.json({file: req.file})
+  res.json({
+    file: req.file
+  })
 })
 console.log(CONST.version)
 console.log("NODE_ENV: " + process.env.NODE_ENV)
@@ -89,12 +101,12 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   next(createError(404));
 });
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};

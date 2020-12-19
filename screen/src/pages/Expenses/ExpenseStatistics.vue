@@ -32,7 +32,7 @@
                   Last Expenditure
                 </v-card-title>
                 <v-card-text>
-                  <v-sheet  color="rgba(0, 0, 0, .12)">
+                  <v-sheet color="rgba(0, 0, 0, .12)">
                     <v-sparkline
                       :value="graph_expenditure"
                       color="rgba(255, 255, 255, .7)"
@@ -302,7 +302,7 @@ export default {
       this.graph_expenditure_day = graph_data.graph_expenditure_day;
       this.graph_savings_day = graph_data.graph_savings_day;
 
-      this.graph_savings =  this.graph_savings_day;
+      this.graph_savings = this.graph_savings_day;
       this.graph_expenditure = this.graph_expenditure_day;
     },
     async setStatsInfo() {

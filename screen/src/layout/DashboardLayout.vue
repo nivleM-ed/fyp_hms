@@ -13,9 +13,7 @@
       :task_notify="task_notify"
       :user="user"
     ></NavDraw>
-    <Toolbar
-      :notifications="latest_notification"
-    ></Toolbar>
+    <Toolbar :notifications="latest_notification"></Toolbar>
     <div>
       <router-view
         :timestamp="timestamp"
@@ -109,7 +107,7 @@ export default {
       this.recurring_payment = exp_res.recurring_payment;
       this.tasks = task_res[0].tasks == null ? [] : task_res[0].tasks;
       this.completed_tasks = task_res[0].completed_tasks;
-      if(!type) this.setNotifyOuter();
+      if (!type) this.setNotifyOuter();
     },
     backgroundProcess() {
       setInterval(() => {
@@ -118,7 +116,7 @@ export default {
       }, 1000);
     },
     viewAlert(data) {
-      console.log(data)
+      console.log(data);
       this.alertData = data;
     },
     errorAlert(error) {
@@ -129,11 +127,11 @@ export default {
         for (var i = 0; i < this.futureTask.length; i++) {
           if (utils.checkTime(this.futureTask[i].start, "second")) {
             // if (!this.futureTask[i].notify_ack) {
-              this.notifyTask = this.futureTask[i];
-              this.notify_message =
-                "You have a task to be done: " + this.notifyTask.name;
-              this.notifications_snackbar = true;
-              this.notification_sound.play();
+            this.notifyTask = this.futureTask[i];
+            this.notify_message =
+              "You have a task to be done: " + this.notifyTask.name;
+            this.notifications_snackbar = true;
+            this.notification_sound.play();
             // }
           }
         }
@@ -148,11 +146,19 @@ export default {
             if (
               !utils.checkTime(this.tasks[i].start, "ago") &&
               utils.checkTime(this.tasks[i].start, "hour") &&
-              this.futureTask.findIndex((x) => x.id === this.tasks[i].id && new Date(x.start).getTime() == new Date(this.tasks[i].start).getTime()) < 0
+              this.futureTask.findIndex(
+                (x) =>
+                  x.id === this.tasks[i].id &&
+                  new Date(x.start).getTime() ==
+                    new Date(this.tasks[i].start).getTime()
+              ) < 0
             ) {
               this.futureTask.push(this.tasks[i]);
               //add to notification
-              await this.notifyObj.addNotification(this.tasks[i], 'upcoming_task');
+              await this.notifyObj.addNotification(
+                this.tasks[i],
+                "upcoming_task"
+              );
               await this.updateData(true);
             }
           }
@@ -160,12 +166,17 @@ export default {
 
         if (this.recurring_payment) {
           for (var j = 0; j < this.recurring_payment.length; j++) {
-            await this.expObj.checkMissedRecur(this.recurring_payment[j])
+            await this.expObj.checkMissedRecur(this.recurring_payment[j]);
             if (
-              await this.expObj.checkRecurAvailability(this.recurring_payment[j])
+              await this.expObj.checkRecurAvailability(
+                this.recurring_payment[j]
+              )
             ) {
               // this.futureTask.push(this.tasks[j]);
-              await this.expObj.addRecurTask(this.recurring_payment[j], this.recurring_payment[j].date);
+              await this.expObj.addRecurTask(
+                this.recurring_payment[j],
+                this.recurring_payment[j].date
+              );
               await this.updateData(true);
             }
           }
@@ -184,4 +195,3 @@ export default {
   watch: {},
 };
 </script>
- 

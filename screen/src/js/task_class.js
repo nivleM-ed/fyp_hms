@@ -127,7 +127,6 @@ export default class taskClass {
 
   async formatCompleteTask(selectedTask) {
     try {
-
       let {
         yearIndex,
         monthIndex,
@@ -151,7 +150,6 @@ export default class taskClass {
   }
 
   async addObj(string, data) {
-
     try {
       let {
         day,

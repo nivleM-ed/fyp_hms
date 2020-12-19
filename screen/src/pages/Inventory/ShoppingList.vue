@@ -261,7 +261,9 @@
                   <v-card v-show="showItems" flat outlined height="65vh">
                     <v-card-title>
                       <p v-if="shopping_list_items_inner">
-                        {{ utils.toFirstUpperCase(shopping_list_items_inner.name) }}
+                        {{
+                          utils.toFirstUpperCase(shopping_list_items_inner.name)
+                        }}
                       </p>
                     </v-card-title>
                     <v-card-text>
@@ -270,7 +272,10 @@
                       </p>
                       <p v-else>
                         You have added this shopping list to your tasklist.
-                        <span v-if="shopping_list_items_inner.completed"> The task related to this shopping list has been completed.</span>
+                        <span v-if="shopping_list_items_inner.completed">
+                          The task related to this shopping list has been
+                          completed.</span
+                        >
                       </p>
                       <v-btn
                         color="green"
@@ -282,7 +287,7 @@
                         >View Task</v-btn
                       >
                       <v-btn
-                      v-if="!shopping_list_items_inner.completed"
+                        v-if="!shopping_list_items_inner.completed"
                         color="blue"
                         class="ml-2"
                         @click="addShoppingItem2 = true"
@@ -345,12 +350,9 @@
                         <template v-slot:no-data>
                           <span>No Items Added</span><br /><br />
                         </template>
-                        <template v-slot:expanded-item="{ headers, item }" >
+                        <template v-slot:expanded-item="{ headers, item }">
                           <td :colspan="headers.length" class="p-2">
-                            <v-sheet
-                              color="rgba(0, 0, 0, .12)"
-                              class="p-2"
-                            >
+                            <v-sheet color="rgba(0, 0, 0, .12)" class="p-2">
                               <b>Food:</b>
                               {{ utils.toFirstUpperCaseInner(item.name) }}
                               <br />
@@ -457,11 +459,13 @@ export default {
       this.shopping_list == null ? [] : this.shopping_list;
     if (this.shopping_list_items.length > 0) {
       let id = this.$route.query.id == null ? 0 : this.$route.query.id;
-      this.item = this.shopping_list_items.findIndex((x) => x.id == id) == -1 ? 0 : this.shopping_list_items.findIndex((x) => x.id == id);
+      this.item =
+        this.shopping_list_items.findIndex((x) => x.id == id) == -1
+          ? 0
+          : this.shopping_list_items.findIndex((x) => x.id == id);
       this.shopping_list_items_inner = this.shopping_list_items[this.item];
       this.showItems = true;
     }
-    
   },
   computed: {
     formTitle() {
@@ -526,7 +530,7 @@ export default {
       await this.updateShoppingList();
       this.addShoppingItem = false;
       this.item = this.shopping_list_items.length - 1;
-      this.$emit("viewAlert", {type:"add_shopping_list",data:data});
+      this.$emit("viewAlert", { type: "add_shopping_list", data: data });
     },
 
     async addToList() {
@@ -551,13 +555,17 @@ export default {
       this.item = this.item - 1;
       await this.updateShoppingList();
       this.deleteAuth2 = false;
-      this.$emit("viewAlert", {type:"delete_shopping_list",data:this.editedItem});
+      this.$emit("viewAlert", {
+        type: "delete_shopping_list",
+        data: this.editedItem,
+      });
     },
 
     viewTask() {
       let task_id = this.shopping_list_items_inner.task_id;
       let url = "";
-      if(this.shopping_list_items_inner.completed) url = "/main/task_ov?tab=1&task_id=" + task_id;
+      if (this.shopping_list_items_inner.completed)
+        url = "/main/task_ov?tab=1&task_id=" + task_id;
       else url = "/main/task_ov?task_id=" + task_id;
       this.$router.push(url);
     },
@@ -578,8 +586,9 @@ export default {
     },
     shopping_list(val) {
       this.shopping_list_items = val == null ? [] : val;
-      if(val != null) this.shopping_list_items_inner = this.shopping_list_items[this.item];
-      console.log(this.shopping_list_items_inner)
+      if (val != null)
+        this.shopping_list_items_inner = this.shopping_list_items[this.item];
+      console.log(this.shopping_list_items_inner);
     },
   },
 };

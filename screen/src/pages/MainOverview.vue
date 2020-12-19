@@ -224,7 +224,7 @@
               <v-card-actions>
                 <v-spacer></v-spacer>
                 <v-btn
-                v-if="getLow().length > 0"
+                  v-if="getLow().length > 0"
                   depressed
                   color="green"
                   @click="toPage('expense_ov?tab=2')"

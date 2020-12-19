@@ -153,7 +153,7 @@ export default {
   data() {
     return {
       register_dialog: false,
-      rules: [v => !!v || "Required!"],
+      rules: [(v) => !!v || "Required!"],
       logButton: false,
       regButton: false,
       password: "",
@@ -166,25 +166,28 @@ export default {
       lastname: null,
       new_username: null,
       new_password: null,
-      userObj: new userClass()
+      userObj: new userClass(),
     };
   },
-  props:["user"],
+  props: ["user"],
   async created() {
     this.userObj = new userClass();
     this.$emit("checkLogged");
-      this.versionB = await this.userObj.versionB();
+    this.versionB = await this.userObj.versionB();
   },
   methods: {
     async login() {
       this.$refs.loginForm.validate();
       if (this.username && this.password) {
         try {
-          const log = await this.userObj.login(this.username.trim(), this.password);
+          const log = await this.userObj.login(
+            this.username.trim(),
+            this.password
+          );
           if (log.err || log == null) {
             alert(log.err);
           } else {
-            console.log(log)
+            console.log(log);
             this.$emit("update:user", log);
             this.$router.push("/main");
           }
@@ -208,7 +211,7 @@ export default {
 
         try {
           const register = await this.userObj.register();
-          console.log(register)
+          console.log(register);
           if (register.err) {
             alert("Something went wrong. Please try again");
           } else {
@@ -226,13 +229,11 @@ export default {
     closeRegisterDialog() {
       this.$refs.registerForm.reset();
       this.register_dialog = false;
-    }
+    },
   },
   watch: {
-    register_dialog() {
-      
-    }
-  }
+    register_dialog() {},
+  },
 };
 </script>
 <style>

@@ -511,7 +511,7 @@ export default {
     shopping_list(val) {
       this.new_task.description = "Shopping list: " + val.name;
       this.new_task.list_id = val.id;
-    }
+    },
   },
 };
 </script>

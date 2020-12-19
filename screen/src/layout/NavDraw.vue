@@ -56,7 +56,7 @@
 
 <script>
 import userClass from "@/js/users_class.js";
-import utils from "@/js/utils.js"
+import utils from "@/js/utils.js";
 
 export default {
   data() {
@@ -90,7 +90,7 @@ export default {
     },
     async logout() {
       try {
-        let logout = await this. userObj.logout();
+        let logout = await this.userObj.logout();
         if (logout.err) {
           alert(logout.err);
         } else {
@@ -101,13 +101,16 @@ export default {
       }
     },
   },
-  props: ["notifications","user","task_notify"],
+  props: ["notifications", "user", "task_notify"],
   computed: {
     username: function() {
-      return this.user ? utils.toFirstUpperCase(this.user.firstname,false) + " " + utils.toFirstUpperCase(this.user.lastname,false) : 'User';
-    }
+      return this.user
+        ? utils.toFirstUpperCase(this.user.firstname, false) +
+            " " +
+            utils.toFirstUpperCase(this.user.lastname, false)
+        : "User";
+    },
   },
-  watch: {
-  },
+  watch: {},
 };
 </script>

@@ -16,7 +16,7 @@ class syncClass {
         var recurring_payment = {};
         var tasks = {};
         var completed_tasks = {};
-        var futureTask  = {};
+        var futureTask = {};
     }
 
     async runSync() {
@@ -30,21 +30,21 @@ class syncClass {
     }
 
     async setTaskNotifyOuter() { // every 10 minutes or if updated
-        if (this.tasks) { 
-          for (var i = 0; i < this.tasks.length; i++) {
-            if (!utils.checkTime(this.tasks[i].start, 'ago') && utils.checkTime(this.tasks[i].start, 'hour')) {
-              if(this.futureTask.findIndex((x)=> x.id === this.tasks[i].id) < 0 || !this.futureTask) {
-                this.futureTask.push(this.tasks[i]);
-              }
+        if (this.tasks) {
+            for (var i = 0; i < this.tasks.length; i++) {
+                if (!utils.checkTime(this.tasks[i].start, 'ago') && utils.checkTime(this.tasks[i].start, 'hour')) {
+                    if (this.futureTask.findIndex((x) => x.id === this.tasks[i].id) < 0 || !this.futureTask) {
+                        this.futureTask.push(this.tasks[i]);
+                    }
+                }
             }
-          }
         }
-      }
+    }
 
     async setExpNotify() {
         try {
             let expObj = new expClass();
-            
+
             if (this.recurring_payment) {
                 for (var i = 0; i < this.recurring_payment.length; i++) {
                     // console.log(expObj.checkRecurAvailability(this.recurring_payment[i]))

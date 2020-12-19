@@ -1,7 +1,9 @@
 /* eslint-disable no-unused-vars */
 import utils from "@/js/utils.js";
 import axios from "axios";
-import { CONST } from './const';
+import {
+    CONST
+} from './const';
 const moment = require("moment");
 const url = CONST.CONST_URL.concat('/notification/');
 
@@ -27,10 +29,15 @@ export default class notificationClass {
     //methods
     async addNotification(data, type) {
         try {
-            await this.getNotifyDB(); console.log(data)
+            await this.getNotifyDB();
+            console.log(data)
             if (!await this.checkExist(data)) {
                 data.notify_date = new Date();
-                let { yearIndex, monthIndex, dayIndex } = await this.getIndex(data);
+                let {
+                    yearIndex,
+                    monthIndex,
+                    dayIndex
+                } = await this.getIndex(data);
 
                 if (yearIndex < 0) {
                     await this.addObj('year', data);
@@ -45,11 +52,46 @@ export default class notificationClass {
                 let id = await utils.getHashId(`${new Date()}-${JSON.stringify(data)}`);
 
                 if (type === 'task') { //to change to switch case
-                    tmpData = { id: id, notify_type: "task", data_id: data.id, name: data.name, description: data.description, notify_date: data.notify_date, msg: 'You have a task scheduled', start: data.start, end: data.end, seen: false, page: `task_ov/?tid=${data.id}` };
+                    tmpData = {
+                        id: id,
+                        notify_type: "task",
+                        data_id: data.id,
+                        name: data.name,
+                        description: data.description,
+                        notify_date: data.notify_date,
+                        msg: 'You have a task scheduled',
+                        start: data.start,
+                        end: data.end,
+                        seen: false,
+                        page: `task_ov/?tid=${data.id}`
+                    };
                 } else if (type === 'recur_expense') {
-                    tmpData = { id: id, notify_type: "recur_expense", data_id: data.id, name: data.title, description: data.description, notify_date: data.notify_date, msg: 'A recurring payment task has been set', date: data.date, seen: false, page: `task_ov/?tid=${data.id}` };
+                    tmpData = {
+                        id: id,
+                        notify_type: "recur_expense",
+                        data_id: data.id,
+                        name: data.title,
+                        description: data.description,
+                        notify_date: data.notify_date,
+                        msg: 'A recurring payment task has been set',
+                        date: data.date,
+                        seen: false,
+                        page: `task_ov/?tid=${data.id}`
+                    };
                 } else if (type === 'upcoming_task') {
-                    tmpData = { id: id, notify_type: "upcoming_task", data_id: data.id, name: data.title, description: data.description, notify_date: data.notify_date, msg: 'You have a task starting soon...', start: data.start, end: data.end, seen: false, page: `task_ov/?tid=${data.id}` };
+                    tmpData = {
+                        id: id,
+                        notify_type: "upcoming_task",
+                        data_id: data.id,
+                        name: data.title,
+                        description: data.description,
+                        notify_date: data.notify_date,
+                        msg: 'You have a task starting soon...',
+                        start: data.start,
+                        end: data.end,
+                        seen: false,
+                        page: `task_ov/?tid=${data.id}`
+                    };
                 } else {
                     return 'noTypeSet'; // should not happen
                 }
@@ -90,50 +132,47 @@ export default class notificationClass {
 
     async addObj(string, data) {
         try {
-            let { day, month, year } = utils.getSeperateDate(data.notify_date);
-            let { yearIndex, monthIndex, dayIndex, dataIndex } = await this.getIndex(data);
+            let {
+                day,
+                month,
+                year
+            } = utils.getSeperateDate(data.notify_date);
+            let {
+                yearIndex,
+                monthIndex,
+                dayIndex,
+                dataIndex
+            } = await this.getIndex(data);
             if (string === 'year') {
                 if (!this.notification) {
                     this.notification = [];
                 }
-                this.notification.push(
-                    {
-                        year: year,
-                        data: [
-                            {
-                                month: month,
-                                data: [
-                                    {
-                                        day: day,
-                                        date: data.notify_date,
-                                        data: []
-                                    }
-                                ]
-                            }
-                        ],
-                    }
-                );
-            } else if (string === 'month') {
-                this.notification[yearIndex].data.push(
-                    {
+                this.notification.push({
+                    year: year,
+                    data: [{
                         month: month,
-                        data: [
-                            {
-                                day: day,
-                                date: data.notify_date,
-                                data: []
-                            }
-                        ],
-                    }
-                );
-            } else if (string === 'day') {
-                this.notification[yearIndex].data[monthIndex].data.push(
-                    {
+                        data: [{
+                            day: day,
+                            date: data.notify_date,
+                            data: []
+                        }]
+                    }],
+                });
+            } else if (string === 'month') {
+                this.notification[yearIndex].data.push({
+                    month: month,
+                    data: [{
                         day: day,
                         date: data.notify_date,
-                        data: [],
-                    }
-                );
+                        data: []
+                    }],
+                });
+            } else if (string === 'day') {
+                this.notification[yearIndex].data[monthIndex].data.push({
+                    day: day,
+                    date: data.notify_date,
+                    data: [],
+                });
             }
         } catch (err) {
             console.log(err);
@@ -180,12 +219,21 @@ export default class notificationClass {
 
     async getIndex(data) {
         try {
-            let { day, month, year } = utils.getSeperateDate(new Date(data.notify_date));
+            let {
+                day,
+                month,
+                year
+            } = utils.getSeperateDate(new Date(data.notify_date));
             let yearIndex = this.notification == null ? parseInt('-1') : this.notification.findIndex(x => x.year == year);
             let monthIndex = yearIndex < 0 ? parseInt('-1') : this.notification[yearIndex].data.findIndex(x => x.month == month);
             let dayIndex = monthIndex < 0 ? parseInt('-1') : this.notification[yearIndex].data[monthIndex].data.findIndex(x => x.day == day);
             let dataIndex = dayIndex < 0 ? parseInt('-1') : this.notification[yearIndex].data[monthIndex].data[dayIndex].data.findIndex(x => x.id == data.id);
-            return { yearIndex, monthIndex, dayIndex, dataIndex };
+            return {
+                yearIndex,
+                monthIndex,
+                dayIndex,
+                dataIndex
+            };
         } catch (err) {
             console.log(err);
             return err;
@@ -199,7 +247,10 @@ export default class notificationClass {
             });
             this.notification = res.data[0].notification != null ? res.data[0].notification : [];
             await this.getLatestNotification();
-            return { notification: res.data[0].notification, latest_notification: this.latest_notification };
+            return {
+                notification: res.data[0].notification,
+                latest_notification: this.latest_notification
+            };
         } catch (err) {
             console.log(err);
             return err;
