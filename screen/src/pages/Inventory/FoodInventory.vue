@@ -441,13 +441,18 @@ export default {
     },
 
     setTmpItem(item, type) {
-      if (type === "delete") {
-        this.foodTmp = item;
-        this.deleteAuth = true;
-      } else if (type === "list") {
-        this.shoppingListTmp = item;
-        this.addList = true;
-        this.shoppingListTmp.add_quantity = 0;
+      try {
+        if (type === "delete") {
+          this.foodTmp = item;
+          this.deleteAuth = true;
+        } else if (type === "list") {
+          this.shoppingListTmp = item;
+          this.addList = true;
+          this.shoppingListTmp.add_quantity = 0;
+        }
+      } catch (err) {
+        console.log(err);
+        this.$emit("errorAlert", err);
       }
     },
 
@@ -462,23 +467,28 @@ export default {
     },
 
     addToList(data) {
-      if (!data) {
-        let tmp = JSON.parse(JSON.stringify(this.shoppingListTmp));
-        this.$emit("addToList", {
-          list_id: this.sListChoose,
-          data: tmp,
-          array: false,
-        });
-        this.addList = false;
-        this.chooseShoppingList = false;
-      } else {
-        this.$emit("addToList", {
-          list_id: data.list_id,
-          data: data.data.data,
-          array: data.data.array,
-        });
+      try {
+        if (!data) {
+          let tmp = JSON.parse(JSON.stringify(this.shoppingListTmp));
+          this.$emit("addToList", {
+            list_id: this.sListChoose,
+            data: tmp,
+            array: false,
+          });
+          this.addList = false;
+          this.chooseShoppingList = false;
+        } else {
+          this.$emit("addToList", {
+            list_id: data.list_id,
+            data: data.data.data,
+            array: data.data.array,
+          });
+        }
+        this.sListChoose = null;
+      } catch (err) {
+        console.log(err);
+        this.$emit("errorAlert", err);
       }
-      this.sListChoose = null;
     },
 
     updateLowSetting(data) {
@@ -486,45 +496,62 @@ export default {
     },
 
     checkExistInList(data) {
-      for (let i in this.shopping_list) {
-        if (this.shopping_list[i].data.findIndex((x) => x.id === data.id) >= 0)
-          return true;
-        return false;
+      try {
+        for (let i in this.shopping_list) {
+          if (
+            this.shopping_list[i].data.findIndex((x) => x.id === data.id) >= 0
+          )
+            return true;
+          return false;
+        }
+      } catch (err) {
+        console.log(err);
+        this.$emit("errorAlert", err);
       }
     },
 
     close() {
-      this.$refs.add_form.reset();
-      this.dialog = false;
-      this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
-        this.editedIndex = -1;
-      });
+      try {
+        this.$refs.add_form.reset();
+        this.dialog = false;
+        this.$nextTick(() => {
+          this.editedItem = Object.assign({}, this.defaultItem);
+          this.editedIndex = -1;
+        });
+      } catch (err) {
+        console.log(err);
+        this.$emit("errorAlert", err);
+      }
     },
 
     async saveFood() {
-      this.$refs.add_form.validate();
-      let editedItem = JSON.parse(JSON.stringify(this.editedItem));
-      if (
-        editedItem.name &&
-        editedItem.description &&
-        Number.isInteger(+editedItem.quantity) &&
-        editedItem.category
-      ) {
-        if (this.editedIndex > -1) {
-          this.editedItem.date_editted = new Date();
-          Object.assign(this.food_items[this.editedIndex], editedItem);
-          this.$emit("viewAlert", { type: "update_food", data: editedItem });
-        } else {
-          editedItem.id = await utils.getHashId(
-            `${Date.now()}-${JSON.stringify(editedItem)}`
-          );
-          editedItem.date_created = new Date();
-          this.food_items.push(editedItem);
-          this.$emit("viewAlert", { type: "add_food", data: editedItem });
+      try {
+        this.$refs.add_form.validate();
+        let editedItem = JSON.parse(JSON.stringify(this.editedItem));
+        if (
+          editedItem.name &&
+          editedItem.description &&
+          Number.isInteger(+editedItem.quantity) &&
+          editedItem.category
+        ) {
+          if (this.editedIndex > -1) {
+            this.editedItem.date_editted = new Date();
+            Object.assign(this.food_items[this.editedIndex], editedItem);
+            this.$emit("viewAlert", { type: "update_food", data: editedItem });
+          } else {
+            editedItem.id = await utils.getHashId(
+              `${Date.now()}-${JSON.stringify(editedItem)}`
+            );
+            editedItem.date_created = new Date();
+            this.food_items.push(editedItem);
+            this.$emit("viewAlert", { type: "add_food", data: editedItem });
+          }
+          this.updateFood();
+          this.close();
         }
-        this.updateFood();
-        this.close();
+      } catch (err) {
+        console.log(err);
+        this.$emit("errorAlert", err);
       }
     },
 
@@ -549,8 +576,13 @@ export default {
     },
 
     setTitles() {
-      for (var item of this.food_items) {
-        this.food_titles.push(item.name);
+      try {
+        for (var item of this.food_items) {
+          this.food_titles.push(item.name);
+        }
+      } catch (err) {
+        console.log(err);
+        this.$emit("errorAlert", err);
       }
     },
 
@@ -578,34 +610,44 @@ export default {
         this.item = 0;
       } catch (err) {
         console.log(err);
+        this.$emit("errorAlert", err);
       }
     },
     getColor(x) {
-      if (x.category === "Grams(g)") {
-        if (parseInt(x.quantity) <= parseInt(this.low_food_setting.low_g))
-          return "red";
-      } else if (x.category === "Kilograms(kg)") {
-        if (parseInt(x.quantity) <= parseInt(this.low_food_setting.low_kg))
-          return "red";
-      } else if (x.category === "Packets") {
-        if (parseInt(x.quantity) <= parseInt(this.low_food_setting.low_packet))
-          return "red";
-      } else if (x.category === "Bottles") {
-        if (parseInt(x.quantity) <= parseInt(this.low_food_setting.low_bottle))
-          return "red";
-      } else if (x.category === "Boxes") {
-        if (parseInt(x.quantity) <= parseInt(this.low_food_setting.low_box))
-          return "red";
-      } else if (x.category === "Millilitres(ml)") {
-        if (parseInt(x.quantity) <= parseInt(this.low_food_setting.low_ml))
-          return "red";
-      } else if (x.category === "Litres(l)") {
-        if (parseInt(x.quantity) <= parseInt(this.low_food_setting.low_l))
-          return "red";
-      } else {
-        console.log("error: getLow (this shouldn't happen)");
+      try {
+        if (x.category === "Grams(g)") {
+          if (parseInt(x.quantity) <= parseInt(this.low_food_setting.low_g))
+            return "red";
+        } else if (x.category === "Kilograms(kg)") {
+          if (parseInt(x.quantity) <= parseInt(this.low_food_setting.low_kg))
+            return "red";
+        } else if (x.category === "Packets") {
+          if (
+            parseInt(x.quantity) <= parseInt(this.low_food_setting.low_packet)
+          )
+            return "red";
+        } else if (x.category === "Bottles") {
+          if (
+            parseInt(x.quantity) <= parseInt(this.low_food_setting.low_bottle)
+          )
+            return "red";
+        } else if (x.category === "Boxes") {
+          if (parseInt(x.quantity) <= parseInt(this.low_food_setting.low_box))
+            return "red";
+        } else if (x.category === "Millilitres(ml)") {
+          if (parseInt(x.quantity) <= parseInt(this.low_food_setting.low_ml))
+            return "red";
+        } else if (x.category === "Litres(l)") {
+          if (parseInt(x.quantity) <= parseInt(this.low_food_setting.low_l))
+            return "red";
+        } else {
+          console.log("error: getLow (this shouldn't happen)");
+        }
+        return "green";
+      } catch (err) {
+        console.log(err);
+        this.$emit("errorAlert", err);
       }
-      return "green";
     },
   },
   watch: {

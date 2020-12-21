@@ -6,12 +6,13 @@
       </v-card-title>
 
       <v-card-text>
+        <p class="mt-4 subtitle-1"><b>Error: Network Error</b></p>
         <p class="mt-4 subtitle-1">{{ error }}</p>
       </v-card-text>
 
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="primary" text @click="visible = false">
+        <v-btn color="primary" text @click="goTo()">
           Close
         </v-btn>
       </v-card-actions>
@@ -28,7 +29,12 @@ export default {
   },
   props: ["error"],
   async created() {},
-  methods: {},
+  methods: {
+    goTo() {
+      this.$router.push("/login");
+      this.visible = false
+    }
+  },
   watch: {
     error(val) {
       console.log(val);

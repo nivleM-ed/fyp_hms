@@ -16,10 +16,12 @@
           :low_food_setting="low_food_setting"
           :all_categories="all_categories"
           :shopping_list_titles="shopping_list_titles"
+          v-on:updateShoppingList="updateShoppingList"
           v-on:updateFood="updateFood"
           v-on:addToList="addToList"
           v-on:updateLowSetting="updateLowSetting"
           v-on:viewAlert="viewAlert"
+          v-on:errorAlert="errorAlert"
         />
       </v-tab-item>
 
@@ -31,6 +33,7 @@
           v-on:updateShoppingList="updateShoppingList"
           v-on:addToTask="addToTask"
           v-on:viewAlert="viewAlert"
+          v-on:errorAlert="errorAlert"
         />
       </v-tab-item>
 
@@ -92,50 +95,89 @@ export default {
   },
   methods: {
     async updateData() {
-      await this.invObj.getInvDB();
-      this.food = this.invObj._food;
-      this.shopping_list = this.invObj._shopping_list;
-      this.shopping_list_titles = await this.getShoppingListTitles(
-        this.invObj._shopping_list
-      );
-      this.low_food_setting = this.invObj._low_food_setting;
-      this.all_categories = this.invObj._all_categories;
+      try {
+        await this.invObj.getInvDB();
+        this.food = this.invObj._food;
+        this.shopping_list = this.invObj._shopping_list;
+        this.shopping_list_titles = await this.getShoppingListTitles(
+          this.invObj._shopping_list
+        );
+        this.low_food_setting = this.invObj._low_food_setting;
+        this.all_categories = this.invObj._all_categories;
+      } catch (err) {
+        console.log(err);
+        this.$emit("errorAlert", err);
+      }
     },
 
     async updateFood(data) {
-      await this.invObj.updateFood(data);
-      await this.updateData();
+      try {
+        await this.invObj.updateFood(data);
+        await this.updateData();
+      } catch (err) {
+        console.log(err);
+        this.$emit("errorAlert", err);
+      }
     },
 
     async updateLowSetting(data) {
-      await this.invObj.updateLowSetting(data);
-      await this.updateData();
+      try {
+        await this.invObj.updateLowSetting(data);
+        await this.updateData();
+      } catch (err) {
+        console.log(err);
+        this.$emit("errorAlert", err);
+      }
     },
 
     async updateShoppingList(data) {
-      await this.invObj.updateShoppingList(data);
-      await this.updateData();
+      try {
+        await this.invObj.updateShoppingList(data);
+        await this.updateData();
+      } catch (err) {
+        console.log(err);
+        this.$emit("errorAlert", err);
+      }
     },
 
     async getShoppingListTitles(data) {
-      let tmp = [];
-      for (let item in data) {
-        if (!data[item].completed)
-          tmp.push({ text: data[item].name, value: data[item].id });
+      try {
+        let tmp = [];
+        for (let item in data) {
+          if (!data[item].completed)
+            tmp.push({ text: data[item].name, value: data[item].id });
+        }
+        return tmp;
+      } catch (err) {
+        console.log(err);
+        this.$emit("errorAlert", err);
       }
-      return tmp;
     },
 
     async addToList(data) {
-      await this.invObj.addShoppingList(data.list_id, data.data, data.array);
-      await this.updateData();
-      this.$emit("viewAlert", { type: "food_add_to_list", data: data });
+      try {
+        await this.invObj.addShoppingList(data.list_id, data.data, data.array);
+        await this.updateData();
+        this.$emit("viewAlert", { type: "food_add_to_list", data: data });
+      } catch (err) {
+        console.log(err);
+        this.$emit("errorAlert", err);
+      }
     },
 
     async addToTask(data) {
-      await this.invObj.addShoppingTask(data);
-      await this.updateData();
-      this.$emit("viewAlert", { type: "shopping_add_to_task", data: data });
+      try {
+        await this.invObj.addShoppingTask(data);
+        await this.updateData();
+        this.$emit("viewAlert", { type: "shopping_add_to_task", data: data });
+      } catch (err) {
+        console.log(err);
+        this.$emit("errorAlert", err);
+      }
+    },
+
+    async errorAlert(err) {
+      this.$emit("errorAlert", err);
     },
 
     async viewAlert(data) {

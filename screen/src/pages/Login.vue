@@ -177,24 +177,24 @@ export default {
   },
   methods: {
     async login() {
-      this.$refs.loginForm.validate();
-      if (this.username && this.password) {
-        try {
-          const log = await this.userObj.login(
-            this.username.trim(),
-            this.password
-          );
-          if (log.err || log == null) {
-            alert(log.err);
-          } else {
-            console.log(log);
-            this.$emit("update:user", log);
-            this.$router.push("/main");
+        this.$refs.loginForm.validate();
+        if (this.username && this.password) {
+          try {
+            const log = await this.userObj.login(
+              this.username.trim(),
+              this.password
+            );
+            if (log.err || log == null ) {
+              alert(log.err);
+            } else {
+              this.$emit("update:user", log);
+              this.$router.push("/main");
+            }
+          } catch (err) {
+            this.error = err.message;
+            alert(err)
           }
-        } catch (err) {
-          this.error = err.message;
         }
-      }
     },
     async register() {
       this.$refs.registerForm.validate();

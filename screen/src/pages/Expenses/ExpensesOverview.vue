@@ -13,6 +13,7 @@
         <ExpenseStatistics
           :expenses="expenses"
           :recurring_payment="recurring_payment"
+          v-on:errorAlert="errorAlert"
         />
       </v-tab-item>
 
@@ -24,6 +25,7 @@
           v-on:addNewExpense="addNewExpense"
           v-on:updateExpenses="updateExpenses"
           v-on:deleteExp="deleteExp"
+          v-on:errorAlert="errorAlert"
         />
       </v-tab-item>
 
@@ -32,6 +34,7 @@
           :logged="logged"
           :recurring_payment="recurring_payment"
           v-on:update="updateData"
+          v-on:errorAlert="errorAlert"
         />
       </v-tab-item>
     </v-tabs>
@@ -134,6 +137,9 @@ export default {
         console.log(err);
         alert(err);
       }
+    },
+    async errorAlert(err) {
+      this.$emit("errorAlert", err);
     },
   },
   watch: {

@@ -22,9 +22,9 @@ exports.login = function (req, res, next) {
         session: true
     }, function (err, user, info) {
         if (err) {
-            res.send(err);
+            res.status(500).send(err);
         } else if (!user) {
-            res.send(info);
+            res.status(500).send(info);
         } else {
             req.logIn(user, function (err) {
                 res.send(user);

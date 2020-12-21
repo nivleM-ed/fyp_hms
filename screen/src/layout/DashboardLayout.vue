@@ -96,18 +96,23 @@ export default {
     },
     async updateData(type) {
       console.log("MAIN UPDATED");
-      let notify_res = await this.notifyObj.getNotifyDB();
-      let task_res = await this.taskObj.getTaskDB();
-      let exp_res = await this.expObj.getExpDB();
+      try {
+        let notify_res = await this.notifyObj.getNotifyDB();
+        let task_res = await this.taskObj.getTaskDB();
+        let exp_res = await this.expObj.getExpDB();
 
-      this.notification = notify_res.notification;
-      this.latest_notification = notify_res.latest_notification;
+        this.notification = notify_res.notification;
+        this.latest_notification = notify_res.latest_notification;
 
-      this.expenses = exp_res.expenses;
-      this.recurring_payment = exp_res.recurring_payment;
-      this.tasks = task_res[0].tasks == null ? [] : task_res[0].tasks;
-      this.completed_tasks = task_res[0].completed_tasks;
-      if (!type) this.setNotifyOuter();
+        this.expenses = exp_res.expenses;
+        this.recurring_payment = exp_res.recurring_payment;
+        this.tasks = task_res[0].tasks == null ? [] : task_res[0].tasks;
+        this.completed_tasks = task_res[0].completed_tasks;
+        if (!type) this.setNotifyOuter();
+      } catch (err) {
+        console.log(err);
+        this.errorAlert(err);
+      }
     },
     backgroundProcess() {
       setInterval(() => {
@@ -182,14 +187,22 @@ export default {
           }
         }
       } catch (err) {
+        this.errorAlert(err);
         console.log(err);
       }
     },
     setNotifyAcknowledge() {
-      this.notifications_snackbar = false;
-      let index = this.futureTask.findIndex((x) => x.id === this.notifyTask.id);
-      this.futureTask.splice(index, 1);
-      this.notifyTask = null;
+      try {
+        this.notifications_snackbar = false;
+        let index = this.futureTask.findIndex(
+          (x) => x.id === this.notifyTask.id
+        );
+        this.futureTask.splice(index, 1);
+        this.notifyTask = null;
+      } catch (err) {
+        console.log(err);
+        this.errorAlert(err);
+      }
     },
   },
   watch: {},

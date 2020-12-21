@@ -455,16 +455,21 @@ export default {
   },
   props: ["food", "shopping_list", "all_categories"],
   async created() {
-    this.shopping_list_items =
-      this.shopping_list == null ? [] : this.shopping_list;
-    if (this.shopping_list_items.length > 0) {
-      let id = this.$route.query.id == null ? 0 : this.$route.query.id;
-      this.item =
-        this.shopping_list_items.findIndex((x) => x.id == id) == -1
-          ? 0
-          : this.shopping_list_items.findIndex((x) => x.id == id);
-      this.shopping_list_items_inner = this.shopping_list_items[this.item];
-      this.showItems = true;
+    try {
+      this.shopping_list_items =
+        this.shopping_list == null ? [] : this.shopping_list;
+      if (this.shopping_list_items.length > 0) {
+        let id = this.$route.query.id == null ? 0 : this.$route.query.id;
+        this.item =
+          this.shopping_list_items.findIndex((x) => x.id == id) == -1
+            ? 0
+            : this.shopping_list_items.findIndex((x) => x.id == id);
+        this.shopping_list_items_inner = this.shopping_list_items[this.item];
+        this.showItems = true;
+      }
+    } catch (err) {
+      console.log(err);
+      this.$emit("errorAlert", err);
     }
   },
   computed: {
@@ -474,41 +479,56 @@ export default {
   },
   methods: {
     setTmpItem(item, type) {
-      if (type === "delete") {
-        this.foodTmp = item;
-        this.deleteAuth = true;
-      } else if (type === "list") {
-        this.shoppingListTmp = item;
-        this.addList = true;
-        this.shoppingListTmp.add_quantity = 0;
+      try {
+        if (type === "delete") {
+          this.foodTmp = item;
+          this.deleteAuth = true;
+        } else if (type === "list") {
+          this.shoppingListTmp = item;
+          this.addList = true;
+          this.shoppingListTmp.add_quantity = 0;
+        }
+      } catch (err) {
+        console.log(err);
+        this.$emit("errorAlert", err);
       }
     },
 
     async save() {
-      let editedItem = JSON.parse(JSON.stringify(this.editedItem));
-      if (this.editedIndex > -1) {
-        this.editedItem.date_editted = new Date();
-        Object.assign(
-          this.shopping_list_items[this.item].data[this.editedIndex],
-          editedItem
-        );
+      try {
+        let editedItem = JSON.parse(JSON.stringify(this.editedItem));
+        if (this.editedIndex > -1) {
+          this.editedItem.date_editted = new Date();
+          Object.assign(
+            this.shopping_list_items[this.item].data[this.editedIndex],
+            editedItem
+          );
+        }
+        await this.updateShoppingList();
+        this.editQuant = false;
+        this.$nextTick(() => {
+          this.editedItem = Object.assign({}, this.defaultItem);
+          this.editedIndex = -1;
+        });
+      } catch (err) {
+        console.log(err);
+        this.$emit("errorAlert", err);
       }
-      await this.updateShoppingList();
-      this.editQuant = false;
-      this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
-        this.editedIndex = -1;
-      });
     },
 
     async deleteShoppingItem() {
-      this.deleteAuth = false;
-      const index = this.shopping_list_items[this.item].data.findIndex(
-        (x) => x.id === this.foodTmp.id
-      );
-      this.shopping_list_items[this.item].data.splice(index, 1);
-      this.foodTmp = null;
-      await this.updateShoppingList();
+      try {
+        this.deleteAuth = false;
+        const index = this.shopping_list_items[this.item].data.findIndex(
+          (x) => x.id === this.foodTmp.id
+        );
+        this.shopping_list_items[this.item].data.splice(index, 1);
+        this.foodTmp = null;
+        await this.updateShoppingList();
+      } catch (err) {
+        console.log(err);
+        this.$emit("errorAlert", err);
+      }
     },
 
     async updateShoppingList() {
@@ -516,34 +536,49 @@ export default {
     },
 
     async editShopListItem(item) {
-      this.editedIndex = this.shopping_list_items[this.item].data.findIndex(
-        (x) => x.id === item.id
-      );
-      this.editedItem = Object.assign({}, item);
-      this.editQuant = true;
-      // await this.updateShoppingList();
+      try {
+        this.editedIndex = this.shopping_list_items[this.item].data.findIndex(
+          (x) => x.id === item.id
+        );
+        this.editedItem = Object.assign({}, item);
+        this.editQuant = true;
+        // await this.updateShoppingList();
+      } catch (err) {
+        console.log(err);
+        this.$emit("errorAlert", err);
+      }
     },
 
     async newShoppingList(data) {
-      let id = await utils.getHashId(`${Date.now()}-${JSON.stringify(data)}`);
-      this.shopping_list_items.push({ id: id, name: data, data: [] });
-      await this.updateShoppingList();
-      this.addShoppingItem = false;
-      this.item = this.shopping_list_items.length - 1;
-      this.$emit("viewAlert", { type: "add_shopping_list", data: data });
+      try {
+        let id = await utils.getHashId(`${Date.now()}-${JSON.stringify(data)}`);
+        this.shopping_list_items.push({ id: id, name: data, data: [] });
+        await this.updateShoppingList();
+        this.addShoppingItem = false;
+        this.item = this.shopping_list_items.length - 1;
+        this.$emit("viewAlert", { type: "add_shopping_list", data: data });
+      } catch (err) {
+        console.log(err);
+        this.$emit("errorAlert", err);
+      }
     },
 
     async addToList() {
-      let editedItem = JSON.parse(JSON.stringify(this.editedItem));
-      let id = await utils.getHashId(
-        `${Date.now()}-${JSON.stringify(editedItem)}`
-      );
-      editedItem.id = id;
-      this.shopping_list_items[this.item].data.push(editedItem);
+      try {
+        let editedItem = JSON.parse(JSON.stringify(this.editedItem));
+        let id = await utils.getHashId(
+          `${Date.now()}-${JSON.stringify(editedItem)}`
+        );
+        editedItem.id = id;
+        this.shopping_list_items[this.item].data.push(editedItem);
 
-      await this.updateShoppingList();
-      this.addShoppingItem2 = false;
-      this.editedItem = Object.assign({}, this.defaultItem);
+        await this.updateShoppingList();
+        this.addShoppingItem2 = false;
+        this.editedItem = Object.assign({}, this.defaultItem);
+      } catch (err) {
+        console.log(err);
+        this.$emit("errorAlert", err);
+      }
     },
 
     addToTask(data) {
@@ -551,23 +586,33 @@ export default {
     },
 
     async deleteList() {
-      this.shopping_list_items.splice(this.item, 1);
-      this.item = this.item - 1;
-      await this.updateShoppingList();
-      this.deleteAuth2 = false;
-      this.$emit("viewAlert", {
-        type: "delete_shopping_list",
-        data: this.editedItem,
-      });
+      try {
+        this.shopping_list_items.splice(this.item, 1);
+        this.item = this.item - 1;
+        await this.updateShoppingList();
+        this.deleteAuth2 = false;
+        this.$emit("viewAlert", {
+          type: "delete_shopping_list",
+          data: this.editedItem,
+        });
+      } catch (err) {
+        console.log(err);
+        this.$emit("errorAlert", err);
+      }
     },
 
     viewTask() {
-      let task_id = this.shopping_list_items_inner.task_id;
-      let url = "";
-      if (this.shopping_list_items_inner.completed)
-        url = "/main/task_ov?tab=1&task_id=" + task_id;
-      else url = "/main/task_ov?task_id=" + task_id;
-      this.$router.push(url);
+      try {
+        let task_id = this.shopping_list_items_inner.task_id;
+        let url = "";
+        if (this.shopping_list_items_inner.completed)
+          url = "/main/task_ov?tab=1&task_id=" + task_id;
+        else url = "/main/task_ov?task_id=" + task_id;
+        this.$router.push(url);
+      } catch (err) {
+        console.log(err);
+        this.$emit("errorAlert", err);
+      }
     },
   },
   watch: {

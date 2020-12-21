@@ -8,13 +8,8 @@ import DashboardLayout from '../layout/DashboardLayout.vue'
 import Login from '@/pages/Login.vue'
 import MainOverview from '@/pages/MainOverview.vue'
 
-import DataEntryRecipe from '@/pages/Recipe/DataEntryRecipe.vue'
-import SearchRecipe from '@/pages/Recipe/SearchRecipe.vue'
-import ViewRecipe from '@/pages/Recipe/ViewRecipe.vue'
-
 import InventoryOverview from '@/pages/Inventory/InventoryOverview.vue'
 import FoodInventory from '@/pages/Inventory/FoodInventory.vue'
-import HomeAssets from '@/pages/Inventory/HomeAssets.vue'
 
 import TaskOverview from '@/pages/Task/TaskOverview.vue'
 
@@ -40,22 +35,6 @@ const routes = [
         name: 'Overview',
         component: MainOverview
       },
-      //Recipe
-      {
-        path: 'dataentry_recipe',
-        name: 'dataEntryRecipe',
-        component: DataEntryRecipe
-      },
-      {
-        path: 'search_recipe',
-        name: 'SearchRecipe',
-        component: SearchRecipe
-      },
-      {
-        path: 'view_recipe',
-        name: 'ViewRecipe',
-        component: ViewRecipe
-      },
       //Inventory
       {
         path: 'inv_ov',
@@ -66,11 +45,6 @@ const routes = [
         path: 'inv_food',
         name: 'FoodInventory',
         component: FoodInventory
-      },
-      {
-        path: 'inv_assets',
-        name: 'HomeAssets',
-        component: HomeAssets
       },
       //Task
       {

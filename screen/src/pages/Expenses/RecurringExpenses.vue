@@ -418,70 +418,64 @@ export default {
         { text: "November", value: 11 },
         { text: "December", value: 12 },
       ],
-
-      chartDataSpent: [],
-      chartDataReceived: [],
-      chartOptionsSpent: {
-        title: "Amount Spent",
-        legend: { position: "bottom" },
-        height: utils.toPX(60, "vh"),
-        width: utils.toPX(25, "vw"),
-      },
-      chartOptionsReceived: {
-        title: "Amount Received",
-        legend: { position: "bottom" },
-        height: utils.toPX(60, "vh"),
-        width: utils.toPX(25, "vw"),
-      },
     };
   },
   props: ["recurring_payment"],
   async created() {
     // this.$emit("checkLogged");
-
-    let id = this.$route.query.id == null ? 0 : this.$route.query.id;
-    this.rec_payment = this.recurring_payment;
-    if (this.recurring_payment != null) {
-      this.item =
-        this.recurring_payment.findIndex((x) => x.id == id) == -1
-          ? 0
-          : this.recurring_payment.findIndex((x) => x.id == id);
-      this.setDetails(false, this.item);
-      this.expDetailsShow = true;
+    try {
+      let id = this.$route.query.id == null ? 0 : this.$route.query.id;
+      this.rec_payment = this.recurring_payment;
+      if (this.recurring_payment != null) {
+        this.item =
+          this.recurring_payment.findIndex((x) => x.id == id) == -1
+            ? 0
+            : this.recurring_payment.findIndex((x) => x.id == id);
+        this.setDetails(false, this.item);
+        this.expDetailsShow = true;
+      }
+    } catch (err) {
+      console.log(err);
+      this.$emit("errorAlert", err);
     }
   },
   methods: {
     async validate() {
-      this.$refs.add_form.validate();
-      let new_recur = JSON.parse(JSON.stringify(this.new_rec_payment));
-      if (new_recur.title && new_recur.description && new_recur.amount) {
-        if (!this.isUpdate) {
-          try {
-            await this.expObj.addNewRecur(new_recur);
-            await this.$emit("update", 1);
-          } catch (err) {
-            alert(err);
-          }
-        } else {
-          try {
-            const tmp = await this.expObj.updateRecur(
-              this.selectedExp,
-              new_recur
-            );
-            if (tmp.err) {
-              alert(tmp.err);
-            } else {
+      try {
+        this.$refs.add_form.validate();
+        let new_recur = JSON.parse(JSON.stringify(this.new_rec_payment));
+        if (new_recur.title && new_recur.description && new_recur.amount) {
+          if (!this.isUpdate) {
+            try {
+              await this.expObj.addNewRecur(new_recur);
               await this.$emit("update", 1);
-              this.selectedExp = tmp;
+            } catch (err) {
+              alert(err);
             }
-          } catch (err) {
-            alert(err);
+          } else {
+            try {
+              const tmp = await this.expObj.updateRecur(
+                this.selectedExp,
+                new_recur
+              );
+              if (tmp.err) {
+                alert(tmp.err);
+              } else {
+                await this.$emit("update", 1);
+                this.selectedExp = tmp;
+              }
+            } catch (err) {
+              alert(err);
+            }
           }
+          this.$emit("update");
+          setTimeout(() => {
+            this.addUpdateMenu = false;
+          }, 100);
         }
-        this.$emit("update");
-        setTimeout(() => {
-          this.addUpdateMenu = false;
-        }, 100);
+      } catch (err) {
+        console.log(err);
+        this.$emit("errorAlert", err);
       }
     },
     async deleteExp(selectedExp) {
@@ -494,7 +488,8 @@ export default {
           this.selectedExp = null;
         }
       } catch (err) {
-        alert(err);
+        console.log(err);
+        this.$emit("errorAlert", err);
       }
       this.deleteAuth = false;
     },
@@ -506,13 +501,18 @@ export default {
       }
     },
     updateButton() {
-      this.addUpdateMenu = true;
-      this.isUpdate = true;
-      this.new_rec_payment = JSON.parse(JSON.stringify(this.selectedExp));
-      this.new_rec_payment.category = utils.toFirstUpperCase(
-        this.new_rec_payment.category,
-        false
-      );
+      try {
+        this.addUpdateMenu = true;
+        this.isUpdate = true;
+        this.new_rec_payment = JSON.parse(JSON.stringify(this.selectedExp));
+        this.new_rec_payment.category = utils.toFirstUpperCase(
+          this.new_rec_payment.category,
+          false
+        );
+      } catch (err) {
+        console.log(err);
+        this.$emit("errorAlert", err);
+      }
     },
   },
   watch: {

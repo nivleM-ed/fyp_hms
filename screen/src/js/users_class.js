@@ -52,7 +52,7 @@ export default class userClass {
       });
       return res.data;
     } catch (err) {
-      return err;
+      return {err:err};
     }
   }
 

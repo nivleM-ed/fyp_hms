@@ -99,13 +99,18 @@ export default class inventoryClass {
     }
 
     async topUpFood(data) {
-        console.log(data)
-        for (let item in data) {
-            let itemNo = this.food.findIndex((x) => x.id == data[item].id);
-            if (itemNo > -1) {
-                this.food[itemNo].quantity = parseInt(this.food[itemNo].quantity) + parseInt(data[item].shoplist_quantity);
-            }
+        try {
 
+            for (let item in data) {
+                let itemNo = this.food.findIndex((x) => x.id == data[item].id);
+                if (itemNo > -1) {
+                    this.food[itemNo].quantity = parseInt(this.food[itemNo].quantity) + parseInt(data[item].shoplist_quantity);
+                }
+
+            }
+        } catch (err) {
+            console.log(err);
+            return err;
         }
     }
 

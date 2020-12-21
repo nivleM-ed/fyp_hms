@@ -16,13 +16,13 @@
               </v-card-title>
               <v-card-text>
                 <v-sheet color="rgba(0, 0, 0, .12)" min-height="100px">
-                  <div v-if="upcoming_task != null">
+                  <div v-if="upcoming_tasks.length > 0">
                     <div
                       v-for="item in upcoming_tasks"
                       :key="item.id"
                       class="p-2"
                     >
-                      - {{ item.name }} - {{ new Date(item.start) }}
+                      - <b>{{ item.name }}</b> ({{ utils.momentFormatDate(true,new Date(item.start)) }})
                     </div>
                   </div>
                   <div class="text-center" v-else>
@@ -38,7 +38,7 @@
               <v-card-actions>
                 <v-spacer></v-spacer>
                 <v-btn
-                  v-if="upcoming_task != null"
+                  v-if="upcoming_tasks.length > 0"
                   depressed
                   color="green"
                   @click="toPage('task_ov')"
@@ -379,6 +379,7 @@ export default {
           this.upcoming_tasks.push(this.tasks[i]);
         }
       }
+      console.log(this.upcoming_tasks)
     },
 
     async updateData() {

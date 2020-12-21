@@ -255,6 +255,7 @@ export default {
         }
       } catch (err) {
         console.log(err);
+        this.$emit("errorAlert", err);
       }
     },
     setToday() {
@@ -276,22 +277,26 @@ export default {
       this.selectedExpInner = null;
     },
     async getDailyExp() {
-      let date = new Date(this.date_pick);
-      let daily = await new expenseClass().getDailyExp(date);
-      if (daily == "noData") {
-        this.now_expense = [];
-        this.chartDataSpent = null;
-        this.chartDataReceived = null;
-        this.daily_total_spent = 0;
-        this.daily_total_received = 0;
-      } else {
-        this.now_expense = daily.expense;
-        this.chartDataSpent = daily.spent;
-        this.chartDataReceived = daily.received;
-        this.daily_total_spent = daily.total_spent;
-        this.daily_total_received = daily.total_received;
+      try {
+        let date = new Date(this.date_pick);
+        let daily = await new expenseClass().getDailyExp(date);
+        if (daily == "noData") {
+          this.now_expense = [];
+          this.chartDataSpent = null;
+          this.chartDataReceived = null;
+          this.daily_total_spent = 0;
+          this.daily_total_received = 0;
+        } else {
+          this.now_expense = daily.expense;
+          this.chartDataSpent = daily.spent;
+          this.chartDataReceived = daily.received;
+          this.daily_total_spent = daily.total_spent;
+          this.daily_total_received = daily.total_received;
+        }
+      } catch (err) {
+        console.log(err);
+        this.$emit("errorAlert", err);
       }
-      console.log(daily);
     },
     setDetails(created, id) {
       if (created) {
@@ -301,11 +306,14 @@ export default {
       }
     },
     async setToExp(data) {
-      console.log(this.now_expense); //now_expense not updated first
-      console.log(data);
-      this.date_pick = data.date;
-      let index = this.now_expense.data.findIndex((x) => x.id == data.id);
-      this.item = index;
+      try {
+        this.date_pick = data.date;
+        let index = this.now_expense.data.findIndex((x) => x.id == data.id);
+        this.item = index;
+      } catch (err) {
+        console.log(err);
+        this.$emit("errorAlert", err);
+      }
     },
   },
   watch: {
