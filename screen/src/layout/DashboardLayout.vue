@@ -222,5 +222,8 @@ export default {
     },
   },
   watch: {},
+  destroyed() {
+    clearInterval(this.intervalSet)
+  }
 };
 </script>
