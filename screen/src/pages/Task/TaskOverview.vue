@@ -14,6 +14,7 @@
           Tasks
         </v-badge></v-tab
       >
+      <v-tab key="recur_task">Recurring Task</v-tab>
       <v-tab key="completed_task">Completed tasks</v-tab>
       <v-tab key="task_calendar">Calendar</v-tab>
 
@@ -30,6 +31,14 @@
           v-on:completeTask="completeTask"
           v-on:addTask="addTask"
           v-on:updateTask="updateTask"
+        />
+      </v-tab-item>
+
+      <v-tab-item key="recur_task">
+        <RecurringTask
+        :recurring_task="recurring_task"
+        v-on:update="updateData"
+          v-on:errorAlert="errorAlert"
         />
       </v-tab-item>
 
@@ -68,10 +77,11 @@ import taskClass from "@/js/task_class.js";
 
 import TaskCalendar from "@/pages/Task/TaskCalendar";
 import TaskView from "@/pages/Task/TaskView";
+import RecurringTask from "@/pages/Task/RecurringTask"
 import CompletedTask from "@/pages/Task/CompletedTask";
 
 export default {
-  components: { TaskCalendar, TaskView, CompletedTask},
+  components: { TaskCalendar, TaskView, CompletedTask, RecurringTask},
   data() {
     return {
       tab_open: 0,
@@ -82,6 +92,7 @@ export default {
       selectedEvent: null,
 
       tasks: [],
+      recurring_task: [],
       completed_tasks: [],
       formatted_completed_tasks: [],
       task_list: [],
@@ -105,6 +116,7 @@ export default {
     async updateData() {
       await this.taskObj.getTaskDB();
       this.tasks = this.taskObj.tasks;
+      this.recurring_task = this.taskObj.recurring_task;
       this.completed_tasks = this.taskObj.completed_tasks;
       this.formatted_completed_tasks = this.taskObj.formatted_completed_tasks;
 

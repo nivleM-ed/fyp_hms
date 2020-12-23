@@ -78,6 +78,19 @@ export default class notificationClass {
                         seen: false,
                         page: `task_ov/?tid=${data.id}`
                     };
+                }  else if (type === 'recur_task') {
+                    tmpData = {
+                        id: id,
+                        notify_type: "recur_task",
+                        data_id: data.id,
+                        name: data.title,
+                        description: data.description,
+                        notify_date: data.notify_date,
+                        msg: 'A recurring task has been set',
+                        date: data.date,
+                        seen: false,
+                        page: `task_ov/?tid=${data.id}`
+                    };
                 } else if (type === 'upcoming_task') {
                     tmpData = {
                         id: id,

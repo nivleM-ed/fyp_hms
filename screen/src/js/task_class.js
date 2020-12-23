@@ -13,6 +13,7 @@ const url = CONST.CONST_URL.concat('/tasks/');
 export default class taskClass {
   constructor() {
     var tasks = [];
+    var recurring_task = [];
     var completed_tasks = [];
     var formatted_completed_tasks = [];
   }
@@ -21,6 +22,13 @@ export default class taskClass {
   }
   set tasks(in_tasks) {
     this._tasks = in_tasks;
+  }
+
+  get recurring_task() {
+    return this._recurring_task;
+  }
+  set recurring_task(in_recurring_task) {
+    this._recurring_task = in_recurring_task;
   }
 
   get completed_tasks() {
@@ -75,6 +83,169 @@ export default class taskClass {
     }
   }
 
+  async addNewRecurTask(new_task) {
+    try {
+      await this.getTaskDB();
+
+      new_task.id = null;
+      new_task.type = 'recur_task';
+
+      const tmpData = await this.toData(new_task);
+      if (!this.recurring_task) {
+        this.recurring_task = [];
+        this.recurring_task[0] = tmpData;
+      } else {
+        this.recurring_task.push(tmpData);
+      }
+
+      await this.setRecurTaskNext();
+      console.log(this.recurring_task)
+      const tmp = await this.updateTaskDB();
+      return tmpData;
+    } catch (err) {
+      return err;
+    }
+  }
+
+  async addRecurTask(new_task) {
+    try {
+      await this.getTaskDB();
+      let notifyObj = new notificationClass();
+      let index = this.recurring_task.findIndex(x => x.id === new_task.id);
+
+      new_task.recur_task_id = new_task.id;
+      await this.addNewTask(new_task);
+      await this.recordRecur(index);
+      await notifyObj.addNotification(new_task, 'recur_task');
+
+      const tmp = await this.updateTaskDB();
+    } catch (err) {
+      return err;
+    }
+  }
+
+  async recordRecur(index) {
+    try {
+      await this.getTaskDB();
+      this.recurring_task[index].taskAdded = this.recurring_task[index].taskAdded == null ? [] : this.recurring_payment[index].taskAdded;
+      this.recurring_task[index].taskAdded.push(new Date(this.recurring_task[index].date));
+    } catch (err) {
+      console.log(err);
+      return err;
+    }
+
+  }
+
+  async updateRecurTask(selectedTask, new_task) {
+    try {
+      await this.getTaskDB();
+      const tmpData = await this.toData(new_task);
+      const index = this.recurring_task.findIndex(x => x.id === selectedTask.id);
+      this.recurring_task[index] = tmpData;
+
+      await this.setRecurTaskNext();
+      const tmp = await this.updateTaskDB();
+      return tmpData;
+    } catch (err) {
+      return err;
+    }
+  }
+
+  async setRecurTaskNext() {
+    try {
+      let today = new Date();
+      for (var i = 0; i < this.recurring_task.length; i++) {
+        if (this.recurring_task[i].category === 'Weekly') {
+          let date = await utils.getNextSelectDay(this.recurring_task[i].day);
+          this.recurring_task[i].date = date;
+        } else if (this.recurring_task[i].category === 'Monthly') {
+          let date = new Date(today.getFullYear(), today.getMonth(), this.recurring_task[i].day);
+          if (date.getTime() > today.getTime()) {
+            this.recurring_task[i].date = date;
+          } else {
+            // while(today.getTime() > date.getTime()) {
+            //     date = date.setMonth(date.getMonth()+1);
+            //     console.log(new Date(date))
+            // }
+            this.recurring_task[i].date = date.setMonth(date.getMonth() + 1);
+          }
+        } else { //this.recurring_task[i].category === 'Annually
+          let date = new Date(today.getFullYear(), parseInt(this.recurring_task[i].month) - 1, this.recurring_task[i].day);
+          if (date.getTime() > today.getTime()) {
+            this.recurring_task[i].date = date;
+          } else {
+            this.recurring_task[i].date = date.setFullYear(date.getFullYear() + 1);
+          }
+        }
+      }
+    } catch (err) {
+      console.log(err);
+      return err;
+    }
+  }
+
+  async checkMissedRecur(data) {
+    try {
+      let taskAdded = data.taskAdded == null ? [] : data.taskAdded;
+      if (taskAdded.length <= 0) return false;
+      else {
+        let latestDate = new Date(data.taskAdded[taskAdded.length == 0 ? 0 : taskAdded.length - 1]);
+        // let expDate = new Date(data.date);
+        switch (data.category) {
+          case 'Weekly':
+            if (utils.checkDateBefore('Weekly', latestDate)) {
+              if (taskAdded.findIndex((x) => new Date(x).getTime() === utils.getNextSelectDay(latestDate.getDay().getTime()) >= 0)) {
+                this.addRecurTask(data, utils.getNextSelectDay(latestDate.getDay()));
+              }
+            }
+            break;
+          case 'Monthly':
+            if (utils.checkDateBefore('Monthly', latestDate)) {
+              latestDate.setMonth(latestDate.getMonth() + 1)
+              if (taskAdded.findIndex((x) => new Date(x).getTime() === latestDate.getTime()) >= 0) {
+                this.addRecurTask(data, latestDate.setMonth(latestDate.getMonth() + 1));
+              }
+            }
+            break;
+          case 'Yearly':
+            if (utils.checkDateBefore('Yearly', latestDate)) {
+              latestDate.setFullYear(latestDate.getFullYear() + 1)
+              if (taskAdded.findIndex((x) => new Date(x).getTime() === latestDate.getTime()) >= 0) {
+                this.addRecurTask(data, latestDate.setFullYear(latestDate.getFullYear() + 1));
+              }
+            }
+            break;
+        }
+      }
+    } catch (err) {
+      console.log(err);
+      return err;
+    }
+  }
+
+  async checkRecurAvailability(data) { // return true to add
+    try {
+      await this.getTaskDB();
+      let index = this.recurring_task.findIndex(x => x.id === data.id);
+      let token = false;
+      //check if task has already been added
+      let taskAdded = this.recurring_task[index].taskAdded == null ? [] : this.recurring_task[index].taskAdded;
+      let tmpDate = new Date(this.recurring_task[index].date);
+      if (taskAdded.length <= 0) token = true;
+      else {
+        if (taskAdded.findIndex((x) => new Date(x).getTime() === tmpDate.getTime()) >= 0) token = false;
+      }
+
+      //check if almost time to recurring date
+      token = token == false ? false : utils.checkRange(data, 'day');
+
+      return token;
+    } catch (err) {
+      console.log(err);
+      return err;
+    }
+  }
+
   async updateTask(selectedTask, new_task) {
     try {
       await this.getTaskDB();
@@ -113,17 +284,18 @@ export default class taskClass {
     }
   }
 
-  // async deleteRecur(data) {
-  //   try {
-  //     await this.getExpDB();
-  //     let index = await this.getRecurIndex(data);
-  //     this.recurring_payment.splice(index, 1);
-  //     const tmp = await this.updateExpDB();
-  //     return tmp;
-  //   } catch (err) {
-  //     return err;
-  //   }
-  // }
+  async deleteRecur(data) {
+    try {
+      await this.getTaskDB();
+      let index = this.recurring_task.findIndex(x => x.id === data.id);
+      this.recurring_task.splice(index, 1);
+      console.log(this.recurring_task)
+      const tmp = await this.updateTaskDB();
+      return tmp;
+    } catch (err) {
+      return err;
+    }
+  }
 
   async formatCompleteTask(selectedTask) {
     try {
@@ -309,9 +481,11 @@ export default class taskClass {
       }
 
       this.tasks = res.data[0].tasks != null ? res.data[0].tasks : [];
+      this.recurring_task = res.data[0].recurring_task != null ? res.data[0].recurring_task : [];
       this.completed_tasks = res.data[0].completed_tasks != null ? res.data[0].completed_tasks : [];
       this.formatted_completed_tasks = res.data[0].formatted_completed_tasks != null ? res.data[0].formatted_completed_tasks : [];
 
+      await this.setRecurTaskNext();
       return res.data;
     } catch (err) {
       return err;
@@ -330,9 +504,9 @@ export default class taskClass {
         description: data.description,
         start: time.start,
         end: time.end,
-        start_date: data.start_date,
+        start_date: time.start_date,
         start_time: data.start_time,
-        end_date: data.end_date,
+        end_date: time.end_date,
         end_time: data.end_time,
         one_day: data.one_day,
         whole_day: data.whole_day,
@@ -344,7 +518,12 @@ export default class taskClass {
         amount: data.amount,
         recur_id: data.recur_id,
         shopping_list_id: data.shopping_list_id,
-        shopping_list: data.shopping_list
+        shopping_list: data.shopping_list,
+        category: data.category,
+        day: data.day,
+        month: data.month,
+        date: data.date,
+        date_created_on: new Date()
       };
     } catch (err) {
       console.log(err);
@@ -356,21 +535,39 @@ export default class taskClass {
   async setTime(data) {
     try {
       let time = {};
-      if (data.one_day) {
-        if (data.whole_day) {
-          time.start = data.start_date;
-          time.end = data.start_date;
+
+      if (data.type != "recur_task") {
+        if (data.one_day) {
+          if (data.whole_day) {
+            time.start = data.start_date;
+            time.end = data.start_date;
+            time.start_date = data.start_date;
+          } else {
+            time.start = data.start_date + " " + data.start_time;
+            time.end = data.start_date + " " + data.end_time;
+            time.start_date = data.start_date;
+
+          }
         } else {
           time.start = data.start_date + " " + data.start_time;
-          time.end = data.start_date + " " + data.end_time;
+          time.end = data.end_date + " " + data.end_time;
+          time.start_date = data.start_date;
+            time.end_date = data.end_date;
         }
+
+        time.format_start_date = utils.formatDate(data.start_date);
+        time.format_end_date = utils.formatDate(data.end_date);
       } else {
-        time.start = data.start_date + " " + data.start_time;
-        time.end = data.end_date + " " + data.end_time;
+        time.start_date = data.date;
+        time.end_date = data.date;
+
+        time.start = utils.parseDate(utils.formatDate2(data.date)) + " " + data.start_time;
+        time.end = utils.parseDate(utils.formatDate2(data.date)) + " 24:00";
+
+        time.format_start_date = utils.formatDate2(data.date);
+        time.format_end_date = utils.formatDate2(data.date);
       }
 
-      time.format_start_date = utils.formatDate(data.start_date);
-      time.format_end_date = utils.formatDate(data.end_date);
       return time;
     } catch (err) {
       console.log(err);

@@ -15,6 +15,9 @@
 </template>
 
 <script>
+import userClass from "@/js/users_class.js";
+import {CONST} from "@/js/const.js"
+
 export default {
   data() {
     return {
@@ -23,6 +26,11 @@ export default {
     };
   },
   props: ["timestamp"],
+  async created() {
+    let userObj = new userClass();
+    this.versionB = await userObj.versionB();
+    this.versionF = CONST.versionF;
+  },
   methods: {},
 };
 </script>

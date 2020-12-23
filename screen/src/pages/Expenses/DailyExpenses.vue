@@ -308,8 +308,10 @@ export default {
     async setToExp(data) {
       try {
         this.date_pick = data.date;
-        let index = this.now_expense.data.findIndex((x) => x.id == data.id);
+        if(this.now_expense.data) {
+          let index = this.now_expense.data.findIndex((x) => x.id == data.id);
         this.item = index;
+        }
       } catch (err) {
         console.log(err);
         this.$emit("errorAlert", err);

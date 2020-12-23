@@ -7,6 +7,7 @@ const op = sequelize.Op;
 exports.update = function (req, res, next) {
     return models.tasks.update({
         tasks: req.body.taskObj._tasks,
+        recurring_task: req.body.taskObj._recurring_task,
         completed_tasks: req.body.taskObj._completed_tasks,
         formatted_completed_tasks: req.body.taskObj._formatted_completed_tasks
     }, {

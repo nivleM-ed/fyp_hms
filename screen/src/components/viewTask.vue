@@ -11,7 +11,12 @@
           {{ utils.toFirstUpperCase(selectedTaskInner.name, false) }}
         </v-card-title>
         <v-card-subtitle class="font-weight-medium title">
-          <p v-if="!selectedTaskInner.one_day">
+          <p
+            v-if="
+              !selectedTaskInner.one_day &&
+                selectedTaskInner.type != 'recur_task'
+            "
+          >
             <span
               >{{ utils.momentFormatDate(true, selectedTaskInner.start) }}
               to
@@ -26,10 +31,13 @@
               (Whole Day)</span
             >
             <span v-else>
-              {{ utils.momentFormatDate(true, selectedTaskInner.start) }}
-              to
-              {{ utils.momentFormatDate(true, selectedTaskInner.end) }}</span
-            >
+              <span v-if="selectedTaskInner.type != 'recur_task'">
+                {{ utils.momentFormatDate(true, selectedTaskInner.start) }}
+                to
+                {{ utils.momentFormatDate(true, selectedTaskInner.end) }}
+              </span>
+              <span v-else>{{ utils.momentFormatDate(false, selectedTaskInner.date) }}</span>
+            </span>
           </p>
           <p v-if="completed">
             Task Completed on:
@@ -42,24 +50,64 @@
           <v-card-text>
             <v-sheet color="rgba(0, 0, 0, .12)" class="p-2" min-height="100px">
               <p class="font-regular title">More Information:</p>
-              <b>Title:</b> {{ selectedTaskInner.name }} <br />
+              <b>Title:</b>
+              {{ utils.toFirstUpperCaseInner(selectedTaskInner.name) }} <br />
               <b>Description:</b> {{ selectedTaskInner.description }}<br />
-              <b>Start:</b>
-              {{ utils.momentFormatDate(false, selectedTaskInner.start) }}<br />
-              <span v-if="!selectedTaskInner.whole_day"
-                ><b>Duration:</b>
+              <span v-if="selectedTaskInner.type != 'recur_task'"
+                ><b>Start:</b>
+                {{ utils.momentFormatDate(false, selectedTaskInner.start)
+                }}<br />
+                <span v-if="!selectedTaskInner.whole_day"
+                  ><b>Duration:</b>
+                  {{
+                    utils.dateDiff(
+                      selectedTaskInner.end,
+                      selectedTaskInner.start,
+                      false
+                    )
+                  }}
+                  hour(s)<br
+                /></span>
+                <span v-else><b>Duration:</b> Whole Day<br /></span>
+              </span>
+              <span v-else
+                ><b>Start:</b>
+
                 {{
-                  utils.dateDiff(
-                    selectedTaskInner.end,
-                    selectedTaskInner.start,
-                    false
+                  utils.momentFormatDate(
+                    false,
+                    new Date(selectedTaskInner.date)
                   )
-                }}
-                hour(s)<br
+                }}<br
               /></span>
-              <span v-else><b>Duration:</b> Whole Day<br /></span>
+              <span v-if="selectedTaskInner.type == 'recur_task'">
+                <b>Recur Category: </b> {{ selectedTaskInner.category }} <br />
+              </span>
               <b>Task type: </b
               >{{ utils.formatTaskTypeName(selectedTaskInner.type) }} <br />
+              <span
+                v-if="
+                  selectedTaskInner.type == 'recur_task' &&
+                    selectedTaskInner.category == 'Monthly'
+                "
+                ><b>Recurs Every: </b>{{ selectedTaskInner.day }} day of the
+                month<br
+              /></span>
+              <span
+                v-if="
+                  selectedTaskInner.type == 'recur_task' &&
+                    selectedTaskInner.category == 'Weekly'
+                "
+                ><b>Recurs Every: </b>{{ selectedTaskInner.day }}<br
+              /></span>
+              <span
+                v-if="
+                  selectedTaskInner.type == 'recur_task' &&
+                    selectedTaskInner.category == 'Annually'
+                "
+                ><b>Recurs Annually on: </b>Day {{ selectedTaskInner.day }} of
+                Month {{ selectedTaskInner.month }}<br
+              /></span>
               <span v-if="completed">
                 <b>Task Completed on:</b>
                 {{

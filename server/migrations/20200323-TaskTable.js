@@ -24,6 +24,10 @@ module.exports = {
                 allowNull: true,
                 type: Sequelize.JSON
             },
+            recurring_task: {
+                type: Sequelize.JSON,
+                allowNull: true
+            },
             completed_tasks: {
                 allowNull: true,
                 type: Sequelize.JSON

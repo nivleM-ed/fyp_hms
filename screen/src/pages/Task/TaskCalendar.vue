@@ -267,7 +267,7 @@ export default {
     async viewEvent() {
       this.selectedOpen = false;
       if (this.selectedEvent.completed) {
-        this.openTab(1, this.selectedEvent, false);
+        this.openTab(2, this.selectedEvent, false);
       } else {
         this.openTab(0, this.selectedEvent, false);
       }

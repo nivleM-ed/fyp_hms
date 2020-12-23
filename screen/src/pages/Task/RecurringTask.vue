@@ -4,11 +4,9 @@
 
     <v-dialog v-model="addUpdateMenu" persistent max-width="400px">
       <v-card color="grey lighten-4" min-width="400px" flat>
-        <v-toolbar :color="new_rec_payment.color" dark>
-          <v-toolbar-title v-if="!isUpdate"
-            >New Recurring Payment</v-toolbar-title
-          >
-          <v-toolbar-title v-else>Update Expense</v-toolbar-title>
+        <v-toolbar :color="new_rec_task.color" dark>
+          <v-toolbar-title v-if="!isUpdate">New Recurring Task</v-toolbar-title>
+          <v-toolbar-title v-else>Update Task</v-toolbar-title>
           <v-spacer></v-spacer>
 
           <v-menu offset-y>
@@ -27,7 +25,7 @@
               </v-tooltip>
             </template>
             <v-color-picker
-              v-model="new_rec_payment.color"
+              v-model="new_rec_task.color"
               mode.sync="hexa"
               hide-inputs
             ></v-color-picker>
@@ -40,14 +38,14 @@
 
         <v-form ref="add_form" v-model="add_valid" class="p-4" lazy-validation>
           <v-text-field
-            v-model="new_rec_payment.title"
+            v-model="new_rec_task.name"
             :rules="inputRules"
             label="Title"
             required
           ></v-text-field>
 
           <v-text-field
-            v-model="new_rec_payment.description"
+            v-model="new_rec_task.description"
             :rules="inputRules"
             label="Description"
             required
@@ -56,16 +54,16 @@
           <v-select
             :items="utils.toFirstUpperCase(payment_type, true)"
             label="Category"
-            v-model="new_rec_payment.category"
+            v-model="new_rec_task.category"
             outlined
             :rules="inputRules"
           ></v-select>
 
           <v-expand-transition>
             <v-select
-              v-show="new_rec_payment.category"
+              v-show="new_rec_task.category"
               :items="
-                new_rec_payment.category == 'Weekly'
+                new_rec_task.category == 'Weekly'
                   ? [
                       'Monday',
                       'Tuesday',
@@ -78,7 +76,7 @@
                   : select_rec_day
               "
               label="Day"
-              v-model="new_rec_payment.day"
+              v-model="new_rec_task.day"
               outlined
               :rules="inputRules"
             ></v-select>
@@ -86,23 +84,51 @@
 
           <v-expand-transition>
             <v-select
-              v-show="new_rec_payment.category == 'Annually'"
+              v-show="new_rec_task.category == 'Annually'"
               :items="select_rec_month"
               label="Month"
-              v-model="new_rec_payment.month"
+              v-model="new_rec_task.month"
               outlined
-              :rules="
-                new_rec_payment.category == 'Annually' ? inputRules : false
-              "
+              :rules="new_rec_task.category == 'Annually' ? inputRules : false"
             ></v-select>
           </v-expand-transition>
 
-          <v-text-field
-            v-model="new_rec_payment.amount"
-            :rules="inputRulesNum"
-            label="Amount"
-            required
-          ></v-text-field>
+          <v-dialog
+            ref="start_dialog"
+            v-model="start_time_modal"
+            :return-value.sync="new_rec_task.start_time"
+            persistent
+            width="290px"
+          >
+            <template v-slot:activator="{ on }">
+              <v-text-field
+                v-model="new_rec_task.start_time"
+                label="Start time"
+                prepend-icon="mdi-clock-outline"
+                :rules="inputRules"
+                readonly
+                v-on="on"
+              ></v-text-field>
+            </template>
+            <v-time-picker
+              v-if="start_time_modal"
+              v-model="new_rec_task.start_time"
+              full-width
+              scrollable
+              color="#228B22"
+            >
+              <v-spacer></v-spacer>
+              <v-btn text color="#228B22" @click="start_time_modal = false"
+                >Cancel</v-btn
+              >
+              <v-btn
+                text
+                color="#228B22"
+                @click="$refs.start_dialog.save(new_rec_task.start_time)"
+                >OK</v-btn
+              >
+            </v-time-picker>
+          </v-dialog>
 
           <p class="caption font-italic">
             ( If 31st is chosen and the month does not have a 31st, it will
@@ -139,7 +165,7 @@
               </v-card-text>
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="primary" text @click="deleteExp(selectedExp)">
+                <v-btn color="primary" text @click="deleteExp(selectedTask)">
                   I accept
                 </v-btn>
               </v-card-actions>
@@ -153,41 +179,25 @@
       <v-card flat min-height="60vh">
         <v-row>
           <v-col class="col-4">
-            <v-row v-if="rec_payment.length > 0">
+            <v-row v-if="rec_task.length > 0">
               <v-card outlined height="60vh" width="100%">
                 <v-card flat class="vuebar-element" v-bar>
                   <v-list dense width="100%">
                     <v-list-item-group v-model="item" color="primary">
-                      <template v-for="(expense, index) in rec_payment">
+                      <template v-for="(task, index) in rec_task">
                         <v-list-item :key="index">
                           <v-list-item-content>
                             <v-list-item-title>
                               <v-row>
                                 <v-col cols="5">
-                                  {{
-                                    utils.toFirstUpperCase(expense.title, false)
-                                  }}
+                                  {{ utils.toFirstUpperCase(task.name, false) }}
                                 </v-col>
-                                <v-col cols="1">
-                                  <v-icon
-                                    v-if="!expense.money_in"
-                                    color="red darken-2"
-                                  >
-                                    mdi-minus
-                                  </v-icon>
-                                  <v-icon v-else color="green darken-2">
-                                    mdi-plus
-                                  </v-icon>
-                                </v-col>
-                                <v-col cols="2">
-                                  RM {{ expense.amount }}
-                                </v-col>
-                                <v-col v-if="expense.category" cols="auto">
+                                <v-col v-if="task.category" cols="auto">
                                   (
                                   {{
-                                    expense.category
+                                    task.category
                                       ? utils.toFirstUpperCase(
-                                          expense.category,
+                                          task.category,
                                           false
                                         )
                                       : null
@@ -222,12 +232,12 @@
             </v-row>
 
             <v-row v-else>
-              <v-card v-show="!expDetailsShow" height="60vh" flat width="100%">
+              <v-card v-show="!taskDetailsShow" height="60vh" flat width="100%">
                 <v-container fill-height fluid>
                   <v-row align="center" justify="center">
                     <v-col class="text-center">
                       <p>
-                        You have not set any recurring payment.
+                        You have not set any recurring task.
                       </p>
                       <v-tooltip right>
                         <template v-slot:activator="{ on }">
@@ -240,7 +250,7 @@
                             Add
                           </v-btn>
                         </template>
-                        <span>Add Recurring Payment</span>
+                        <span>Add Recurring Task</span>
                       </v-tooltip>
                     </v-col>
                   </v-row>
@@ -248,7 +258,7 @@
               </v-card>
             </v-row>
 
-            <v-row v-if="rec_payment.length > 0">
+            <v-row v-if="rec_task.length > 0">
               <v-tooltip right>
                 <template v-slot:activator="{ on }">
                   <v-btn
@@ -271,7 +281,7 @@
           <v-col>
             <v-card height="100%" flat min-height="70vh">
               <v-expand-transition>
-                <v-card v-show="!expDetailsShow" height="60vh" flat>
+                <v-card v-show="!taskDetailsShow" height="60vh" flat>
                   <v-container fill-height fluid>
                     <v-row align="center" justify="center">
                       <h3 class="text-center">
@@ -282,23 +292,38 @@
                 </v-card>
               </v-expand-transition>
               <v-expand-transition>
-                <v-card v-show="selectedExp" outlined height="70vh">
+                <v-card v-show="selectedTask" outlined height="70vh">
                   <div
-                    v-if="selectedExp"
+                    v-if="selectedTask"
                     class="d-flex align-start flex-column mb-6 ma-4"
                     height="100%"
                   >
                     <div class="mb-auto">
                       <h3>
-                        {{ utils.toFirstUpperCase(selectedExp.title, false) }}
+                        {{ utils.toFirstUpperCase(selectedTask.name, false) }}
                       </h3>
                       <p>
-                        <b>Amount:</b> RM{{ selectedExp.amount }} <br />
-                        <b>Description:</b> {{ selectedExp.description }} <br />
+                        <b>Description:</b> {{ selectedTask.description }}
+                        <br />
                         <b>Recurrence Type:</b>
-                        {{ selectedExp.category }} Recurrence <br />
-                        <b>Next Payment:</b>
-                        {{ utils.momentFormatDate(false, selectedExp.date) }}
+                        {{ selectedTask.category }} Recurrence <br />
+                        <b>Next Task Scheduled:</b>
+                        {{ utils.momentFormatDate(false, selectedTask.date) }}
+                        <br />
+                        <span v-if="getTaskAdded(selectedTask).length > 0"
+                          ><b>Task was added on: </b>
+                          <span
+                            v-for="item in getTaskAdded(selectedTask)"
+                            :key="item.id"
+                          >
+                            <br /><b>-</b>
+                            {{ utils.momentFormatDate(false, new Date(item)) }}
+                          </span></span
+                        >
+                        <span v-else
+                          ><br />A task have not been added for this recurring
+                          task</span
+                        >
                       </p>
                     </div>
                     <div class="mb-auto">
@@ -327,10 +352,10 @@
 </template>
 <script>
 import utils from "@/js/utils.js";
-import expenseClass from "@/js/expense_class.js";
+import taskClass from "@/js/task_class.js";
 
 export default {
-  name: "RecurringExpenses",
+  name: "RecurringTask",
   data() {
     return {
       addUpdateMenu: false,
@@ -345,17 +370,19 @@ export default {
       isUpdate: false,
       deleteAuth: false,
 
-      new_rec_payment: {
-        title: null,
+      new_rec_task: {
+        name: null,
         description: null,
-        amount: null,
         category: "Monthly",
         color: "#228B22",
         day: null,
         month: null,
+        start_time: "00:00",
       },
-      selectedExp: null,
-      expDetailsShow: false,
+      selectedTask: null,
+      taskDetailsShow: false,
+      start_time_modal: false,
+      start_time: null,
 
       date_menu: false,
       tab_open: 1,
@@ -364,9 +391,9 @@ export default {
       date_pick: new Date().toISOString().substr(0, 10),
       today: new Date().toISOString().substr(0, 10),
 
-      expObj: new expenseClass(),
+      taskObj: new taskClass(),
       expenses: [],
-      rec_payment: {},
+      rec_task: {},
       daily_total_spent: 0,
       daily_total_received: 0,
       payment_type: ["Weekly", "Monthly", "Annually"],
@@ -420,49 +447,51 @@ export default {
       ],
     };
   },
-  props: ["recurring_payment"],
+  props: ["recurring_task"],
   async created() {
     // this.$emit("checkLogged");
     try {
       let id = this.$route.query.id == null ? 0 : this.$route.query.id;
-      this.rec_payment = this.recurring_payment;
-      if (this.recurring_payment != null) {
+      this.rec_task = this.recurring_task;
+      if (this.recurring_task != null) {
         this.item =
-          this.recurring_payment.findIndex((x) => x.id == id) == -1
+          this.recurring_task.findIndex((x) => x.id == id) == -1
             ? 0
-            : this.recurring_payment.findIndex((x) => x.id == id);
+            : this.recurring_task.findIndex((x) => x.id == id);
         this.setDetails(false, this.item);
-        this.expDetailsShow = true;
+        this.taskDetailsShow = true;
       }
     } catch (err) {
       console.log(err);
       this.$emit("errorAlert", err);
     }
+    console.log(this.recurring_task);
   },
   methods: {
     async validate() {
       try {
         this.$refs.add_form.validate();
-        let new_recur = JSON.parse(JSON.stringify(this.new_rec_payment));
-        if (new_recur.title && new_recur.description && new_recur.amount) {
+        let new_recur = JSON.parse(JSON.stringify(this.new_rec_task));
+        if (new_recur.name && new_recur.description) {
           if (!this.isUpdate) {
             try {
-              await this.expObj.addNewRecur(new_recur);
+              console.log("yes");
+              await this.taskObj.addNewRecurTask(new_recur);
               await this.$emit("update", 1);
             } catch (err) {
               alert(err);
             }
           } else {
             try {
-              const tmp = await this.expObj.updateRecur(
-                this.selectedExp,
+              const tmp = await this.taskObj.updateRecurTask(
+                this.selectedTask,
                 new_recur
               );
               if (tmp.err) {
                 alert(tmp.err);
               } else {
                 await this.$emit("update", 1);
-                this.selectedExp = tmp;
+                this.selectedTask = tmp;
               }
             } catch (err) {
               alert(err);
@@ -478,35 +507,38 @@ export default {
         this.$emit("errorAlert", err);
       }
     },
-    async deleteExp(selectedExp) {
+    async deleteExp(selectedTask) {
       try {
-        const tmp = await this.expObj.deleteRecur(selectedExp);
+        const tmp = await this.taskObj.deleteRecur(selectedTask);
+
         if (tmp.err) {
           alert(tmp.err);
         } else {
           await this.$emit("update", 1);
-          this.selectedExp = null;
+          this.selectedTask = null;
         }
+
+        this.deleteAuth = false;
+        this.addUpdateMenu = false;
       } catch (err) {
         console.log(err);
         this.$emit("errorAlert", err);
       }
-      this.deleteAuth = false;
     },
     setDetails(created, id) {
       if (created) {
         alert("NO GO SET DETAILS");
       } else {
-        this.selectedExp = this.rec_payment[id];
+        this.selectedTask = this.rec_task[id];
       }
     },
     updateButton() {
       try {
         this.addUpdateMenu = true;
         this.isUpdate = true;
-        this.new_rec_payment = JSON.parse(JSON.stringify(this.selectedExp));
-        this.new_rec_payment.category = utils.toFirstUpperCase(
-          this.new_rec_payment.category,
+        this.new_rec_task = JSON.parse(JSON.stringify(this.selectedTask));
+        this.new_rec_task.category = utils.toFirstUpperCase(
+          this.new_rec_task.category,
           false
         );
       } catch (err) {
@@ -514,36 +546,37 @@ export default {
         this.$emit("errorAlert", err);
       }
     },
+    getTaskAdded(data) {
+      let tmp = data.taskAdded == null ? [] : data.taskAdded;
+      return tmp;
+    },
   },
   watch: {
     item: async function(val) {
       if (val == null) {
-        this.selectedExp = null;
+        this.selectedTask = null;
       } else {
         this.setDetails(false, val);
       }
     },
-    selectedExp() {
-      if (this.selectedExp) {
-        this.expDetailsShow = true;
+    selectedTask() {
+      if (this.selectedTask) {
+        this.taskDetailsShow = true;
       } else {
-        this.expDetailsShow = false;
+        this.taskDetailsShow = false;
       }
     },
     addUpdateMenu: function() {
       if (!this.addUpdateMenu) {
         this.$refs.add_form.reset();
         setTimeout(() => {
-          this.new_rec_payment.category = "Monthly";
+          this.new_rec_task.category = "Monthly";
           this.isUpdate = false;
         }, 100);
       }
     },
-    recurring_payment(val) {
-      this.rec_payment = val;
-    },
-    expDetailsShow(val) {
-      console.log(val);
+    recurring_task(val) {
+      this.rec_task = val;
     },
   },
 };

@@ -16,6 +16,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.JSON,
             allowNull: true
         },
+        recurring_task: {
+            type: DataTypes.JSON,
+            allowNull: true
+        },
         completed_tasks: {
             type: DataTypes.JSON,
             allowNull: true

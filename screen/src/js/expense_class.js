@@ -441,7 +441,7 @@ export default class expenseClass {
             //check if task has already been added
             let taskAdded = data.taskAdded == null ? [] : data.taskAdded;
             let tmpDate = new Date(data.date);
-            if (taskAdded.length < 0) token = true;
+            if (taskAdded.length <= 0) token = true;
             else {
                 if (taskAdded.findIndex((x) => new Date(x).getTime() === tmpDate.getTime()) >= 0) token = false;
             }
@@ -461,7 +461,7 @@ export default class expenseClass {
             let taskAdded = data.taskAdded == null ? [] : data.taskAdded;
             if (taskAdded.length <= 0) return false;
             else {
-                let latestDate = new Date(data.taskAdded[taskAdded.length - 1]);
+                let latestDate = new Date(data.taskAdded[taskAdded.length == 0 ? 0 : taskAdded.length - 1]);
                 // let expDate = new Date(data.date);
                 switch (data.category) {
                     case 'Weekly':
@@ -473,18 +473,18 @@ export default class expenseClass {
                         break;
                     case 'Monthly':
                         if (utils.checkDateBefore('Monthly', latestDate)) {
-                            if (taskAdded.findIndex((x) => new Date(x).getTime() === latestDate.setMonth(latestDate.getMonth() + 1).getTime()) >= 0) {
+                            latestDate.setMonth(latestDate.getMonth() + 1)
+                            if (taskAdded.findIndex((x) => new Date(x).getTime() === latestDate.getTime()) >= 0) {
                                 this.addRecurTask(data, latestDate.setMonth(latestDate.getMonth() + 1));
                             }
-
                         }
                         break;
                     case 'Yearly':
                         if (utils.checkDateBefore('Yearly', latestDate)) {
-                            if (taskAdded.findIndex((x) => new Date(x).getTime() === latestDate.setFullYear(latestDate.getFullYear() + 1).getTime()) >= 0) {
+                            latestDate.setFullYear(latestDate.getFullYear() + 1)
+                            if (taskAdded.findIndex((x) => new Date(x).getTime() === latestDate.getTime()) >= 0) {
                                 this.addRecurTask(data, latestDate.setFullYear(latestDate.getFullYear() + 1));
                             }
-
                         }
                         break;
                 }
@@ -592,6 +592,7 @@ export default class expenseClass {
     }
 
     async recordRecur(index) {
+        await this.getExpDB();
         try {
             this.recurring_payment[index].taskAdded = this.recurring_payment[index].taskAdded == null ? [] : this.recurring_payment[index].taskAdded;
             this.recurring_payment[index].taskAdded.push(new Date(this.recurring_payment[index].date));
@@ -802,7 +803,6 @@ export default class expenseClass {
                         total: 0
                     }
                 };
-                console.log(tmp)
                 for (i = 0; i < tmp.length; i++) {
                     if (tmp[i].month_total_spent.total > year_spend_highest.month_total_spent.total) {
                         year_spend_highest = tmp[i];

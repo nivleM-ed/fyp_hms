@@ -417,6 +417,8 @@ class utils {
                     return 'Home Task';
                 case 'recur_expense':
                     return 'Recurring Bill';
+                case 'recur_task':
+                    return 'Recurring Task';
             }
         } catch (err) {
             console.log(err);

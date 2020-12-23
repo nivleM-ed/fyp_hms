@@ -54,6 +54,7 @@ export default {
       timestamp: "",
       tasks: [],
       completed_tasks: [],
+      recurring_task: [],
       com_tasks: "",
       task_notify: 0,
       expenses: [],
@@ -107,6 +108,8 @@ export default {
         this.expenses = exp_res.expenses;
         this.recurring_payment = exp_res.recurring_payment;
         this.tasks = task_res[0].tasks == null ? [] : task_res[0].tasks;
+        this.recurring_task =
+          task_res[0].recurring_task == null ? [] : task_res[0].recurring_task;
         this.completed_tasks = task_res[0].completed_tasks;
         if (!type) this.setNotifyOuter();
       } catch (err) {
@@ -171,7 +174,7 @@ export default {
 
         if (this.recurring_payment) {
           for (var j = 0; j < this.recurring_payment.length; j++) {
-            await this.expObj.checkMissedRecur(this.recurring_payment[j]);
+            // await this.expObj.checkMissedRecur(this.recurring_payment[j]);
             if (
               await this.expObj.checkRecurAvailability(
                 this.recurring_payment[j]
@@ -182,6 +185,19 @@ export default {
                 this.recurring_payment[j],
                 this.recurring_payment[j].date
               );
+              await this.updateData(true);
+            }
+          }
+        }
+
+        if (this.recurring_task) {
+          for (var k = 0; k < this.recurring_task.length; k++) {
+            // await this.taskObj.checkMissedRecur(this.recurring_task[k]);
+            if (
+              await this.taskObj.checkRecurAvailability(this.recurring_task[k])
+            ) {
+              // this.futureTask.push(this.tasks[j]);
+              await this.taskObj.addRecurTask(this.recurring_task[k]);
               await this.updateData(true);
             }
           }

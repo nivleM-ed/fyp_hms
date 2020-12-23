@@ -606,7 +606,7 @@ export default {
         let task_id = this.shopping_list_items_inner.task_id;
         let url = "";
         if (this.shopping_list_items_inner.completed)
-          url = "/main/task_ov?tab=1&task_id=" + task_id;
+          url = "/main/task_ov?tab=2&task_id=" + task_id;
         else url = "/main/task_ov?task_id=" + task_id;
         this.$router.push(url);
       } catch (err) {

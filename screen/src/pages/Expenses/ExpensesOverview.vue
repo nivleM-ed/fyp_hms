@@ -83,7 +83,6 @@ export default {
       await this.$emit("updateData", 1);
     },
     async addNewExpense(new_expense) {
-      console.log("ADD EPXENSE OUTER 2");
       try {
         const tmp = await this.expObj.addNewExpense(new_expense);
         if (tmp.err) {

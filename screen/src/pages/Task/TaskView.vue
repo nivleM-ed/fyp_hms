@@ -80,11 +80,14 @@
                               }}</span>
                             </v-col>
                             <v-col>
-                              <span>
+                              <span v-if="task.type != 'recur_task'">
                                 {{
                                   utils.momentFormatDate(false, task.start_date)
                                 }}</span
                               >
+                              <span v-else>
+                                {{ utils.momentFormatDate(false, task.date) }}
+                              </span>
                             </v-col>
                           </v-row>
                         </v-list-item-title>

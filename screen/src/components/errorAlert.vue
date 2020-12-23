@@ -7,6 +7,7 @@
 
       <v-card-text>
         <p class="mt-4 subtitle-1"><b>Error: Network Error</b></p>
+        <p class="mt-4 subtitle-1"><b>If you see this error, please inform the developer how this error happened. Thanks!</b></p>
         <p class="mt-4 subtitle-1">{{ error }}</p>
       </v-card-text>
 

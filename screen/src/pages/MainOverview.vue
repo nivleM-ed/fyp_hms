@@ -263,6 +263,7 @@ export default {
       low_food_setting: {},
 
       tasks: [],
+      recurring_task: [],
       completed_tasks: [],
       incomplete_tasks: [],
       upcoming_tasks: [],
@@ -379,7 +380,6 @@ export default {
           this.upcoming_tasks.push(this.tasks[i]);
         }
       }
-      console.log(this.upcoming_tasks)
     },
 
     async updateData() {
@@ -394,6 +394,7 @@ export default {
       this.low_food_setting = this.invObj._low_food_setting;
 
       this.tasks = this.taskObj.tasks;
+      this.recurring_task = this.taskObj.recurring_task;
       this.completed_tasks = this.taskObj.completed_tasks;
 
       await this.getDailyExp();
