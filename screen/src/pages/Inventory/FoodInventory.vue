@@ -52,18 +52,20 @@
           Add to Shopping List
         </v-card-title>
         <v-card-text class="p-4">
-          {{ utils.toFirstUpperCase(shoppingListTmp.name, false) }}
+          Item to be added: <b>{{ utils.toFirstUpperCase(shoppingListTmp.name, false) }}</b>
           <br /><span v-if="checkExistInList(shoppingListTmp)"
             >You have already added this into the shoppping list. Adding here
             will add extra quantity to the food item in the shopping list.</span
           >
+          <v-form ref="add_form_shop" v-model="add_valid_shop" class="p-4" lazy-validation>
           <v-row>
             <v-col>
               <v-text-field
                 v-model="shoppingListTmp.add_quantity"
                 label="Quantity"
                 placeholder="Food Quantity"
-                :rules="inputRulesNum"
+                :rules="inputRulesNumMoreThanZero"
+                required
               ></v-text-field>
             </v-col>
             <v-col>
@@ -78,13 +80,14 @@
               ></v-select>
             </v-col>
           </v-row>
+          </v-form>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="red darken-1" text @click="addList = false"
             >Cancel</v-btn
           >
-          <v-btn color="green" text @click="chooseShoppingList = true">
+          <v-btn :disabled="!add_valid_shop" color="green" text @click="checkAddItemToShoppingList()">
             Add
           </v-btn>
         </v-card-actions>
@@ -108,7 +111,7 @@
                   flat
                   hide-no-data
                   hide-details
-                  label="Search tasks"
+                  label="Search Food Item"
                   solo-inverted
                   ><template slot="append-outer">
                     <v-icon @click="resetSearch()" v-if="cancel_icon"
@@ -359,6 +362,11 @@ export default {
         (v) => !!v || "Required!",
         (v) => !isNaN(v) || "Must be a number!",
       ],
+      inputRulesNumMoreThanZero: [
+        (v) => !!v || "Required!",
+        (v) => !isNaN(v) || "Must be a number!",
+        (v) => !(v < 1) || "Number must be more than 0!", 
+      ],
       cancel_icon: false,
       tab_open: 0,
       utils: utils,
@@ -376,6 +384,7 @@ export default {
       show_food: [],
 
       dialog: false,
+      add_valid_shop: false,
       headers: [
         {
           text: "Food ",
@@ -427,6 +436,15 @@ export default {
     initialize() {
       this.food_items = this.food == null ? [] : this.food;
       this.setTitles();
+    },
+
+    checkAddItemToShoppingList() {
+      this.$refs.add_form_shop.validate();
+      if(this.shoppingListTmp.add_quantity < 1) {
+        this.add_valid_shop = true;
+      } else {
+        this.chooseShoppingList = true;
+      }
     },
 
     updateFood() {

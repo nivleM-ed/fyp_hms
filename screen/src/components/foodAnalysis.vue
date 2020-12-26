@@ -270,7 +270,7 @@
         </v-card-title>
         <v-card-text>
           <v-sheet class="p-2" color="rgba(0, 0, 0, .12)" min-height="100px">
-            <div v-if="getLow(food).length > 0" class="text-center">
+            <div v-if="getLow(food).length > 0">
               <div v-for="item in getLow(food)" :key="item.id">
                 - <b>{{ item.name }}</b> ({{ item.quantity }}
                 {{ item.category }} left)

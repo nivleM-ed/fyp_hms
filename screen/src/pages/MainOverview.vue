@@ -1,5 +1,5 @@
 <template>
-  <v-card flat class="m-4">
+  <v-card flat class="m-4" min-height="700px">
     <v-card flat>
       <v-row>
         <v-col cols="auto">
@@ -151,46 +151,6 @@
           <v-row class="mx-auto">
             <v-card
               flat
-              color="amber lighten-5"
-              elevation="2"
-              :min-width="width"
-              class="mt-2"
-            >
-              <v-card-title>
-                Food Item running low:
-              </v-card-title>
-              <v-card-text>
-                <v-sheet color="rgba(0, 0, 0, .12)" min-height="100px">
-                  <div v-if="getLow().length > 0">
-                    <div v-for="item in getLow()" :key="item.id" class="p-2">
-                      - <b>{{ item.name }}</b> ({{ item.quantity }}
-                      {{ item.category }} left)
-                    </div>
-                  </div>
-                  <div v-else class="text-center">
-                    <p class="pt-2">You have no food running low</p>
-                    <v-btn depressed color="green" @click="toPage('inv_ov')">
-                      View Inventory
-                    </v-btn>
-                  </div>
-                </v-sheet>
-              </v-card-text>
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn
-                  v-if="getLow().length > 0"
-                  depressed
-                  color="green"
-                  @click="toPage('inv_ov')"
-                >
-                  View
-                </v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-row>
-          <v-row class="mx-auto">
-            <v-card
-              flat
               class="mt-2"
               color="amber lighten-5"
               elevation="2"
@@ -228,6 +188,47 @@
                   depressed
                   color="green"
                   @click="toPage('expense_ov?tab=2')"
+                >
+                  View
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-row>
+        </v-col>
+        <v-col cols="auto">
+          <v-row class="mx-auto">
+            <v-card
+              flat
+              color="amber lighten-5"
+              elevation="2"
+              :min-width="width"
+            >
+              <v-card-title>
+                Food Item running low:
+              </v-card-title>
+              <v-card-text>
+                <v-sheet color="rgba(0, 0, 0, .12)" min-height="100px">
+                  <div v-if="getLow().length > 0">
+                    <div v-for="item in getLow()" :key="item.id" class="p-2">
+                      - <b>{{ item.name }}</b> ({{ item.quantity }}
+                      {{ item.category }} left)
+                    </div>
+                  </div>
+                  <div v-else class="text-center">
+                    <p class="pt-2">You have no food running low</p>
+                    <v-btn depressed color="green" @click="toPage('inv_ov')">
+                      View Inventory
+                    </v-btn>
+                  </div>
+                </v-sheet>
+              </v-card-text>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn
+                  v-if="getLow().length > 0"
+                  depressed
+                  color="green"
+                  @click="toPage('inv_ov')"
                 >
                   View
                 </v-btn>
