@@ -17,12 +17,18 @@
               <v-card-text>
                 <v-sheet color="rgba(0, 0, 0, .12)" min-height="100px">
                   <div v-if="upcoming_tasks.length > 0">
-                    <div
-                      v-for="item in upcoming_tasks"
-                      :key="item.id"
-                      class="p-2"
-                    >
-                      - <b>{{ item.name }}</b> ({{ utils.momentFormatDate(true,new Date(item.start)) }})
+                    <div class="vuebar-element-2" v-bar>
+                      <div>
+                        <div
+                          v-for="item in upcoming_tasks"
+                          :key="item.id"
+                          class="p-2"
+                        >
+                          - <b>{{ item.name }}</b> ({{
+                            utils.momentFormatDate(true, new Date(item.start))
+                          }})
+                        </div>
+                      </div>
                     </div>
                   </div>
                   <div class="text-center" v-else>
@@ -63,13 +69,22 @@
                 <v-sheet color="rgba(0, 0, 0, .12)" min-height="100px">
                   <div v-if="incomplete_tasks.length > 0">
                     <div
-                      v-for="item in incomplete_tasks"
-                      :key="item.id"
-                      class="p-2"
+                      class="vuebar-element-2"
+                      height="200px"
+                      width="100%"
+                      v-bar
                     >
-                      - <b>{{ item.name }}</b> ({{
-                        utils.momentFormatDate(true, new Date(item.end))
-                      }})
+                      <div>
+                        <div
+                          v-for="item in incomplete_tasks"
+                          :key="item.id"
+                          class="p-2"
+                        >
+                          - <b>{{ item.name }}</b> ({{
+                            utils.momentFormatDate(true, new Date(item.end))
+                          }})
+                        </div>
+                      </div>
                     </div>
                   </div>
                   <div v-else class="text-center">
@@ -110,15 +125,28 @@
               <v-card-text>
                 <v-sheet color="rgba(0, 0, 0, .12)" min-height="100px">
                   <div v-if="now_expense.length > 0">
-                    <div v-for="item in now_expense" :key="item.id" class="p-2">
-                      - <b>{{ item.title }}</b>
-                      <v-icon v-if="!item.money_in" color="red darken-2">
-                        mdi-minus
-                      </v-icon>
-                      <v-icon v-else color="green darken-2">
-                        mdi-plus
-                      </v-icon>
-                      RM {{ item.amount }}
+                    <div
+                      class="vuebar-element-2"
+                      height="200px"
+                      width="100%"
+                      v-bar
+                    >
+                      <div>
+                        <div
+                          v-for="item in now_expense"
+                          :key="item.id"
+                          class="p-2"
+                        >
+                          - <b>{{ item.title }}</b>
+                          <v-icon v-if="!item.money_in" color="red darken-2">
+                            mdi-minus
+                          </v-icon>
+                          <v-icon v-else color="green darken-2">
+                            mdi-plus
+                          </v-icon>
+                          RM {{ item.amount }}
+                        </div>
+                      </div>
                     </div>
                   </div>
                   <div class="text-center" v-else>
@@ -209,9 +237,22 @@
               <v-card-text>
                 <v-sheet color="rgba(0, 0, 0, .12)" min-height="100px">
                   <div v-if="getLow().length > 0">
-                    <div v-for="item in getLow()" :key="item.id" class="p-2">
-                      - <b>{{ item.name }}</b> ({{ item.quantity }}
-                      {{ item.category }} left)
+                    <div
+                      class="vuebar-element-3"
+                      height="200px"
+                      width="100%"
+                      v-bar
+                    >
+                      <div>
+                        <div
+                          v-for="item in getLow()"
+                          :key="item.id"
+                          class="p-2"
+                        >
+                          - <b>{{ item.name }}</b> ({{ item.quantity }}
+                          {{ item.category }} left)
+                        </div>
+                      </div>
                     </div>
                   </div>
                   <div v-else class="text-center">
@@ -235,6 +276,29 @@
               </v-card-actions>
             </v-card>
           </v-row>
+          <v-row>
+            <v-card
+              height="100%"
+              flat
+              :min-width="width"
+              color="amber lighten-5"
+              elevation="2"
+              class="m-3"
+            >
+              <v-card-title>
+                Amount Spent & Received Chart
+              </v-card-title>
+              <v-card-text>
+              <expenseDailyPieChart
+                :expDetailsShow="false"
+                :chartDataReceived="chartDataReceived"
+                :chartDataSpent="chartDataSpent"
+                :daily_total_spent="daily_total_spent"
+                :daily_total_received="daily_total_received"
+                :mainOv="true"
+              /></v-card-text>
+            </v-card>
+          </v-row>
         </v-col>
       </v-row>
     </v-card>
@@ -248,8 +312,10 @@ import expenseClass from "@/js/expense_class.js";
 import invClass from "@/js/inventory_class.js";
 import taskClass from "@/js/task_class.js";
 
+import expenseDailyPieChart from "@/components/expenseDailyPieChart";
+
 export default {
-  components: {},
+  components: { expenseDailyPieChart },
   data() {
     return {
       recurring_payment: {},
@@ -270,6 +336,11 @@ export default {
       upcoming_tasks: [],
 
       now_expense: [],
+      daily_total_spent: 0,
+      daily_total_received: 0,
+
+      chartDataSpent: [],
+      chartDataReceived: [],
     };
   },
   props: ["logged"],
@@ -369,8 +440,16 @@ export default {
       let daily = await this.expObj.getDailyExp(new Date());
       if (daily == "noData") {
         this.now_expense = [];
+        this.chartDataSpent = null;
+        this.chartDataReceived = null;
+        this.daily_total_spent = 0;
+        this.daily_total_received = 0;
       } else {
         this.now_expense = daily.expense.data;
+        this.chartDataSpent = daily.spent;
+        this.chartDataReceived = daily.received;
+        this.daily_total_spent = daily.total_spent;
+        this.daily_total_received = daily.total_received;
       }
     },
     async arrangeTasks() {
