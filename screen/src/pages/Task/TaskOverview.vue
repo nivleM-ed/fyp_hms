@@ -6,11 +6,7 @@
       v-model="tab_open"
     >
       <v-tab key="task"
-        ><v-badge
-          :value="task_notify > 0"
-          color="pink"
-          :content="task_notify"
-        >
+        ><v-badge :value="task_notify > 0" color="pink" :content="task_notify">
           Tasks
         </v-badge></v-tab
       >
@@ -31,13 +27,14 @@
           v-on:completeTask="completeTask"
           v-on:addTask="addTask"
           v-on:updateTask="updateTask"
+          v-on:changeTab="tabChange"
         />
       </v-tab-item>
 
       <v-tab-item key="recur_task">
         <RecurringTask
-        :recurring_task="recurring_task"
-        v-on:update="updateData"
+          :recurring_task="recurring_task"
+          v-on:update="updateData"
           v-on:errorAlert="errorAlert"
         />
       </v-tab-item>
@@ -77,11 +74,11 @@ import taskClass from "@/js/task_class.js";
 
 import TaskCalendar from "@/pages/Task/TaskCalendar";
 import TaskView from "@/pages/Task/TaskView";
-import RecurringTask from "@/pages/Task/RecurringTask"
+import RecurringTask from "@/pages/Task/RecurringTask";
 import CompletedTask from "@/pages/Task/CompletedTask";
 
 export default {
-  components: { TaskCalendar, TaskView, CompletedTask, RecurringTask},
+  components: { TaskCalendar, TaskView, CompletedTask, RecurringTask },
   data() {
     return {
       tab_open: 0,
@@ -108,8 +105,9 @@ export default {
       await this.updateData();
 
       let task_id = this.$route.query.task_id;
-      this.tab_open = this.$route.query.tab == null ? 0 : parseInt(this.$route.query.tab);
-      if(task_id) this.selectedTask = {id:task_id};
+      this.tab_open =
+        this.$route.query.tab == null ? 0 : parseInt(this.$route.query.tab);
+      if (task_id) this.selectedTask = { id: task_id };
     }
   },
   methods: {
@@ -125,7 +123,7 @@ export default {
       this.com_task_list = com_tmp;
       this.$emit("updateData");
     },
-    tabChange(val) {
+    async tabChange(val) {
       this.tab_open = parseInt(val);
     },
     setCalendarEvent(val) {
@@ -142,7 +140,7 @@ export default {
           this.$emit("errorAlert", tmp.err);
         } else {
           await this.updateData();
-          this.$emit("viewAlert", {type:"new_task",data:new_task})
+          this.$emit("viewAlert", { type: "new_task", data: new_task });
           this.selectedTask = tmp;
         }
       } catch (err) {
@@ -160,7 +158,10 @@ export default {
           this.$emit("errorAlert", tmp.err);
         } else {
           await this.updateData();
-          this.$emit("viewAlert", {type:"update_task",data:tasks.new_task});
+          this.$emit("viewAlert", {
+            type: "update_task",
+            data: tasks.new_task,
+          });
           this.selectedTask = tmp;
         }
       } catch (err) {
@@ -171,19 +172,22 @@ export default {
     async completeTask(selectedTask) {
       try {
         let tmp;
-        if(selectedTask.type === 'recur_expense') {
+        if (selectedTask.type === "recur_expense") {
           tmp = await this.taskObj.completeRecurTask(selectedTask);
-        } else if(selectedTask.type === 'shopping_list') {
+        } else if (selectedTask.type === "shopping_list") {
           tmp = await this.taskObj.completeShopListTask(selectedTask);
         } else {
           tmp = await this.taskObj.completeTask(selectedTask);
         }
-        
+
         if (tmp.err) {
           this.$emit("errorAlert", tmp.err);
         } else {
           await this.updateData();
-          this.$emit("viewAlert", {type:"complete_task",data:selectedTask});
+          this.$emit("viewAlert", {
+            type: "complete_task",
+            data: selectedTask,
+          });
           this.selectedTask = null;
         }
       } catch (err) {
@@ -199,7 +203,7 @@ export default {
           alert(tmp);
         } else {
           this.updateData();
-          this.$emit("viewAlert", {type:"delete_task",data:selectedTask});
+          this.$emit("viewAlert", { type: "delete_task", data: selectedTask });
           this.selectedTask = null;
         }
       } catch (err) {

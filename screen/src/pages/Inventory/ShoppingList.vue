@@ -69,6 +69,35 @@
       </v-card>
     </v-dialog>
 
+    <!-- dialog to edit shopping list -->
+    <v-dialog v-model="editShopListName" width="500">
+      <v-card>
+        <v-card-text class="p-4">
+          <p>
+            Update shopping list name for {{ shopping_list_items_inner.name }}
+          </p>
+
+          <v-text-field
+            v-model="listName"
+            label="New Shopping List Name:"
+            :placeholder="shopping_list_items_inner.name"
+            :rules="inputRules"
+            required
+          ></v-text-field>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="red darken-1" text @click="editShopListName = false"
+            >Cancel</v-btn
+          >
+          <v-btn color="green" text @click="updateShopListName(listName)">
+            Yes
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <!-- dialog to add shopping list item-->
     <v-dialog v-model="addShoppingItem2" width="500">
       <v-card>
@@ -264,6 +293,20 @@
                         {{
                           utils.toFirstUpperCase(shopping_list_items_inner.name)
                         }}
+                        <v-tooltip right>
+                          <template v-slot:activator="{ on: tooltip }">
+                            <v-icon
+                              small
+                              color="blue"
+                              class="mr-2"
+                              v-on="{ ...tooltip }"
+                              @click="editShopListName = true"
+                            >
+                              mdi-pencil
+                            </v-icon>
+                          </template>
+                          <span>Edit Name</span>
+                        </v-tooltip>
                       </p>
                     </v-card-title>
                     <v-card-text>
@@ -451,6 +494,7 @@ export default {
       item: null,
       showItems: false,
       listName: null,
+      editShopListName: false,
     };
   },
   props: ["food", "shopping_list", "all_categories"],
@@ -561,6 +605,15 @@ export default {
         console.log(err);
         this.$emit("errorAlert", err);
       }
+    },
+
+    async updateShopListName(listName) {
+      let index = this.shopping_list_items.findIndex(
+        (x) => x.id == this.shopping_list_items_inner.id
+      );
+      this.shopping_list_items[index].name = listName;
+      await this.updateShoppingList();
+      this.editShopListName = false;
     },
 
     async addToList() {

@@ -36,7 +36,9 @@
                 to
                 {{ utils.momentFormatDate(true, selectedTaskInner.end) }}
               </span>
-              <span v-else>{{ utils.momentFormatDate(false, selectedTaskInner.date) }}</span>
+              <span v-else>{{
+                utils.momentFormatDate(false, selectedTaskInner.date)
+              }}</span>
             </span>
           </p>
           <p v-if="completed">
@@ -180,6 +182,14 @@
           >
             View Recurring Bill
           </v-btn>
+          <v-btn
+            v-if="selectedTaskInner.type == 'recur_task'"
+            color="blue darken-3"
+            dark
+            @click.prevent="tabChange(1)"
+          >
+            View Recurring Task
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-expand-transition>
@@ -239,6 +249,9 @@ export default {
       if (id != null) tmp = "/main/" + page + "?tab=" + tab + "&id=" + id;
       else tmp = "/main/" + page;
       this.$router.push(tmp);
+    },
+    async tabChange(val) {
+      await this.$emit("changeTab", val);
     },
   },
   watch: {},

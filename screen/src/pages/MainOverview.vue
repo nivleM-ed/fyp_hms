@@ -289,13 +289,13 @@
                 Amount Spent & Received Chart
               </v-card-title>
               <v-card-text>
-              <expenseDailyPieChart
-                :expDetailsShow="false"
-                :chartDataReceived="chartDataReceived"
-                :chartDataSpent="chartDataSpent"
-                :daily_total_spent="daily_total_spent"
-                :daily_total_received="daily_total_received"
-                :mainOv="true"
+                <expenseDailyPieChart
+                  :expDetailsShow="false"
+                  :chartDataReceived="chartDataReceived"
+                  :chartDataSpent="chartDataSpent"
+                  :daily_total_spent="daily_total_spent"
+                  :daily_total_received="daily_total_received"
+                  :mainOv="true"
               /></v-card-text>
             </v-card>
           </v-row>

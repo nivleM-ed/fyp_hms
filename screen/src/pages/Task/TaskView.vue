@@ -155,6 +155,7 @@
                 :selectedTaskInner="selectedTaskInner"
                 v-on:updateButton="updateButton"
                 v-on:completeTask="completeTask"
+                v-on:changeTab="tabChange"
               />
             </v-card>
           </v-col>
@@ -295,6 +296,9 @@ export default {
       } catch (err) {
         console.log(err);
       }
+    },
+    async tabChange(val) {
+      await this.$emit("changeTab", val);
     },
     querySelections(v) {
       try {
