@@ -25,7 +25,7 @@
               <v-icon class="mr-2">mdi-account</v-icon>
               <v-text-field
                 v-model="username"
-                :rules="rules"
+                :rules="rules2"
                 label="Username"
                 type="text"
                 placeholder=""
@@ -36,7 +36,7 @@
               <v-icon class="mr-2">mdi-lock</v-icon>
               <v-text-field
                 v-model="password"
-                :rules="rules"
+                :rules="rules2"
                 label="Password"
                 type="password"
                 placeholder=""
@@ -94,7 +94,7 @@
                               <v-col cols="12" sm="6" md="6">
                                 <v-text-field
                                   label="Username"
-                                  :rules="rules"
+                                  :rules="rules2"
                                   v-model="new_username"
                                   required
                                   hint="You will login using this"
@@ -104,7 +104,7 @@
                                 <v-text-field
                                   label="Password"
                                   type="password"
-                                  :rules="rules"
+                                  :rules="rules2"
                                   v-model="new_password"
                                   required
                                 ></v-text-field>
@@ -154,6 +154,9 @@ export default {
     return {
       register_dialog: false,
       rules: [(v) => !!v || "Required!"],
+      rules2: [(v) => !!v || "Required!",
+      (v) => (v.split("")).length > 5 || "Must have 6 characters or more"
+      ],
       logButton: false,
       regButton: false,
       password: "",
