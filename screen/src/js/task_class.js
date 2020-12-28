@@ -99,7 +99,6 @@ export default class taskClass {
       }
 
       await this.setRecurTaskNext();
-      console.log(this.recurring_task)
       const tmp = await this.updateTaskDB();
       return tmpData;
     } catch (err) {

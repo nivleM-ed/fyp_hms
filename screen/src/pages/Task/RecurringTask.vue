@@ -465,7 +465,6 @@ export default {
       console.log(err);
       this.$emit("errorAlert", err);
     }
-    console.log(this.recurring_task);
   },
   methods: {
     async validate() {
@@ -475,7 +474,6 @@ export default {
         if (new_recur.name && new_recur.description) {
           if (!this.isUpdate) {
             try {
-              console.log("yes");
               await this.taskObj.addNewRecurTask(new_recur);
               await this.$emit("update", 1);
             } catch (err) {

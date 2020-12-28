@@ -21,25 +21,29 @@
         </v-btn>
       </template>
 
-      <v-list v-if="notification.length != 0">
-        <v-list-item
-          v-for="(item, index) in notification"
-          :key="index"
-          @click="goToPage(item)"
-        >
-          <template>
-            <v-list-item-content>
-              <v-list-item-title v-on:mouseover="setSeen(index)"
-                >{{ item.msg }}: {{ item.name }}
-                <span class="font-italic font-weight-light caption"
-                  ><br />{{ item.time }}</span
-                >
-              </v-list-item-title>
-            </v-list-item-content>
-          </template>
-        </v-list-item>
-      </v-list>
-      <p class="ma-4" v-else>You have no notification</p>
+      <v-card flat min-width="300px">
+        <v-card-text>
+          <v-list v-if="notification.length != 0">
+            <v-list-item
+              v-for="(item, index) in notification"
+              :key="index"
+              @click="goToPage(item)"
+            >
+              <template>
+                <v-list-item-content>
+                  <v-list-item-title v-on:mouseover="setSeen(index)"
+                    >{{ item.msg }}: {{ utils.toFirstUpperCaseInner(item.name) }}
+                    <span class="font-italic font-weight-light caption"
+                      ><br />{{ utils.momentFormatDate(false, item.date) }}</span
+                    >
+                  </v-list-item-title>
+                </v-list-item-content>
+              </template>
+            </v-list-item>
+          </v-list>
+          <p v-else>You have no notification</p>
+        </v-card-text>
+      </v-card>
     </v-menu>
     <v-btn color="red" depressed @click.prevent="logout">
       Logout
@@ -50,6 +54,7 @@
 <script>
 import userApi from "@/api/users_api.js";
 import notificationClass from "@/js/notification.js";
+import utils from "@/js/utils.js";
 
 export default {
   data() {
@@ -58,6 +63,7 @@ export default {
       closeOnContentClick: true,
       notifyNum: [],
       notifyObj: new notificationClass(),
+      utils: utils
     };
   },
   props: ["notifications"],

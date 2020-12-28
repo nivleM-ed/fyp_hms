@@ -60,10 +60,10 @@ export default class notificationClass {
                         description: data.description,
                         notify_date: data.notify_date,
                         msg: 'You have a task scheduled',
-                        start: data.start,
+                        date: data.start,
                         end: data.end,
                         seen: false,
-                        page: `task_ov/?tid=${data.id}`
+                        page: `task_ov/?id=${data.id}`
                     };
                 } else if (type === 'recur_expense') {
                     tmpData = {
@@ -76,34 +76,34 @@ export default class notificationClass {
                         msg: 'A recurring payment task has been set',
                         date: data.date,
                         seen: false,
-                        page: `task_ov/?tid=${data.id}`
+                        page: `task_ov/?id=${data.id}`
                     };
                 }  else if (type === 'recur_task') {
                     tmpData = {
                         id: id,
                         notify_type: "recur_task",
                         data_id: data.id,
-                        name: data.title,
+                        name: data.name,
                         description: data.description,
                         notify_date: data.notify_date,
                         msg: 'A recurring task has been set',
-                        date: data.date,
+                        date: new Date(data.date),
                         seen: false,
-                        page: `task_ov/?tid=${data.id}`
+                        page: `task_ov/?id=${data.id}`
                     };
                 } else if (type === 'upcoming_task') {
                     tmpData = {
                         id: id,
                         notify_type: "upcoming_task",
                         data_id: data.id,
-                        name: data.title,
+                        name: data.name,
                         description: data.description,
                         notify_date: data.notify_date,
-                        msg: 'You have a task starting soon...',
-                        start: data.start,
+                        msg: 'You have a task starting soon',
+                        date: data.start,
                         end: data.end,
                         seen: false,
-                        page: `task_ov/?tid=${data.id}`
+                        page: `task_ov/?id=${data.id}`
                     };
                 } else {
                     return 'noTypeSet'; // should not happen

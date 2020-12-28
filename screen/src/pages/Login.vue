@@ -5,7 +5,7 @@
         <v-card
           v-if="err"
           style="background-color: #edd2d1"
-          class="border border-danger rounded text-center"
+          class="border border-danger rounded text-center p-4"
         >
           <div>
             <h4 slot="header" class="card-title">You are not logged in</h4>
@@ -13,7 +13,7 @@
           </div>
         </v-card>
 
-        <v-card class="p-4">
+        <v-card class="p-4 m-4">
           <v-card-title class="text-center">Login</v-card-title>
           <v-form
             class="p-4"
@@ -155,7 +155,7 @@ export default {
       register_dialog: false,
       rules: [(v) => !!v || "Required!"],
       rules2: [(v) => !!v || "Required!",
-      (v) => (v.split("")).length > 5 || "Must have 6 characters or more"
+      (v) => (v.split("")).length > 4 || "Must have 6 characters or more"
       ],
       logButton: false,
       regButton: false,

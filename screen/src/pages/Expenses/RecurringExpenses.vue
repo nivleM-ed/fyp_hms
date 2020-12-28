@@ -542,9 +542,6 @@ export default {
     recurring_payment(val) {
       this.rec_payment = val;
     },
-    expDetailsShow(val) {
-      console.log(val);
-    },
   },
 };
 </script>
