@@ -370,6 +370,18 @@ export default class taskClass {
     }
   }
 
+  async confirmAddToNotification(task) {
+    await this.getTaskDB();
+    try {
+      const index = await this.getIndex(task, false);
+      this.tasks[index].notify_ack = true;
+      await this.updateTaskDB();
+    } catch (err) {
+      console.log(err);
+    }
+
+  }
+
   async completeShopListTask(selectedTask) {
     try {
       await this.getTaskDB();
@@ -551,7 +563,7 @@ export default class taskClass {
           time.start = data.start_date + " " + data.start_time;
           time.end = data.end_date + " " + data.end_time;
           time.start_date = data.start_date;
-            time.end_date = data.end_date;
+          time.end_date = data.end_date;
         }
 
         time.format_start_date = utils.formatDate(data.start_date);

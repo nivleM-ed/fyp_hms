@@ -48,8 +48,9 @@ export default {
   components: { NavDraw, Toolbar, Footer, viewAlert, errorAlert },
   data() {
     return {
-      // taskObj: new taskClass(),
-      // expObj: new expClass(),
+      taskObj: new taskClass(),
+      expObj: new expClass(),
+      notifyObj: new notificationClass(),
 
       timestamp: "",
       tasks: [],
@@ -140,8 +141,8 @@ export default {
               "You have a task to be done: " + this.notifyTask.name;
             this.notifications_snackbar = true;
             this.notification_sound.play();
-            // }
           }
+          // }
         }
       }
     },
@@ -159,7 +160,8 @@ export default {
                   x.id === this.tasks[i].id &&
                   new Date(x.start).getTime() ==
                     new Date(this.tasks[i].start).getTime()
-              ) < 0
+              ) < 0 &&
+              !this.tasks[i].notify_ack
             ) {
               this.futureTask.push(this.tasks[i]);
               //add to notification
@@ -167,6 +169,7 @@ export default {
                 this.tasks[i],
                 "upcoming_task"
               );
+              await this.taskObj.confirmAddToNotification(this.tasks[i]);
               await this.updateData(true);
             }
           }
@@ -223,7 +226,7 @@ export default {
   },
   watch: {},
   destroyed() {
-    clearInterval(this.intervalSet)
-  }
+    clearInterval(this.intervalSet);
+  },
 };
 </script>
