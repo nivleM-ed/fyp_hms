@@ -76,6 +76,7 @@ export default class taskClass {
       } else {
         this.tasks.push(tmpData);
       }
+      console.log(tmpData)
       const tmp = await this.updateTaskDB();
       return tmpData;
     } catch (err) {
@@ -518,8 +519,8 @@ export default class taskClass {
         start_date: time.start_date,
         start_time: data.start_time,
         end_date: time.end_date,
-        end_time: data.end_time,
-        one_day: data.one_day,
+        end_time: data.type == "recur_task" ? "24:00" : data.end_time,
+        one_day: data.type == "recur_task" ? true : data.one_day,
         whole_day: data.whole_day,
         color: data.color,
         format_start_date: time.format_start_date,
@@ -569,14 +570,14 @@ export default class taskClass {
         time.format_start_date = utils.formatDate(data.start_date);
         time.format_end_date = utils.formatDate(data.end_date);
       } else {
-        time.start_date = data.date;
-        time.end_date = data.date;
+        time.start_date = utils.parseDate(utils.formatDate2(new Date(data.date)));
+        time.end_date = utils.parseDate(utils.formatDate2(new Date(data.date)));
 
-        time.start = utils.parseDate(utils.formatDate2(data.date)) + " " + data.start_time;
-        time.end = utils.parseDate(utils.formatDate2(data.date)) + " 24:00";
+        time.start = utils.parseDate(utils.formatDate2(new Date(data.date))) + " " + data.start_time;
+        time.end = utils.parseDate(utils.formatDate2(new Date(data.date))) + " 24:00";
 
-        time.format_start_date = utils.formatDate2(data.date);
-        time.format_end_date = utils.formatDate2(data.date);
+        time.format_start_date = utils.formatDate2(new Date(data.date));
+        time.format_end_date = utils.formatDate2(new Date(data.date));
       }
 
       return time;

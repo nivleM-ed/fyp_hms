@@ -212,6 +212,7 @@ class utils {
     //Not moment time input (new Date)
     static getSeperateDate(date) {
         try {
+            date = new Date(date);
             let year = date.getFullYear();
             let month = date.getMonth() + 1;
             let day = date.getDate();
