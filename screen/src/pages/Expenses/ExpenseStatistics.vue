@@ -233,6 +233,7 @@ export default {
     async setGraph() {
       try {
         let graph_data = await new expenseClass().setGraphData();
+        console.log(graph_data)
         this.graph_expenditure_year = graph_data.graph_expenditure_year;
         this.graph_savings_year = graph_data.graph_savings_year;
         this.graph_expenditure_month = graph_data.graph_expenditure_month;

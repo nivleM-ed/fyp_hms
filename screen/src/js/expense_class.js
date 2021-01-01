@@ -680,10 +680,17 @@ export default class expenseClass {
                     } else {
                         graph_month.push(0);
                     }
-                    time_static = await utils.previousDate(time_static, "month");
-                    time = await utils.getSeperateDate(new Date(time_static));
+                    if (time.month == 1) {
+                        time_static = await utils.previousDate(time_static, "year");
+                        time = await utils.getSeperateDate(new Date(time_static));
+                        time.month = 12;
+                    } else {
+                        time_static = await utils.previousDate(time_static, "month");
+                        time = await utils.getSeperateDate(new Date(time_static));
+                    }
+
                 } else {
-                    while (graph_month.length < 10) {
+                    while (graph_month.length < 6) {
                         graph_month.push(0);
                     }
                 }
@@ -693,6 +700,7 @@ export default class expenseClass {
             let tmp_date = new Date();
             while (graph_day.length < 10) {
                 let year = this.expenses.findIndex((x) => x.year === time.year);
+                console.log(time)
                 if (year >= 0) {
                     let month = this.expenses[year].data.findIndex(
                         (x) => x.month === time.month
@@ -706,8 +714,22 @@ export default class expenseClass {
                         } else {
                             graph_day.push(0);
                         }
-                        tmp_date = await utils.previousDate(tmp_date, "day");
-                        time.day = await utils.getSeperateDate(new Date(tmp_date)).day;
+                        if (time.day == 1) {
+                            if (time.month == 1) {
+                                console.log("timesstatic----",tmp_date)
+                                tmp_date = await utils.previousDate(tmp_date, "year");
+                                time = await utils.getSeperateDate(new Date(tmp_date));
+                                time.month = 12;
+                                time.day = 31;
+                            } else {
+                                tmp_date = await utils.previousDate(tmp_date, "month");
+                                time = await utils.getSeperateDate(new Date(tmp_date));
+                                time.day = time.month == 2 ? 29 : time.month % 2 == 1 ? 31 : 30;
+                            }
+                        } else {
+                            tmp_date = await utils.previousDate(tmp_date, "day");
+                            time.day = await utils.getSeperateDate(new Date(tmp_date)).day;
+                        }
                     } else {
                         while (graph_day.length < 10) {
                             graph_day.push(0);
