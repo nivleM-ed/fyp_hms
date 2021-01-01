@@ -668,7 +668,6 @@ export default class expenseClass {
 
             time = await utils.getSeperateDate(new Date());
             time_static = new Date();
-            // console.log(time)
             while (graph_month.length < 6) {
                 let year = this.expenses.findIndex((x) => x.year === time.year);
                 if (year >= 0) {
@@ -682,8 +681,8 @@ export default class expenseClass {
                     }
                     if (time.month == 1) {
                         time_static = await utils.previousDate(time_static, "year");
+                        time_static = new Date(time_static).setMonth(11);
                         time = await utils.getSeperateDate(new Date(time_static));
-                        time.month = 12;
                     } else {
                         time_static = await utils.previousDate(time_static, "month");
                         time = await utils.getSeperateDate(new Date(time_static));
@@ -700,7 +699,6 @@ export default class expenseClass {
             let tmp_date = new Date();
             while (graph_day.length < 10) {
                 let year = this.expenses.findIndex((x) => x.year === time.year);
-                console.log(time)
                 if (year >= 0) {
                     let month = this.expenses[year].data.findIndex(
                         (x) => x.month === time.month
@@ -716,11 +714,10 @@ export default class expenseClass {
                         }
                         if (time.day == 1) {
                             if (time.month == 1) {
-                                console.log("timesstatic----",tmp_date)
                                 tmp_date = await utils.previousDate(tmp_date, "year");
+                                tmp_date = new Date(tmp_date).setMonth(11);
+                                tmp_date = new Date(tmp_date).setDate(31);
                                 time = await utils.getSeperateDate(new Date(tmp_date));
-                                time.month = 12;
-                                time.day = 31;
                             } else {
                                 tmp_date = await utils.previousDate(tmp_date, "month");
                                 time = await utils.getSeperateDate(new Date(tmp_date));
