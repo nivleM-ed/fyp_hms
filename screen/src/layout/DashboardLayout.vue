@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-snackbar v-model="notifications_snackbar" :timeout="-1" top>
+    <v-snackbar v-model="notifications_snackbar" top>
       {{ notify_message }}
       <v-btn color="pink" text @click="setNotifyAcknowledge()">
         Close
