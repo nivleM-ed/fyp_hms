@@ -25,7 +25,6 @@ export default {
   methods: {},
   watch: {
     data(val) {
-      console.log(val);
       let delay = 0;
       try {
         if (this.visible) {

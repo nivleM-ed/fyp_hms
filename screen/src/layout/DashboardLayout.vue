@@ -71,6 +71,7 @@ export default {
       notification_sound: new Audio("sound/notification-sound.mp3"),
       logged: true,
       intervalSet: null,
+      intervalSet2: null,
       alertData: {},
     };
   },
@@ -119,13 +120,12 @@ export default {
       }
     },
     backgroundProcess() {
-      setInterval(() => {
+      this.intervalSet2 = setInterval(() => {
         this.timestamp = utils.getToday(true);
         this.setTaskNotify();
       }, 1000);
     },
     viewAlert(data) {
-      console.log(data);
       this.alertData = data;
     },
     errorAlert(error) {
@@ -136,10 +136,12 @@ export default {
         for (var i = 0; i < this.futureTask.length; i++) {
           if (utils.checkTime(this.futureTask[i].start, "second")) {
             // if (!this.futureTask[i].notify_ack) {
-            this.notifyTask = this.futureTask[i];
-            this.notify_message =
-              "You have a task to be done: " + this.notifyTask.name;
-            this.notifications_snackbar = true;
+            if (!this.notifications_snackbar) {
+              this.notifyTask = this.futureTask[i];
+              this.notify_message =
+                "You have a task to be done: " + this.notifyTask.name;
+              this.notifications_snackbar = true;
+            }
             this.notification_sound.play();
           }
           // }
@@ -227,6 +229,7 @@ export default {
   watch: {},
   destroyed() {
     clearInterval(this.intervalSet);
+    clearInterval(this.intervalSet2);
   },
 };
 </script>
