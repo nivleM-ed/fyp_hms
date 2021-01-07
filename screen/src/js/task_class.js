@@ -68,7 +68,10 @@ export default class taskClass {
   async addNewTask(new_task) {
     try {
       await this.getTaskDB();
+      
       new_task.id = null;
+      new_task.notify_ack = false;
+
       const tmpData = await this.toData(new_task);
       if (!this.tasks) {
         this.tasks = [];
@@ -76,7 +79,9 @@ export default class taskClass {
       } else {
         this.tasks.push(tmpData);
       }
+      console.log("NEW TASK ADDED: ")
       console.log(tmpData)
+      
       const tmp = await this.updateTaskDB();
       return tmpData;
     } catch (err) {
@@ -90,6 +95,7 @@ export default class taskClass {
 
       new_task.id = null;
       new_task.type = 'recur_task';
+      new_task.notify_ack = false;
 
       const tmpData = await this.toData(new_task);
       if (!this.recurring_task) {

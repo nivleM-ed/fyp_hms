@@ -85,6 +85,8 @@ export default {
     this.backgroundProcess();
     await this.updateData();
 
+    this.futureTask = [];
+
     this.intervalSet = setInterval(() => {
       // this.timestamp = utils.getToday(true);
       // this.notifications = this.syncObj.latest_notification;
@@ -120,6 +122,7 @@ export default {
       }
     },
     backgroundProcess() {
+      console.log("BACKGROUND PROCRESS: START")
       this.intervalSet2 = setInterval(() => {
         this.timestamp = utils.getToday(true);
         this.setTaskNotify();
@@ -150,7 +153,7 @@ export default {
     },
     async setNotifyOuter() {
       // every 10 minutes or if updated
-      this.futureTask = [];
+      
       try {
         if (this.tasks.length > 0) {
           for (var i = 0; i < this.tasks.length; i++) {
@@ -166,6 +169,7 @@ export default {
               !this.tasks[i].notify_ack
             ) {
               this.futureTask.push(this.tasks[i]);
+              console.log("NEW TASK ADDED TO NOTIFICATION")
               //add to notification
               await this.notifyObj.addNotification(
                 this.tasks[i],
@@ -176,6 +180,8 @@ export default {
             }
           }
         }
+
+        console.log("FUTURE TASK: " + this.futureTask.length);
 
         if (this.recurring_payment) {
           for (var j = 0; j < this.recurring_payment.length; j++) {
@@ -228,6 +234,7 @@ export default {
   },
   watch: {},
   destroyed() {
+    console.log("BACKGROUND PROCRESS: STOP")
     clearInterval(this.intervalSet);
     clearInterval(this.intervalSet2);
   },
