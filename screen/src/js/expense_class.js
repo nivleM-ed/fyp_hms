@@ -533,7 +533,7 @@ export default class expenseClass {
                 total: 0
             };
             // this.all_categories = utils.toFirstUpperCase(res.data.all_categories, true);
-            this.all_categories = ['Transportation', 'Food', 'Utilities', 'Insurance', 'Housing', 'Healthcare', 'Entertainment', 'Miscellaneous', 'Recurring Payment'];
+            this.all_categories = ['Transportation', 'Food', 'Utilities', 'Insurance', 'Housing', 'Healthcare', 'Entertainment', 'Miscellaneous', 'Recurring Payment', 'Shopping List'];
             this.recurring_payment = res.data.recurring_payment != null ? res.data.recurring_payment : [];
             await this.setRecurNext();
             return res.data;

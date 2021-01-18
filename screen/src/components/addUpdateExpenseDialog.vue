@@ -60,6 +60,8 @@
               :items="
                 new_expense.category == 'Recurring Payment'
                   ? ['Recurring Payment']
+                  : new_expense.category == 'Shopping List'
+                  ? ['Shopping List']
                   : utils.toFirstUpperCase(all_categories, true)
               "
               label="Category"
