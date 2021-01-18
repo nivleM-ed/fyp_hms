@@ -114,6 +114,8 @@ export default {
           case "Recurring Payment":
             this.imgSrc = "img/rec_pay.jpg";
             break;
+          case "Shopping List":
+            this.imgSrc = "img/shopping_list.jpeg";
         }
       }
     },
