@@ -410,6 +410,20 @@ export default class taskClass {
       let invObj = new inventoryClass();
       await invObj.setShopListComplete(selectedTask.shopping_list_id);
 
+      let expObj = new expenseClass();
+      let tmpData = {
+        recur_id: selectedTask.recur_id,
+        type: 'shopping_list',
+        date: new Date(),
+        title: selectedTask.name,
+        amount: selectedTask.amount,
+        description: selectedTask.description,
+        money_in: false,
+        color: selectedTask.color,
+        category: 'Shopping List'
+      };
+      let tmp = await expObj.addNewExpense(tmpData);
+
       await this.updateTaskDB();
       return 1;
     } catch (err) {

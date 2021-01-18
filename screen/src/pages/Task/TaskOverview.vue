@@ -1,5 +1,35 @@
 <template>
   <v-card flat>
+
+    <!-- dialog to add expense for completed shopping list -->
+    <v-dialog v-model="shopListAmount" width="500">
+      <v-card>
+        <v-card-text class="p-4">
+          <p>
+            How much did you spend?
+          </p>
+
+          <v-text-field
+            v-model="amount"
+            label="Amount spend"
+            placeholder="Amount spend"
+            :rules="inputRulesNum"
+            required
+          ></v-text-field>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="red darken-1" text @click="shopListAmount = false"
+            >Cancel</v-btn
+          >
+          <v-btn color="green" text @click="completeShopListTask(amount)">
+            Yes
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <v-tabs
       background-color="white"
       color="deep-purple accent-4"
@@ -95,6 +125,12 @@ export default {
       task_list: [],
       com_task_list: [],
       taskObj: new taskClass(),
+      inputRulesNum: [
+        (v) => !!v || "Required!",
+        (v) => !isNaN(v) || "Must be a number!",
+      ],
+      amount: 0,
+      shopListAmount: false,
     };
   },
   props: ["timestamp", "task_notify", "logged"],
@@ -172,27 +208,50 @@ export default {
     async completeTask(selectedTask) {
       try {
         let tmp;
+        let token = false;
+        this.selectedTask = selectedTask;
         if (selectedTask.type === "recur_expense") {
           tmp = await this.taskObj.completeRecurTask(selectedTask);
+          token = true;
         } else if (selectedTask.type === "shopping_list") {
-          tmp = await this.taskObj.completeShopListTask(selectedTask);
+          this.shopListAmount = true;
         } else {
           tmp = await this.taskObj.completeTask(selectedTask);
+          token = true;
         }
 
-        if (tmp.err) {
-          this.$emit("errorAlert", tmp.err);
-        } else {
-          await this.updateData();
-          this.$emit("viewAlert", {
-            type: "complete_task",
-            data: selectedTask,
-          });
-          this.selectedTask = null;
+        if (token) {
+          if (tmp.err) {
+            this.$emit("errorAlert", tmp.err);
+          } else {
+            await this.updateData();
+            this.$emit("viewAlert", {
+              type: "complete_task",
+              data: selectedTask,
+            });
+            this.selectedTask = null;
+          }
         }
       } catch (err) {
         console.log(err);
         this.$emit("errorAlert", err);
+      }
+    },
+    async completeShopListTask(amount) {
+      this.shopListAmount = false;
+      this.selectedTask.amount = amount;
+
+      let tmp = await this.taskObj.completeShopListTask(this.selectedTask);
+
+      if (tmp.err) {
+        this.$emit("errorAlert", tmp.err);
+      } else {
+        await this.updateData();
+        this.$emit("viewAlert", {
+          type: "complete_task",
+          data: this.selectedTask,
+        });
+        this.selectedTask = null;
       }
     },
     async deleteTask(selectedTask) {
